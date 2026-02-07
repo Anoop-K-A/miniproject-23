@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BackButton } from "./BackButton";
 import { ProfileHeader } from "./ProfileHeader";
 import { PortfolioTabs } from "./PortfolioTabs";
@@ -8,46 +8,52 @@ import { CourseFile, EventReport, FacultyPortfolioProps } from "./types";
 
 export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
-  const [selectedReport, setSelectedReport] = useState<EventReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<EventReport | null>(
+    null,
+  );
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
   const [isReportViewOpen, setIsReportViewOpen] = useState(false);
+  const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
+  const [eventReports, setEventReports] = useState<EventReport[]>([]);
 
-  // Mock data - Replace with actual API call
-  const courseFiles: CourseFile[] = [
-    {
-      id: "1",
-      fileName: "CS101_Syllabus_Fall2024.pdf",
-      fileType: "Syllabus",
-      uploadDate: "2024-11-15",
-      courseName: "CS101 - Introduction to Programming",
-      semester: "Fall 2024",
-      status: "Approved",
-    },
-  ];
+  useEffect(() => {
+    const loadPortfolioData = async () => {
+      try {
+        const [filesResponse, reportsResponse] = await Promise.all([
+          fetch("/api/course-files"),
+          fetch("/api/event-reports"),
+        ]);
 
-  const eventReports: EventReport[] = [
-    {
-      id: "1",
-      eventName: "Community Health Awareness Campaign",
-      eventType: "Community Service",
-      eventDate: "2024-11-15",
-      location: "Local Community Center",
-      participants: 45,
-      duration: "4 hours",
-      description:
-        "Organized a health awareness campaign focusing on preventive healthcare and nutrition.",
-      objectives:
-        "Educate community members about healthy lifestyle choices and disease prevention",
-      outcomes:
-        "Successfully reached 45 community members, distributed health information materials",
-      status: "Approved",
-    },
-  ];
+        const filesData = await filesResponse.json();
+        const reportsData = await reportsResponse.json();
+
+        if (!filesResponse.ok || !reportsResponse.ok) {
+          return;
+        }
+
+        const scopedFiles: CourseFile[] = (filesData.files ?? []).filter(
+          (file: CourseFile) => file.facultyId === faculty.id,
+        );
+        const scopedReports: EventReport[] = (reportsData.reports ?? []).filter(
+          (report: EventReport) => report.facultyId === faculty.id,
+        );
+
+        setCourseFiles(scopedFiles);
+        setEventReports(scopedReports);
+      } catch (error) {
+        console.error("Load faculty portfolio error:", error);
+      }
+    };
+
+    loadPortfolioData();
+  }, [faculty.id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Approved":
         return "bg-green-100 text-green-800";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-800";
       case "Submitted":
         return "bg-blue-100 text-blue-800";
       case "Draft":

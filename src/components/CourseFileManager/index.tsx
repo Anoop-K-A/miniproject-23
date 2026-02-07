@@ -1,12 +1,51 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Upload, FileText, Download, Trash2, Search, Filter, MessageSquare, Eye, Reply, Users } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Upload,
+  FileText,
+  Download,
+  Trash2,
+  Search,
+  Filter,
+  MessageSquare,
+  Eye,
+  Reply,
+  Users,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,11 +54,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PeerReviewDialog } from "@/components/shared/dialogs/PeerReviewDialog";
 import { AllFacultyFilesView } from "./AllFacultyFilesView";
-import { mockCourseFiles, fileCategories, fileTypes } from "./mockData";
 import { CourseFile } from "./types";
+import { useAuth } from "@/context/AuthContext";
 
-export function CourseFileManager() {
-  const [files, setFiles] = useState<CourseFile[]>(mockCourseFiles);
+interface CourseFileManagerProps {
+  initialFiles?: CourseFile[];
+  fileCategories?: string[];
+  fileTypes?: string[];
+}
+
+export function CourseFileManager({
+  initialFiles = [],
+  fileCategories = [],
+  fileTypes = [],
+}: CourseFileManagerProps) {
+  const [files, setFiles] = useState<CourseFile[]>(initialFiles);
+  const [categoryOptions, setCategoryOptions] =
+    useState<string[]>(fileCategories);
+  const [typeOptions, setTypeOptions] = useState<string[]>(fileTypes);
+  const { user, userRole } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -28,45 +81,109 @@ export function CourseFileManager() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedFileType, setSelectedFileType] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [semester, setSemester] = useState("");
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-  const [viewMode, setViewMode] = useState<"my-files" | "all-files">("my-files");
+  const [fileName, setFileName] = useState("");
+  const [selectedYear, setSelectedYear] = useState(
+    new Date().getFullYear().toString(),
+  );
+  const [viewMode, setViewMode] = useState<"my-files" | "all-files">(
+    "my-files",
+  );
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isResponseOpen, setIsResponseOpen] = useState(false);
 
-  const handleFileUpload = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const mockFile: CourseFile = {
-      id: Date.now().toString(),
-      fileName: "NewFile_Example.pdf",
-      courseCode: "CS101",
-      courseName: "Introduction to Computer Science",
-      fileType: selectedFileType,
-      uploadDate: new Date().toISOString().split('T')[0],
-      semester: semester,
-      academicYear: selectedYear,
-      size: "1.5 MB",
-      facultyName: "Dr. Jane Smith",
-      department: "Computer Science"
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const response = await fetch("/api/course-files");
+        const data = await response.json();
+        if (!response.ok) {
+          toast.error(data.error || "Failed to load files");
+          return;
+        }
+        setFiles(data.files ?? []);
+        setCategoryOptions(data.fileCategories ?? []);
+        setTypeOptions(data.fileTypes ?? []);
+      } catch (error) {
+        console.error("Load files error:", error);
+        toast.error("Failed to load files");
+      }
     };
 
-    setFiles([mockFile, ...files]);
-    setUploadDialogOpen(false);
-    toast.success("File uploaded successfully");
-    
-    // Reset form
-    setSelectedFileType("");
-    setCourseName("");
-    setSemester("");
-    setSelectedYear(new Date().getFullYear().toString());
+    fetchFiles();
+  }, []);
+
+  const handleFileUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!fileName || !courseCode || !courseName || !selectedFileType) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/course-files", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          facultyId: user?.id,
+          facultyName: user?.name ?? "",
+          department: user?.department ?? "",
+          fileName,
+          courseCode,
+          courseName,
+          fileType: selectedFileType,
+          uploadDate: new Date().toISOString().split("T")[0],
+          semester,
+          academicYear: selectedYear,
+          size: "1.5 MB",
+          status: "Pending",
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Upload failed");
+        return;
+      }
+
+      setFiles(data.files);
+      setUploadDialogOpen(false);
+      toast.success("File uploaded successfully");
+
+      setSelectedFileType("");
+      setCourseCode("");
+      setCourseName("");
+      setSemester("");
+      setFileName("");
+      setSelectedYear(new Date().getFullYear().toString());
+    } catch (error) {
+      console.error("File upload error:", error);
+      toast.error("An error occurred during upload");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setFiles(files.filter(f => f.id !== id));
-    toast.success("File deleted successfully");
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/course-files/${id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Delete failed");
+        return;
+      }
+      setFiles(data.files);
+      toast.success("File deleted successfully");
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("An error occurred while deleting");
+    }
   };
 
   const handleDownload = (file: CourseFile) => {
@@ -78,43 +195,70 @@ export function CourseFileManager() {
     setIsViewOpen(true);
   };
 
-  const handleResponse = (response: string) => {
+  const handleResponse = async (response: string) => {
     if (!selectedFile) return;
 
-    const updatedFiles = files.map(f =>
-      f.id === selectedFile.id
-        ? { ...f, facultyResponse: response, responseDate: new Date().toISOString().split('T')[0] }
-        : f
-    );
-    setFiles(updatedFiles);
-
-    setSelectedFile({
-      ...selectedFile,
-      facultyResponse: response,
-      responseDate: new Date().toISOString().split('T')[0]
-    });
+    try {
+      const apiResponse = await fetch(`/api/course-files/${selectedFile.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          facultyResponse: response,
+        }),
+      });
+      const data = await apiResponse.json();
+      if (!apiResponse.ok) {
+        toast.error(data.error || "Response update failed");
+        return;
+      }
+      setFiles(data.files);
+      const updated = data.files
+        .filter((file: CourseFile) => file.id === selectedFile.id)
+        .reduce<CourseFile | undefined>((acc, file) => acc ?? file, undefined);
+      if (updated) {
+        setSelectedFile(updated);
+      }
+    } catch (error) {
+      console.error("Response error:", error);
+      toast.error("An error occurred while saving response");
+    }
   };
 
-  const filteredFiles = files.filter(file => {
-    const matchesSearch = file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         file.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         file.courseName.toLowerCase().includes(searchTerm.toLowerCase());
+  const facultyFiles = useMemo(() => {
+    if (userRole === "faculty" && user?.id) {
+      return files.filter((file) => file.facultyId === user.id);
+    }
+    return files;
+  }, [files, user?.id, userRole]);
+
+  const resolvedFiles = facultyFiles.filter((file) => {
+    const matchesSearch =
+      file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      file.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      file.courseName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === "all" || file.fileType === filterType;
-    const matchesStatus = filterStatus === "all" || file.status === filterStatus;
-    const matchesYear = filterYear === "all" || file.academicYear === filterYear;
-    
+    const matchesStatus =
+      filterStatus === "all" || file.status === filterStatus;
+    const matchesYear =
+      filterYear === "all" || file.academicYear === filterYear;
+
     return matchesSearch && matchesType && matchesStatus && matchesYear;
   });
 
-  const statuses = Array.from(new Set(files.map(f => f.status).filter(Boolean)));
-  const years = Array.from(new Set(files.map(f => f.academicYear)));
+  const statuses = Array.from(
+    new Set(facultyFiles.map((f) => f.status).filter(Boolean)),
+  );
+  const years = Array.from(new Set(facultyFiles.map((f) => f.academicYear)));
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Course File Management</CardTitle>
         <CardDescription>
-          Upload and manage course materials, syllabi, lesson plans, and assignments
+          Upload and manage course materials, syllabi, lesson plans, and
+          assignments
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -146,8 +290,10 @@ export function CourseFileManager() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  {fileTypes.map((type:any) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  {typeOptions.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -158,8 +304,13 @@ export function CourseFileManager() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
-                  {statuses.map(status => (
-                    <SelectItem key={status || "unknown"} value={status || "unknown"}>{status || "Unknown"}</SelectItem>
+                  {statuses.map((status) => (
+                    <SelectItem
+                      key={status || "unknown"}
+                      value={status || "unknown"}
+                    >
+                      {status || "Unknown"}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -170,12 +321,17 @@ export function CourseFileManager() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Years</SelectItem>
-                  {years.map(year => (
-                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+              <Dialog
+                open={uploadDialogOpen}
+                onOpenChange={setUploadDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <Button className="w-full md:w-auto">
                     <Upload className="h-4 w-4 mr-2" />
@@ -197,17 +353,26 @@ export function CourseFileManager() {
                         type="file"
                         required
                         accept=".pdf,.doc,.docx,.ppt,.pptx"
+                        onChange={(e) =>
+                          setFileName(e.target.files?.[0]?.name || "")
+                        }
                       />
                     </div>
                     <div>
                       <Label htmlFor="category">File Category *</Label>
-                      <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value)} required>
+                      <Select
+                        value={selectedCategory}
+                        onValueChange={(value) => setSelectedCategory(value)}
+                        required
+                      >
                         <SelectTrigger id="category">
                           <SelectValue placeholder="Select file category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {fileCategories.map((category:any) => (
-                            <SelectItem key={category} value={category}>{category}</SelectItem>
+                          {categoryOptions.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -216,8 +381,8 @@ export function CourseFileManager() {
                       <Label htmlFor="courseCode">Course Code</Label>
                       <Input
                         id="courseCode"
-                        value="CS101"
-                        onChange={(e) => setCourseName(e.target.value)}
+                        value={courseCode}
+                        onChange={(e) => setCourseCode(e.target.value)}
                         placeholder="e.g., CS101"
                         required
                       />
@@ -234,24 +399,29 @@ export function CourseFileManager() {
                     </div>
                     <div>
                       <Label htmlFor="fileType">File Type</Label>
-                      <Select value={selectedFileType} onValueChange={(value) => setSelectedFileType(value)}>
+                      <Select
+                        value={selectedFileType}
+                        onValueChange={(value) => setSelectedFileType(value)}
+                      >
                         <SelectTrigger id="fileType">
                           <SelectValue placeholder="Select file type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Syllabus">Syllabus</SelectItem>
-                          <SelectItem value="Lesson Plan">Lesson Plan</SelectItem>
-                          <SelectItem value="Assignment">Assignment</SelectItem>
-                          <SelectItem value="Reading Material">Reading Material</SelectItem>
-                          <SelectItem value="Presentation">Presentation</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
+                          {typeOptions.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="semester">Semester</Label>
-                        <Select value={semester} onValueChange={(value) => setSemester(value)}>
+                        <Select
+                          value={semester}
+                          onValueChange={(value) => setSemester(value)}
+                        >
                           <SelectTrigger id="semester">
                             <SelectValue placeholder="Select semester" />
                           </SelectTrigger>
@@ -273,7 +443,9 @@ export function CourseFileManager() {
                         />
                       </div>
                     </div>
-                    <Button type="submit" className="w-full">Upload File</Button>
+                    <Button type="submit" className="w-full">
+                      Upload File
+                    </Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -294,14 +466,18 @@ export function CourseFileManager() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredFiles.length === 0 ? (
+                  {resolvedFiles.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-gray-500 py-8">
-                        No files found. Upload your first course file to get started.
+                      <TableCell
+                        colSpan={7}
+                        className="text-center text-gray-500 py-8"
+                      >
+                        No files found. Upload your first course file to get
+                        started.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredFiles.map((file) => (
+                    resolvedFiles.map((file) => (
                       <TableRow key={file.id}>
                         <TableCell className="flex items-center gap-2">
                           <FileText className="h-4 w-4 text-blue-600" />
@@ -310,7 +486,9 @@ export function CourseFileManager() {
                         <TableCell>
                           <div>
                             <div>{file.courseCode}</div>
-                            <div className="text-sm text-gray-500">{file.courseName}</div>
+                            <div className="text-sm text-gray-500">
+                              {file.courseName}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -357,7 +535,7 @@ export function CourseFileManager() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
               <Card>
                 <CardContent className="pt-6">
-                  <div className="text-2xl">{files.length}</div>
+                  <div className="text-2xl">{resolvedFiles.length}</div>
                   <p className="text-sm text-gray-500">Total Files</p>
                 </CardContent>
               </Card>
@@ -406,7 +584,9 @@ export function CourseFileManager() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Semester</p>
-                        <p>{selectedFile.semester} {selectedFile.academicYear}</p>
+                        <p>
+                          {selectedFile.semester} {selectedFile.academicYear}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Upload Date</p>
@@ -426,33 +606,39 @@ export function CourseFileManager() {
                             <MessageSquare className="h-5 w-5 text-gray-600" />
                             Admin Review
                           </h4>
-                          <Badge 
+                          <Badge
                             className={
-                              selectedFile.status === "Approved" 
-                                ? "bg-green-100 text-green-800" 
+                              selectedFile.status === "Approved"
+                                ? "bg-green-100 text-green-800"
                                 : selectedFile.status === "Rejected"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
                             }
                           >
                             {selectedFile.status}
                           </Badge>
                         </div>
-                        
+
                         {selectedFile.adminRemarks ? (
                           <div className="space-y-3">
-                            <Alert className={
-                              selectedFile.status === "Approved" 
-                                ? "border-green-200 bg-green-50" 
-                                : selectedFile.status === "Rejected"
-                                ? "border-red-200 bg-red-50"
-                                : "border-yellow-200 bg-yellow-50"
-                            }>
+                            <Alert
+                              className={
+                                selectedFile.status === "Approved"
+                                  ? "border-green-200 bg-green-50"
+                                  : selectedFile.status === "Rejected"
+                                    ? "border-red-200 bg-red-50"
+                                    : "border-yellow-200 bg-yellow-50"
+                              }
+                            >
                               <AlertDescription>
-                                <p className="text-sm mb-3">{selectedFile.adminRemarks}</p>
+                                <p className="text-sm mb-3">
+                                  {selectedFile.adminRemarks}
+                                </p>
                                 {selectedFile.reviewedBy && (
                                   <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
-                                    <p>Reviewed by: {selectedFile.reviewedBy}</p>
+                                    <p>
+                                      Reviewed by: {selectedFile.reviewedBy}
+                                    </p>
                                     {selectedFile.reviewedDate && (
                                       <p>Date: {selectedFile.reviewedDate}</p>
                                     )}
@@ -465,11 +651,18 @@ export function CourseFileManager() {
                             {selectedFile.facultyResponse ? (
                               <Alert className="border-blue-200 bg-blue-50">
                                 <AlertDescription>
-                                  <p className="text-xs text-blue-800 mb-2">Your Response:</p>
-                                  <p className="text-sm mb-3">{selectedFile.facultyResponse}</p>
+                                  <p className="text-xs text-blue-800 mb-2">
+                                    Your Response:
+                                  </p>
+                                  <p className="text-sm mb-3">
+                                    {selectedFile.facultyResponse}
+                                  </p>
                                   {selectedFile.responseDate && (
                                     <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
-                                      <p>Response Date: {selectedFile.responseDate}</p>
+                                      <p>
+                                        Response Date:{" "}
+                                        {selectedFile.responseDate}
+                                      </p>
                                     </div>
                                   )}
                                 </AlertDescription>
@@ -489,7 +682,8 @@ export function CourseFileManager() {
                         ) : (
                           <Alert>
                             <AlertDescription className="text-sm text-gray-500">
-                              This file is pending admin review. You will be notified once the review is complete.
+                              This file is pending admin review. You will be
+                              notified once the review is complete.
                             </AlertDescription>
                           </Alert>
                         )}
@@ -497,12 +691,15 @@ export function CourseFileManager() {
                     )}
 
                     <div className="flex gap-2 pt-4">
-                      <Button onClick={() => handleDownload(selectedFile)} className="flex-1">
+                      <Button
+                        onClick={() => handleDownload(selectedFile)}
+                        className="flex-1"
+                      >
                         <Download className="h-4 w-4 mr-2" />
                         Download File
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setIsViewOpen(false)}
                       >
                         Close
@@ -523,10 +720,11 @@ export function CourseFileManager() {
           </TabsContent>
 
           <TabsContent value="all-files" className="space-y-4 mt-4">
-            <AllFacultyFilesView files={files} onFileUpdate={(updatedFile) => {
-              const updated = files.map(f => f.id === updatedFile.id ? updatedFile : f);
-              setFiles(updated);
-            }} />
+            <AllFacultyFilesView
+              files={facultyFiles}
+              currentUser={user?.name ?? ""}
+              onFilesChange={setFiles}
+            />
           </TabsContent>
         </Tabs>
       </CardContent>

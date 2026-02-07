@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(dashboard)/layout,_N_T_/(dashboard)/staff-advisor/layout,_N_T_/(dashboard)/staff-advisor/dashboard/layout,_N_T_/(dashboard)/staff-advisor/dashboard/page,_N_T_/staff-advisor/dashboard"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGRhc2hib2FyZCk/staff-advisor/dashboard/__PAGE__",
+    "/!KGRhc2hib2FyZCk/staff-advisor/dashboard",
+    "/!KGRhc2hib2FyZCk/staff-advisor",
+    "/!KGRhc2hib2FyZCk",
+    "/_index",
+    "/_head"
+  ]
+}

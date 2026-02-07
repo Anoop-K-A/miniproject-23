@@ -28,7 +28,7 @@ export function AppLayout() {
   if (!isAuthenticated) {
     return (
       <>
-        <AuthPage onLogin={handleLogin} />
+        <AuthPage onLogin={handleLogin} register={() => {}} />
         <Toaster />
       </>
     );
@@ -45,7 +45,11 @@ export function AppLayout() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <RoleSwitcher currentRole={userRole} onRoleChange={handleRoleChange} />
-        <MainContent activeTab={activeTab} onTabChange={setActiveTab} userRole={userRole} />
+        <MainContent
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          userRole={userRole}
+        />
       </main>
 
       <Toaster />

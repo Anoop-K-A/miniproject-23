@@ -2,32 +2,70 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Download, Search, Filter, Eye, MessageSquare, Reply, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Calendar,
+  Download,
+  Search,
+  Filter,
+  Eye,
+  MessageSquare,
+  Reply,
+  User,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PeerReviewDialog } from "@/components/shared/dialogs/PeerReviewDialog";
 import { ResponseDialog } from "@/components/shared/dialogs/ResponseDialog";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { EventReport, PeerReview } from "./types";
-
-const CURRENT_USER = "Dr. Sarah Johnson";
 
 interface AllFacultyReportsViewProps {
   reports: EventReport[];
-  onReportUpdate?: (updatedReport: EventReport) => void;
+  currentUser: string;
+  onReportsChange?: (reports: EventReport[]) => void;
 }
 
-export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyReportsViewProps) {
+export function AllFacultyReportsView({
+  reports,
+  currentUser,
+  onReportsChange,
+}: AllFacultyReportsViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterYear, setFilterYear] = useState("all");
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<EventReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<EventReport | null>(
+    null,
+  );
   const [isPeerReviewOpen, setIsPeerReviewOpen] = useState(false);
   const [isResponseOpen, setIsResponseOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<PeerReview | null>(null);
@@ -37,42 +75,89 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
     setIsViewOpen(true);
   };
 
-  const handlePeerReview = (review: string) => {
+  const handlePeerReview = async (review: string) => {
     if (!selectedReport) return;
 
     const newReview: PeerReview = {
       id: `pr${Date.now()}`,
-      reviewerName: CURRENT_USER,
-      reviewDate: new Date().toISOString().split('T')[0],
-      comment: review
+      reviewerName: currentUser,
+      reviewDate: new Date().toISOString().split("T")[0],
+      comment: review,
     };
 
     const updatedReport = {
       ...selectedReport,
-      peerReviews: [...(selectedReport.peerReviews || []), newReview]
+      peerReviews: [...(selectedReport.peerReviews || []), newReview],
     };
-    
-    setSelectedReport(updatedReport);
-    onReportUpdate?.(updatedReport);
-    setIsPeerReviewOpen(false);
+
+    try {
+      const response = await fetch(`/api/event-reports/${selectedReport.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ peerReviews: updatedReport.peerReviews }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Peer review failed");
+        return;
+      }
+      onReportsChange?.(data.reports);
+      const refreshed = data.reports.find(
+        (report: EventReport) => report.id === selectedReport.id,
+      );
+      setSelectedReport(refreshed ?? updatedReport);
+      setIsPeerReviewOpen(false);
+    } catch (error) {
+      console.error("Peer review error:", error);
+      toast.error("An error occurred while submitting review");
+    }
   };
 
-  const handleRespondToReview = (response: string) => {
+  const handleRespondToReview = async (response: string) => {
     if (!selectedReport || !selectedReview) return;
 
     const updatedReport = {
       ...selectedReport,
-      peerReviews: selectedReport.peerReviews?.map(pr =>
+      peerReviews: selectedReport.peerReviews?.map((pr) =>
         pr.id === selectedReview.id
-          ? { ...pr, facultyResponse: response, responseDate: new Date().toISOString().split('T')[0] }
-          : pr
-      )
+          ? {
+              ...pr,
+              facultyResponse: response,
+              responseDate: new Date().toISOString().split("T")[0],
+            }
+          : pr,
+      ),
     };
 
-    setSelectedReport(updatedReport);
-    onReportUpdate?.(updatedReport);
-    setSelectedReview(null);
-    setIsResponseOpen(false);
+    try {
+      const apiResponse = await fetch(
+        `/api/event-reports/${selectedReport.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ peerReviews: updatedReport.peerReviews }),
+        },
+      );
+      const data = await apiResponse.json();
+      if (!apiResponse.ok) {
+        toast.error(data.error || "Response failed");
+        return;
+      }
+      onReportsChange?.(data.reports);
+      const refreshed = data.reports.find(
+        (report: EventReport) => report.id === selectedReport.id,
+      );
+      setSelectedReport(refreshed ?? updatedReport);
+      setSelectedReview(null);
+      setIsResponseOpen(false);
+    } catch (error) {
+      console.error("Response error:", error);
+      toast.error("An error occurred while responding");
+    }
   };
 
   const handleDownload = (report: EventReport) => {
@@ -92,19 +177,31 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
     }
   };
 
-  const filteredReports = reports.filter(report => {
-    const matchesSearch = report.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.facultyCoordinator.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (report.eventType && report.eventType.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesDepartment = filterDepartment === "all" || report.department === filterDepartment;
-    const matchesStatus = filterStatus === "all" || report.status === filterStatus;
-    const matchesYear = filterYear === "all" || new Date(report.eventDate).getFullYear().toString() === filterYear;
-    
+  const filteredReports = reports.filter((report) => {
+    const matchesSearch =
+      report.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.facultyCoordinator
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (report.eventType &&
+        report.eventType.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesDepartment =
+      filterDepartment === "all" || report.department === filterDepartment;
+    const matchesStatus =
+      filterStatus === "all" || report.status === filterStatus;
+    const matchesYear =
+      filterYear === "all" ||
+      new Date(report.eventDate).getFullYear().toString() === filterYear;
+
     return matchesSearch && matchesDepartment && matchesStatus && matchesYear;
   });
 
-  const uniqueDepartments = Array.from(new Set(reports.map(r => r.department).filter(Boolean) as string[]));
-  const uniqueYears = Array.from(new Set(reports.map(r => new Date(r.eventDate).getFullYear().toString()))).sort((a, b) => parseInt(b) - parseInt(a));
+  const uniqueDepartments = Array.from(
+    new Set(reports.map((r) => r.department).filter(Boolean) as string[]),
+  );
+  const uniqueYears = Array.from(
+    new Set(reports.map((r) => new Date(r.eventDate).getFullYear().toString())),
+  ).sort((a, b) => parseInt(b) - parseInt(a));
 
   return (
     <Card>
@@ -127,8 +224,10 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Departments</SelectItem>
-              {uniqueDepartments.map(dept => (
-                <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+              {uniqueDepartments.map((dept) => (
+                <SelectItem key={dept} value={dept}>
+                  {dept}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -152,8 +251,10 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Years</SelectItem>
-              {uniqueYears.map(year => (
-                <SelectItem key={year} value={year}>{year}</SelectItem>
+              {uniqueYears.map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -176,7 +277,10 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
             <TableBody>
               {filteredReports.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray-500 py-8">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-gray-500 py-8"
+                  >
                     No event reports found matching your criteria.
                   </TableCell>
                 </TableRow>
@@ -189,7 +293,9 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                         <div>
                           <div>{report.eventName}</div>
                           {report.location && (
-                            <div className="text-sm text-gray-500">{report.location}</div>
+                            <div className="text-sm text-gray-500">
+                              {report.location}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -198,7 +304,9 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                       <div>
                         <div>{report.facultyCoordinator}</div>
                         {report.department && (
-                          <div className="text-sm text-gray-500">{report.department}</div>
+                          <div className="text-sm text-gray-500">
+                            {report.department}
+                          </div>
                         )}
                       </div>
                     </TableCell>
@@ -216,7 +324,9 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm">{report.peerReviews?.length || 0}</span>
+                        <span className="text-sm">
+                          {report.peerReviews?.length || 0}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -337,15 +447,19 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                       <MessageSquare className="h-5 w-5 text-gray-600" />
                       Admin Review
                     </h4>
-                    <Alert className={
-                      selectedReport.status === "Approved" 
-                        ? "border-green-200 bg-green-50" 
-                        : selectedReport.status === "Rejected"
-                        ? "border-red-200 bg-red-50"
-                        : "border-blue-200 bg-blue-50"
-                    }>
+                    <Alert
+                      className={
+                        selectedReport.status === "Approved"
+                          ? "border-green-200 bg-green-50"
+                          : selectedReport.status === "Rejected"
+                            ? "border-red-200 bg-red-50"
+                            : "border-blue-200 bg-blue-50"
+                      }
+                    >
                       <AlertDescription>
-                        <p className="text-sm mb-3">{selectedReport.adminRemarks}</p>
+                        <p className="text-sm mb-3">
+                          {selectedReport.adminRemarks}
+                        </p>
                         {selectedReport.reviewedBy && (
                           <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
                             <p>Reviewed by: {selectedReport.reviewedBy}</p>
@@ -366,17 +480,19 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                       <MessageSquare className="h-5 w-5 text-gray-600" />
                       Peer Reviews ({selectedReport.peerReviews?.length || 0})
                     </h4>
-                    <Button
-                      size="sm"
-                      onClick={() => setIsPeerReviewOpen(true)}
-                    >
+                    <Button size="sm" onClick={() => setIsPeerReviewOpen(true)}>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Add Review
                     </Button>
                   </div>
 
-                  {selectedReport.peerReviews && selectedReport.peerReviews.length > 0 ? (
-                    <Accordion type="single" collapsible className="w-full border rounded-lg">
+                  {selectedReport.peerReviews &&
+                  selectedReport.peerReviews.length > 0 ? (
+                    <Accordion
+                      type="single"
+                      collapsible
+                      className="w-full border rounded-lg"
+                    >
                       {selectedReport.peerReviews.map((review) => (
                         <AccordionItem key={review.id} value={review.id}>
                           <AccordionTrigger className="px-4 hover:no-underline">
@@ -386,8 +502,12 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                                   <User className="h-4 w-4 text-purple-600" />
                                 </div>
                                 <div className="text-left">
-                                  <p className="font-medium">{review.reviewerName}</p>
-                                  <p className="text-xs text-gray-500">{review.reviewDate}</p>
+                                  <p className="font-medium">
+                                    {review.reviewerName}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {review.reviewDate}
+                                  </p>
                                 </div>
                               </div>
                               {review.facultyResponse && (
@@ -402,7 +522,9 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                               {/* Review Comment */}
                               <Alert className="border-purple-200 bg-purple-50">
                                 <AlertDescription>
-                                  <p className="text-xs text-purple-800 mb-2">Review:</p>
+                                  <p className="text-xs text-purple-800 mb-2">
+                                    Review:
+                                  </p>
                                   <p className="text-sm">{review.comment}</p>
                                 </AlertDescription>
                               </Alert>
@@ -411,9 +533,16 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                               {review.facultyResponse ? (
                                 <Alert className="border-blue-200 bg-blue-50">
                                   <AlertDescription>
-                                    <p className="text-xs text-blue-800 mb-2">Response from {selectedReport.facultyCoordinator}:</p>
-                                    <p className="text-sm">{review.facultyResponse}</p>
-                                    <p className="text-xs text-gray-500 mt-2">{review.responseDate}</p>
+                                    <p className="text-xs text-blue-800 mb-2">
+                                      Response from{" "}
+                                      {selectedReport.facultyCoordinator}:
+                                    </p>
+                                    <p className="text-sm">
+                                      {review.facultyResponse}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                      {review.responseDate}
+                                    </p>
                                   </AlertDescription>
                                 </Alert>
                               ) : (
@@ -421,10 +550,12 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                                   {review.reviewerName === CURRENT_USER ? (
                                     <Alert>
                                       <AlertDescription className="text-xs text-gray-500 italic">
-                                        Awaiting response from {selectedReport.facultyCoordinator}...
+                                        Awaiting response from{" "}
+                                        {selectedReport.facultyCoordinator}...
                                       </AlertDescription>
                                     </Alert>
-                                  ) : selectedReport.facultyCoordinator === CURRENT_USER ? (
+                                  ) : selectedReport.facultyCoordinator ===
+                                    CURRENT_USER ? (
                                     <Button
                                       variant="outline"
                                       size="sm"
@@ -455,8 +586,8 @@ export function AllFacultyReportsView({ reports, onReportUpdate }: AllFacultyRep
                 </div>
 
                 <div className="flex gap-2 pt-4">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => setIsViewOpen(false)}
                     className="flex-1"
                   >

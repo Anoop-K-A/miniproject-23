@@ -11,11 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Mail, Lock, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import { SignInFormData } from "./types";
+import { AuthUser, SignInFormData } from "./types";
 
 interface SignInFormProps {
-  onLogin?: (role: string) => void;
-  onSignInSuccess?: (role: string) => void;
+  onLogin?: (user: AuthUser) => void;
+  onSignInSuccess?: (user: AuthUser) => void;
   onSwitchToSignUp?: () => void;
 }
 
@@ -29,7 +29,7 @@ export function SignInForm({
     password: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
@@ -37,14 +37,41 @@ export function SignInForm({
       return;
     }
 
-    // TODO: Replace with actual API call
-    // POST /api/auth/signin
-    toast.success("Sign in successful!");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-    // Default to Faculty role for demo
-    const callback = onLogin || onSignInSuccess;
-    if (callback) {
-      callback("Faculty");
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || "Login failed");
+        return;
+      }
+
+      toast.success("Sign in successful!");
+
+      // Call callback with user role
+      const callback = onLogin || onSignInSuccess;
+      if (callback) {
+        callback({
+          id: data.id,
+          username: data.username,
+          name: data.name,
+          role: data.role,
+          department: data.department,
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An error occurred during login");
     }
   };
 
@@ -110,7 +137,7 @@ export function SignInForm({
 
           <div className="text-center text-sm">
             <span className="text-gray-600">Don't have an account? </span>
-              <Button
+            <Button
               type="button"
               variant="link"
               className="p-0 h-auto"

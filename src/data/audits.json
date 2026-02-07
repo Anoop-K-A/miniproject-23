@@ -1,0 +1,12 @@
+[
+  {
+    "id": "audit-1",
+    "auditorId": "a1",
+    "entityType": "course-file",
+    "entityId": "cf-1",
+    "status": "completed",
+    "remarks": "Reviewed and approved.",
+    "createdAt": "2024-08-16T10:00:00.000Z",
+    "updatedAt": "2024-08-16T11:00:00.000Z"
+  }
+]

@@ -8,17 +8,19 @@ export interface FacultyMember {
 
 export interface CourseFile {
   id: string;
+  facultyId?: string;
   fileName: string;
   fileType: string;
   uploadDate: string;
   courseName: string;
   semester: string;
-  status: "Draft" | "Submitted" | "Approved" | "Rejected";
+  status: "Draft" | "Submitted" | "Pending" | "Approved" | "Rejected";
   auditorRemarks?: string;
 }
 
 export interface EventReport {
   id: string;
+  facultyId?: string;
   eventName: string;
   eventType: string;
   eventDate: string;

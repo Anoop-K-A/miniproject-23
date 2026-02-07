@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { StatsOverview } from "./StatsOverview";
@@ -6,12 +8,22 @@ import { CareerExplorationStats } from "./CareerExplorationStats";
 import { StudentList } from "./StudentList";
 import { StudentDetailDialog } from "./StudentDetailDialog";
 import { AddActivityDialog } from "./AddActivityDialog";
-import { Student } from "./types";
-import { mockStats, mockCareerStats, mockStudents } from "./mockData";
+import { CareerStats, DashboardStats, Student } from "./types";
 import { toast } from "sonner";
 
-export function StaffAdvisorDashboard() {
+interface StaffAdvisorDashboardProps {
+  stats: DashboardStats;
+  careerStats: CareerStats;
+  students: Student[];
+}
+
+export function StaffAdvisorDashboard({
+  stats,
+  careerStats,
+  students,
+}: StaffAdvisorDashboardProps) {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [studentList, setStudentList] = useState<Student[]>(students);
   const [isStudentViewOpen, setIsStudentViewOpen] = useState(false);
   const [isActivityDialogOpen, setIsActivityDialogOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState("");
@@ -23,45 +35,61 @@ export function StaffAdvisorDashboard() {
     setIsStudentViewOpen(true);
   };
 
-  const handleAddActivity = () => {
+  const handleAddActivity = async () => {
     if (!selectedStudent) return;
     if (!selectedActivity || !selectedCommunity || !activityPoints) {
       toast.error("Please fill in all fields");
       return;
     }
-    const newActivity = {
-      id: (selectedStudent.activities.length + 1).toString(),
-      name: selectedActivity,
-      community: selectedCommunity,
-      points: parseInt(activityPoints, 10),
-      date: new Date().toISOString().split('T')[0]
-    };
-    const updatedStudent = {
-      ...selectedStudent,
-      activities: [...selectedStudent.activities, newActivity],
-      activityPoints: selectedStudent.activityPoints + parseInt(activityPoints, 10)
-    };
-    setSelectedStudent(updatedStudent);
-    setIsActivityDialogOpen(false);
-    setSelectedActivity("");
-    setSelectedCommunity("");
-    setActivityPoints("");
-    toast.success("Activity added successfully");
+    try {
+      const response = await fetch(
+        `/api/students/${selectedStudent.id}/activities`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: selectedActivity,
+            community: selectedCommunity,
+            points: parseInt(activityPoints, 10),
+          }),
+        },
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Activity update failed");
+        return;
+      }
+      setStudentList(data.students);
+      const updatedStudent = data.students.find(
+        (student: Student) => student.id === selectedStudent.id,
+      );
+      setSelectedStudent(updatedStudent ?? null);
+      setIsActivityDialogOpen(false);
+      setSelectedActivity("");
+      setSelectedCommunity("");
+      setActivityPoints("");
+      toast.success("Activity added successfully");
+    } catch (error) {
+      console.error("Activity error:", error);
+      toast.error("An error occurred while updating activity");
+    }
   };
 
   return (
     <div className="space-y-6">
-      <DashboardHeader stats={mockStats} />
-      <StatsOverview stats={mockStats} />
-      
+      <DashboardHeader stats={stats} />
+      <StatsOverview stats={stats} />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FacultyStatusOverview stats={mockStats} />
-        <CareerExplorationStats careerStats={mockCareerStats} />
+        <FacultyStatusOverview stats={stats} />
+        <CareerExplorationStats careerStats={careerStats} />
       </div>
 
-      <StudentList 
-        students={mockStudents} 
-        stats={mockStats} 
+      <StudentList
+        students={studentList}
+        stats={stats}
         onSelectStudent={handleViewStudent}
       />
 

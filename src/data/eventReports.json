@@ -1,0 +1,29 @@
+[
+  {
+    "id": "er-1",
+    "facultyId": "f1",
+    "eventName": "Community Health Awareness Campaign",
+    "community": "Health & Wellness",
+    "eventDate": "2024-11-15",
+    "location": "Local Community Center",
+    "participants": 45,
+    "duration": "4 hours",
+    "description": "Organized a comprehensive health awareness campaign focusing on preventive healthcare and nutrition.",
+    "objectives": "Educate community members about healthy lifestyle choices and disease prevention.",
+    "outcomes": "Successfully reached 45 community members from diverse age groups.",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop",
+    "galleryImages": [
+      "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=400&fit=crop"
+    ],
+    "status": "Approved",
+    "submittedDate": "2024-11-20",
+    "facultyCoordinator": "Dr. John Doe",
+    "department": "Computer Science",
+    "eventType": "Community Service",
+    "adminRemarks": "Outstanding community outreach initiative.",
+    "reviewedBy": "Dr. Patricia Williams (Academic Dean)",
+    "reviewedDate": "2024-11-22",
+    "createdAt": "2024-11-15T09:00:00.000Z",
+    "updatedAt": "2024-11-22T09:00:00.000Z"
+  }
+]

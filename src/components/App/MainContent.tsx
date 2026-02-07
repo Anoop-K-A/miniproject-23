@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { LayoutDashboard, FileText, Calendar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FacultyDashboard } from "@/components/FacultyDashboard";
@@ -6,6 +9,17 @@ import { EventReportManager } from "@/components/EventReportManager";
 import { AuditorDashboard } from "@/components/AuditorDashboard";
 import { StaffAdvisorDashboard } from "@/components/StaffAdvisorDashboard";
 import { UserRole } from "./config";
+import type { DashboardStats, FacultyMember } from "@/types/faculty";
+import type {
+  DashboardStats as AuditorStats,
+  FacultyMember as AuditorFacultyMember,
+  RecentReview,
+} from "@/components/AuditorDashboard/types";
+import type {
+  CareerStats,
+  DashboardStats as StaffStats,
+  Student,
+} from "@/components/StaffAdvisorDashboard/types";
 
 interface MainContentProps {
   activeTab: string;
@@ -13,7 +27,50 @@ interface MainContentProps {
   userRole: UserRole;
 }
 
-export function MainContent({ activeTab, onTabChange, userRole }: MainContentProps) {
+export function MainContent({
+  activeTab,
+  onTabChange,
+  userRole,
+}: MainContentProps) {
+  const [facultyData, setFacultyData] = useState<{
+    stats: DashboardStats;
+    facultyMembers: FacultyMember[];
+  } | null>(null);
+  const [auditorData, setAuditorData] = useState<{
+    stats: AuditorStats;
+    facultyMembers: AuditorFacultyMember[];
+    recentReviews: RecentReview[];
+  } | null>(null);
+  const [staffData, setStaffData] = useState<{
+    stats: StaffStats;
+    careerStats: CareerStats;
+    students: Student[];
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (userRole === "faculty") {
+        const response = await fetch("/api/dashboard/faculty");
+        const data = await response.json();
+        setFacultyData(data);
+      }
+      if (userRole === "auditor") {
+        const response = await fetch("/api/dashboard/auditor");
+        const data = await response.json();
+        setAuditorData(data);
+      }
+      if (userRole === "staff-advisor") {
+        const response = await fetch("/api/dashboard/staff-advisor");
+        const data = await response.json();
+        setStaffData(data);
+      }
+    };
+
+    fetchData().catch((error) => {
+      console.error("Dashboard load error:", error);
+    });
+  }, [userRole]);
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
@@ -39,9 +96,26 @@ export function MainContent({ activeTab, onTabChange, userRole }: MainContentPro
         )}
 
         <TabsContent value="dashboard" className="space-y-6">
-          {userRole === "faculty" && <FacultyDashboard />}
-          {userRole === "auditor" && <AuditorDashboard />}
-          {userRole === "staff-advisor" && <StaffAdvisorDashboard />}
+          {userRole === "faculty" && facultyData && (
+            <FacultyDashboard
+              stats={facultyData.stats}
+              facultyMembers={facultyData.facultyMembers}
+            />
+          )}
+          {userRole === "auditor" && auditorData && (
+            <AuditorDashboard
+              stats={auditorData.stats}
+              facultyMembers={auditorData.facultyMembers}
+              recentReviews={auditorData.recentReviews}
+            />
+          )}
+          {userRole === "staff-advisor" && staffData && (
+            <StaffAdvisorDashboard
+              stats={staffData.stats}
+              careerStats={staffData.careerStats}
+              students={staffData.students}
+            />
+          )}
         </TabsContent>
 
         {/* Only render these tabs for faculty */}

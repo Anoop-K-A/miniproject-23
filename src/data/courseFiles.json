@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1770467243944",
+    "facultyId": "f1",
+    "fileName": "Anoop Aadhar.pdf",
+    "courseCode": "saNF>n.",
+    "courseName": "M<SDfM",
+    "fileType": "Lesson Plan",
+    "uploadDate": "2026-02-07",
+    "semester": "Spring",
+    "academicYear": "2026",
+    "size": "1.5 MB",
+    "status": "Pending",
+    "facultyName": "Dr. John Doe",
+    "department": "Computer Science",
+    "createdAt": "2026-02-07T12:27:23.943Z",
+    "updatedAt": "2026-02-07T12:27:23.943Z"
+  },
+  {
+    "id": "cf-1",
+    "facultyId": "f1",
+    "fileName": "CS101_Syllabus_Fall2024.pdf",
+    "courseCode": "CS101",
+    "courseName": "Introduction to Computer Science",
+    "fileType": "Syllabus",
+    "uploadDate": "2024-08-15",
+    "semester": "Fall",
+    "academicYear": "2024-2025",
+    "size": "1.2 MB",
+    "status": "Approved",
+    "adminRemarks": "Excellent syllabus with comprehensive learning objectives.",
+    "reviewedBy": "Dr. Michael Chen (Department Head)",
+    "reviewedDate": "2024-08-16",
+    "facultyName": "Dr. John Doe",
+    "department": "Computer Science",
+    "peerReviews": [
+      {
+        "id": "pr1",
+        "reviewerName": "Dr. Robert Brown",
+        "reviewDate": "2024-08-17",
+        "comment": "Very well-structured syllabus. The learning outcomes are clearly defined and measurable."
+      }
+    ],
+    "createdAt": "2024-08-15T10:00:00.000Z",
+    "updatedAt": "2024-08-16T09:00:00.000Z"
+  }
+]

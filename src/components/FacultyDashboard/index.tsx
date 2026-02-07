@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { FacultyPortfolio } from "./FacultyPortfolio";
 import { DashboardHeader } from "./DashboardHeader";
@@ -5,28 +7,42 @@ import { StatsOverview } from "./StatsOverview";
 import { PendingAlerts } from "./PendingAlerts";
 import { ActivitySection } from "./ActivitySection";
 import { AllFacultyMembers } from "./AllFacultyMembers";
-import { FacultyMember } from "@/types/faculty";
-import { mockStats, mockFacultyMembers } from "./mockData";
+import { DashboardStats, FacultyMember } from "@/types/faculty";
 
-export function FacultyDashboard() {
-  const [selectedFaculty, setSelectedFaculty] = useState<FacultyMember | null>(null);
+interface FacultyDashboardProps {
+  stats: DashboardStats;
+  facultyMembers: FacultyMember[];
+}
+
+export function FacultyDashboard({
+  stats,
+  facultyMembers,
+}: FacultyDashboardProps) {
+  const [selectedFaculty, setSelectedFaculty] = useState<FacultyMember | null>(
+    null,
+  );
 
   if (selectedFaculty) {
-    return <FacultyPortfolio faculty={selectedFaculty} onBack={() => setSelectedFaculty(null)} />;
+    return (
+      <FacultyPortfolio
+        faculty={selectedFaculty}
+        onBack={() => setSelectedFaculty(null)}
+      />
+    );
   }
 
   return (
     <div className="space-y-6">
       <DashboardHeader />
-      <StatsOverview stats={mockStats} />
-      <PendingAlerts pendingReports={mockStats.pendingReports} />
-      <ActivitySection 
-        activities={mockStats.recentActivity} 
-        facultyMembers={mockFacultyMembers} 
+      <StatsOverview stats={stats} />
+      <PendingAlerts pendingReports={stats.pendingReports} />
+      <ActivitySection
+        activities={stats.recentActivity}
+        facultyMembers={facultyMembers}
         onSelectFaculty={setSelectedFaculty}
       />
-      <AllFacultyMembers 
-        facultyMembers={mockFacultyMembers} 
+      <AllFacultyMembers
+        facultyMembers={facultyMembers}
         onSelectFaculty={setSelectedFaculty}
       />
     </div>

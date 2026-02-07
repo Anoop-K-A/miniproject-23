@@ -1,20 +1,34 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Mail, Lock, User, Building, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { SignUpFormData } from "./types";
-import { UserRole } from "../App/config";
 
 interface SignUpFormProps {
-  onSignUpSuccess: (role: UserRole) => void;
+  onSignUpSuccess: (formData: SignUpFormData) => void;
   onSwitchToSignIn: () => void;
 }
 
-export function SignUpForm({ onSignUpSuccess, onSwitchToSignIn }: SignUpFormProps) {
+export function SignUpForm({
+  onSignUpSuccess,
+  onSwitchToSignIn,
+}: SignUpFormProps) {
   const [formData, setFormData] = useState<SignUpFormData>({
     email: "",
     password: "",
@@ -24,7 +38,7 @@ export function SignUpForm({ onSignUpSuccess, onSwitchToSignIn }: SignUpFormProp
     department: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (
@@ -49,10 +63,13 @@ export function SignUpForm({ onSignUpSuccess, onSwitchToSignIn }: SignUpFormProp
       return;
     }
 
-    // TODO: Replace with actual API call
-    // POST /api/auth/signup
-    toast.success("Account created successfully! Please sign in.");
-    onSignUpSuccess(formData.role as UserRole);
+    try {
+      toast.success("Account created successfully! Please sign in.");
+      onSignUpSuccess(formData);
+    } catch (error) {
+      console.error("Register error:", error);
+      toast.error("An error occurred during registration");
+    }
   };
 
   return (
@@ -106,7 +123,12 @@ export function SignUpForm({ onSignUpSuccess, onSwitchToSignIn }: SignUpFormProp
 
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+            <Select
+              value={formData.role}
+              onValueChange={(value) =>
+                setFormData({ ...formData, role: value })
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>

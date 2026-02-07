@@ -32,16 +32,16 @@ import { PeerReviewDialog } from "@/components/shared/dialogs/PeerReviewDialog";
 import { ResponseDialog } from "@/components/shared/dialogs/ResponseDialog";
 import { CourseFile, PeerReview } from "./types";
 
-const CURRENT_USER = "Dr. Sarah Johnson";
-
 interface AllFacultyFilesViewProps {
   files: CourseFile[];
-  onFileUpdate?: (updatedFile: CourseFile) => void;
+  currentUser: string;
+  onFilesChange?: (files: CourseFile[]) => void;
 }
 
 export function AllFacultyFilesView({
   files,
-  onFileUpdate,
+  currentUser,
+  onFilesChange,
 }: AllFacultyFilesViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
@@ -62,12 +62,12 @@ export function AllFacultyFilesView({
     toast.success(`Downloading ${file.fileName}`);
   };
 
-  const handlePeerReview = (review: string) => {
+  const handlePeerReview = async (review: string) => {
     if (!selectedFile) return;
 
     const newReview: PeerReview = {
       id: `pr${Date.now()}`,
-      reviewerName: CURRENT_USER,
+      reviewerName: currentUser,
       reviewDate: new Date().toISOString().split("T")[0],
       comment: review,
     };
@@ -77,12 +77,32 @@ export function AllFacultyFilesView({
       peerReviews: [...(selectedFile.peerReviews || []), newReview],
     };
 
-    setSelectedFile(updatedFile);
-    onFileUpdate?.(updatedFile);
-    setIsPeerReviewOpen(false);
+    try {
+      const response = await fetch(`/api/course-files/${selectedFile.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ peerReviews: updatedFile.peerReviews }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Peer review failed");
+        return;
+      }
+      onFilesChange?.(data.files);
+      const refreshed = data.files
+        .filter((file: CourseFile) => file.id === selectedFile.id)
+        .reduce<CourseFile | undefined>((acc, file) => acc ?? file, undefined);
+      setSelectedFile(refreshed ?? updatedFile);
+      setIsPeerReviewOpen(false);
+    } catch (error) {
+      console.error("Peer review error:", error);
+      toast.error("An error occurred while submitting review");
+    }
   };
 
-  const handleRespondToReview = (response: string) => {
+  const handleRespondToReview = async (response: string) => {
     if (!selectedFile || !selectedReview) return;
 
     const updatedFile = {
@@ -98,10 +118,30 @@ export function AllFacultyFilesView({
       ),
     };
 
-    setSelectedFile(updatedFile);
-    onFileUpdate?.(updatedFile);
-    setSelectedReview(null);
-    setIsResponseOpen(false);
+    try {
+      const apiResponse = await fetch(`/api/course-files/${selectedFile.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ peerReviews: updatedFile.peerReviews }),
+      });
+      const data = await apiResponse.json();
+      if (!apiResponse.ok) {
+        toast.error(data.error || "Response failed");
+        return;
+      }
+      onFilesChange?.(data.files);
+      const refreshed = data.files
+        .filter((file: CourseFile) => file.id === selectedFile.id)
+        .reduce<CourseFile | undefined>((acc, file) => acc ?? file, undefined);
+      setSelectedFile(refreshed ?? updatedFile);
+      setSelectedReview(null);
+      setIsResponseOpen(false);
+    } catch (error) {
+      console.error("Response error:", error);
+      toast.error("An error occurred while responding");
+    }
   };
 
   const filteredFiles = files.filter((file) => {
@@ -130,7 +170,7 @@ export function AllFacultyFilesView({
         onDownload={handleDownload}
         onPeerReview={handlePeerReview}
         onRespondToReview={handleRespondToReview}
-        currentUser={CURRENT_USER}
+        currentUser={currentUser}
       />
     );
   }

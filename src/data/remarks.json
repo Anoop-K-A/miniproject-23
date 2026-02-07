@@ -1,0 +1,12 @@
+[
+  {
+    "id": "rm-1",
+    "authorId": "a1",
+    "entityType": "event-report",
+    "entityId": "er-1",
+    "status": "published",
+    "text": "Excellent outreach event with measurable impact.",
+    "createdAt": "2024-11-22T09:30:00.000Z",
+    "updatedAt": "2024-11-22T09:30:00.000Z"
+  }
+]

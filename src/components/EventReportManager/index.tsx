@@ -1,30 +1,82 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Eye, Trash2, Plus, Search, FileCheck, Upload, Image as ImageIcon, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Calendar,
+  Eye,
+  Trash2,
+  Plus,
+  Search,
+  FileCheck,
+  Upload,
+  Image as ImageIcon,
+  X,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AllFacultyReportsView } from "./AllFacultyReportsView";
 import { EventReportBlogViewer } from "./EventReportBlogViewer";
-import { mockEventReports, communities } from "./mockData";
 import { EventReport } from "./types";
+import { useAuth } from "@/context/AuthContext";
 
-export function EventReportManager() {
-  const [reports, setReports] = useState<EventReport[]>(mockEventReports);
+interface EventReportManagerProps {
+  initialReports?: EventReport[];
+  communities?: string[];
+}
+
+export function EventReportManager({
+  initialReports = [],
+  communities = [],
+}: EventReportManagerProps) {
+  const [reports, setReports] = useState<EventReport[]>(initialReports);
+  const [communityOptions, setCommunityOptions] =
+    useState<string[]>(communities);
+  const { user, userRole } = useAuth();
+  const displayName = user?.name ?? "";
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCommunity, setFilterCommunity] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<EventReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<EventReport | null>(
+    null,
+  );
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   // Form state for new report
@@ -39,10 +91,30 @@ export function EventReportManager() {
     objectives: "",
     outcomes: "",
     thumbnailFile: null as File | null,
-    galleryFiles: [] as File[]
+    galleryFiles: [] as File[],
   });
 
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await fetch("/api/event-reports");
+        const data = await response.json();
+        if (!response.ok) {
+          toast.error(data.error || "Failed to load reports");
+          return;
+        }
+        setReports(data.reports ?? []);
+        setCommunityOptions(data.communities ?? []);
+      } catch (error) {
+        console.error("Load reports error:", error);
+        toast.error("Failed to load reports");
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -56,7 +128,7 @@ export function EventReportManager() {
         return;
       }
       setNewReport({ ...newReport, thumbnailFile: file });
-      
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setThumbnailPreview(reader.result as string);
@@ -67,7 +139,7 @@ export function EventReportManager() {
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
+
     if (files.length + newReport.galleryFiles.length > 10) {
       toast.error("Maximum 10 gallery images allowed");
       return;
@@ -75,8 +147,8 @@ export function EventReportManager() {
 
     const validFiles: File[] = [];
     const previews: string[] = [];
-    
-    files.forEach(file => {
+
+    files.forEach((file) => {
       if (file.size > 5 * 1024 * 1024) {
         toast.error(`${file.name} is too large. Max size is 5MB`);
         return;
@@ -85,9 +157,9 @@ export function EventReportManager() {
         toast.error(`${file.name} is not an image file`);
         return;
       }
-      
+
       validFiles.push(file);
-      
+
       const reader = new FileReader();
       reader.onloadend = () => {
         previews.push(reader.result as string);
@@ -98,74 +170,129 @@ export function EventReportManager() {
       reader.readAsDataURL(file);
     });
 
-    setNewReport({ ...newReport, galleryFiles: [...newReport.galleryFiles, ...validFiles] });
+    setNewReport({
+      ...newReport,
+      galleryFiles: [...newReport.galleryFiles, ...validFiles],
+    });
   };
 
   const removeGalleryImage = (index: number) => {
-    const newGalleryFiles = newReport.galleryFiles.filter((_, i) => i !== index);
+    const newGalleryFiles = newReport.galleryFiles.filter(
+      (_, i) => i !== index,
+    );
     const newPreviews = galleryPreviews.filter((_, i) => i !== index);
     setNewReport({ ...newReport, galleryFiles: newGalleryFiles });
     setGalleryPreviews(newPreviews);
   };
 
-  const handleCreateReport = (e: React.FormEvent) => {
+  const handleCreateReport = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!newReport.thumbnailFile) {
       toast.error("Please upload a thumbnail image");
       return;
     }
 
-    const mockReport: EventReport = {
-      id: Date.now().toString(),
-      eventName: newReport.eventName,
-      community: newReport.community,
-      eventDate: newReport.eventDate,
-      description: newReport.description,
-      location: newReport.location || undefined,
-      participants: newReport.participants ? parseInt(newReport.participants) : undefined,
-      duration: newReport.duration || undefined,
-      objectives: newReport.objectives || undefined,
-      outcomes: newReport.outcomes || undefined,
-      thumbnailUrl: thumbnailPreview || undefined,
-      galleryImages: galleryPreviews.length > 0 ? galleryPreviews : undefined,
-      status: "Draft",
-      facultyCoordinator: "Dr. Sarah Johnson"
-    };
+    try {
+      const response = await fetch("/api/event-reports", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          facultyId: user?.id,
+          facultyCoordinator: displayName,
+          department: user?.department,
+          eventName: newReport.eventName,
+          community: newReport.community,
+          eventDate: newReport.eventDate,
+          description: newReport.description,
+          location: newReport.location || undefined,
+          participants: newReport.participants
+            ? parseInt(newReport.participants)
+            : undefined,
+          duration: newReport.duration || undefined,
+          objectives: newReport.objectives || undefined,
+          outcomes: newReport.outcomes || undefined,
+          thumbnailUrl: thumbnailPreview || undefined,
+          galleryImages:
+            galleryPreviews.length > 0 ? galleryPreviews : undefined,
+          status: "Draft",
+        }),
+      });
 
-    setReports([mockReport, ...reports]);
-    setIsCreateOpen(false);
-    toast.success("Event report created successfully");
-    
-    setNewReport({
-      eventName: "",
-      community: "",
-      eventDate: "",
-      description: "",
-      location: "",
-      participants: "",
-      duration: "",
-      objectives: "",
-      outcomes: "",
-      thumbnailFile: null,
-      galleryFiles: []
-    });
-    setThumbnailPreview(null);
-    setGalleryPreviews([]);
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Report creation failed");
+        return;
+      }
+
+      setReports(data.reports);
+      setIsCreateOpen(false);
+      toast.success("Event report created successfully");
+
+      setNewReport({
+        eventName: "",
+        community: "",
+        eventDate: "",
+        description: "",
+        location: "",
+        participants: "",
+        duration: "",
+        objectives: "",
+        outcomes: "",
+        thumbnailFile: null,
+        galleryFiles: [],
+      });
+      setThumbnailPreview(null);
+      setGalleryPreviews([]);
+    } catch (error) {
+      console.error("Report create error:", error);
+      toast.error("An error occurred during creation");
+    }
   };
 
-  const handleSubmitReport = (id: string) => {
-    setReports(reports.map(r => 
-      r.id === id 
-        ? { ...r, status: "Submitted" as const, submittedDate: new Date().toISOString().split('T')[0] }
-        : r
-    ));
-    toast.success("Report submitted for review");
+  const handleSubmitReport = async (id: string) => {
+    try {
+      const response = await fetch(`/api/event-reports/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "Submitted",
+          submittedDate: new Date().toISOString().split("T")[0],
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Submit failed");
+        return;
+      }
+      setReports(data.reports);
+      toast.success("Report submitted for review");
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error("An error occurred while submitting");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setReports(reports.filter(r => r.id !== id));
-    toast.success("Report deleted successfully");
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/event-reports/${id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Delete failed");
+        return;
+      }
+      setReports(data.reports);
+      toast.success("Report deleted successfully");
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("An error occurred while deleting");
+    }
   };
 
   const handleView = (report: EventReport) => {
@@ -177,22 +304,37 @@ export function EventReportManager() {
     toast.success(`Downloading ${report.eventName} report`);
   };
 
-  const filteredReports = reports.filter(report => {
-    const matchesSearch = report.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.community.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || report.status === filterStatus;
-    const matchesCommunity = filterCommunity === "all" || report.community === filterCommunity;
-    
+  const visibleReports = useMemo(() => {
+    if (userRole === "faculty" && user?.id) {
+      return reports.filter((report) => report.facultyId === user.id);
+    }
+    return reports;
+  }, [reports, user?.id, userRole]);
+
+  const filteredReports = visibleReports.filter((report) => {
+    const matchesSearch =
+      report.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.community.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      filterStatus === "all" || report.status === filterStatus;
+    const matchesCommunity =
+      filterCommunity === "all" || report.community === filterCommunity;
+
     return matchesSearch && matchesStatus && matchesCommunity;
   });
 
   const getStatusColor = (status: string | undefined) => {
     switch (status) {
-      case "Approved": return "bg-green-100 text-green-800";
-      case "Submitted": return "bg-blue-100 text-blue-800";
-      case "Draft": return "bg-gray-100 text-gray-800";
-      case "Rejected": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Approved":
+        return "bg-green-100 text-green-800";
+      case "Submitted":
+        return "bg-blue-100 text-blue-800";
+      case "Draft":
+        return "bg-gray-100 text-gray-800";
+      case "Rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -202,17 +344,39 @@ export function EventReportManager() {
         report={selectedReport}
         onBack={() => setIsViewOpen(false)}
         onDownload={handleDownload}
-        onRespondToAdminReview={(response) => {
-          const updated = reports.map(r => 
-            r.id === selectedReport.id 
-              ? { ...r, facultyResponse: response, responseDate: new Date().toISOString().split('T')[0] }
-              : r
-          );
-          setReports(updated);
-          setSelectedReport({...selectedReport, facultyResponse: response, responseDate: new Date().toISOString().split('T')[0]});
-          toast.success("Response submitted successfully");
+        onRespondToAdminReview={async (responseText) => {
+          try {
+            const apiResponse = await fetch(
+              `/api/event-reports/${selectedReport.id}`,
+              {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  facultyResponse: responseText,
+                }),
+              },
+            );
+            const data = await apiResponse.json();
+            if (!apiResponse.ok) {
+              toast.error(data.error || "Response failed");
+              return;
+            }
+            setReports(data.reports);
+            const updated = data.reports.find(
+              (report: EventReport) => report.id === selectedReport.id,
+            );
+            if (updated) {
+              setSelectedReport(updated);
+            }
+            toast.success("Response submitted successfully");
+          } catch (error) {
+            console.error("Response error:", error);
+            toast.error("An error occurred while responding");
+          }
         }}
-        currentUser="Dr. Sarah Johnson"
+        currentUser={displayName}
       />
     );
   }
@@ -233,7 +397,6 @@ export function EventReportManager() {
           </TabsList>
 
           <TabsContent value="my-reports" className="space-y-4 mt-4">
-            {/* Search and Filter Bar */}
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -256,14 +419,19 @@ export function EventReportManager() {
                   <SelectItem value="Rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={filterCommunity} onValueChange={setFilterCommunity}>
+              <Select
+                value={filterCommunity}
+                onValueChange={setFilterCommunity}
+              >
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue placeholder="Filter by Community" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Communities</SelectItem>
-                  {communities.map(community => (
-                    <SelectItem key={community} value={community}>{community}</SelectItem>
+                  {communityOptions.map((community) => (
+                    <SelectItem key={community} value={community}>
+                      {community}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -278,7 +446,8 @@ export function EventReportManager() {
                   <DialogHeader>
                     <DialogTitle>Create Event Report</DialogTitle>
                     <DialogDescription>
-                      Document a community engagement event with details and thumbnail
+                      Document a community engagement event with details and
+                      thumbnail
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleCreateReport} className="space-y-4">
@@ -299,7 +468,10 @@ export function EventReportManager() {
                               size="sm"
                               className="absolute top-2 right-2"
                               onClick={() => {
-                                setNewReport({ ...newReport, thumbnailFile: null });
+                                setNewReport({
+                                  ...newReport,
+                                  thumbnailFile: null,
+                                });
                                 setThumbnailPreview(null);
                               }}
                             >
@@ -336,7 +508,12 @@ export function EventReportManager() {
                       <Input
                         id="eventName"
                         value={newReport.eventName}
-                        onChange={(e) => setNewReport({...newReport, eventName: e.target.value})}
+                        onChange={(e) =>
+                          setNewReport({
+                            ...newReport,
+                            eventName: e.target.value,
+                          })
+                        }
                         placeholder="e.g., Community Health Workshop"
                         required
                       />
@@ -347,13 +524,15 @@ export function EventReportManager() {
                       <Label htmlFor="community">Community *</Label>
                       <Select
                         value={newReport.community}
-                        onValueChange={(value) => setNewReport({...newReport, community: value})}
+                        onValueChange={(value) =>
+                          setNewReport({ ...newReport, community: value })
+                        }
                       >
                         <SelectTrigger id="community">
                           <SelectValue placeholder="Select community type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {communities.map(community => (
+                          {communityOptions.map((community) => (
                             <SelectItem key={community} value={community}>
                               {community}
                             </SelectItem>
@@ -369,7 +548,12 @@ export function EventReportManager() {
                         id="eventDate"
                         type="date"
                         value={newReport.eventDate}
-                        onChange={(e) => setNewReport({...newReport, eventDate: e.target.value})}
+                        onChange={(e) =>
+                          setNewReport({
+                            ...newReport,
+                            eventDate: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
@@ -381,18 +565,30 @@ export function EventReportManager() {
                         <Input
                           id="location"
                           value={newReport.location}
-                          onChange={(e) => setNewReport({...newReport, location: e.target.value})}
+                          onChange={(e) =>
+                            setNewReport({
+                              ...newReport,
+                              location: e.target.value,
+                            })
+                          }
                           placeholder="e.g., Community Center"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="participants">Number of Participants</Label>
+                        <Label htmlFor="participants">
+                          Number of Participants
+                        </Label>
                         <Input
                           id="participants"
                           type="number"
                           min="0"
                           value={newReport.participants}
-                          onChange={(e) => setNewReport({...newReport, participants: e.target.value})}
+                          onChange={(e) =>
+                            setNewReport({
+                              ...newReport,
+                              participants: e.target.value,
+                            })
+                          }
                           placeholder="0"
                         />
                       </div>
@@ -404,7 +600,12 @@ export function EventReportManager() {
                       <Input
                         id="duration"
                         value={newReport.duration}
-                        onChange={(e) => setNewReport({...newReport, duration: e.target.value})}
+                        onChange={(e) =>
+                          setNewReport({
+                            ...newReport,
+                            duration: e.target.value,
+                          })
+                        }
                         placeholder="e.g., 3 hours"
                       />
                     </div>
@@ -415,13 +616,19 @@ export function EventReportManager() {
                       <Textarea
                         id="description"
                         value={newReport.description}
-                        onChange={(e) => setNewReport({...newReport, description: e.target.value})}
+                        onChange={(e) =>
+                          setNewReport({
+                            ...newReport,
+                            description: e.target.value,
+                          })
+                        }
                         placeholder="Provide a detailed description of the event, its activities, and impact..."
                         rows={4}
                         required
                       />
                       <p className="text-xs text-gray-500">
-                        Provide comprehensive details about the event, activities conducted, and community impact.
+                        Provide comprehensive details about the event,
+                        activities conducted, and community impact.
                       </p>
                     </div>
 
@@ -431,7 +638,12 @@ export function EventReportManager() {
                       <Textarea
                         id="objectives"
                         value={newReport.objectives}
-                        onChange={(e) => setNewReport({...newReport, objectives: e.target.value})}
+                        onChange={(e) =>
+                          setNewReport({
+                            ...newReport,
+                            objectives: e.target.value,
+                          })
+                        }
                         placeholder="What were the goals and objectives of this event?"
                         rows={3}
                       />
@@ -443,7 +655,12 @@ export function EventReportManager() {
                       <Textarea
                         id="outcomes"
                         value={newReport.outcomes}
-                        onChange={(e) => setNewReport({...newReport, outcomes: e.target.value})}
+                        onChange={(e) =>
+                          setNewReport({
+                            ...newReport,
+                            outcomes: e.target.value,
+                          })
+                        }
                         placeholder="What were the results and impact of the event?"
                         rows={3}
                       />
@@ -525,8 +742,12 @@ export function EventReportManager() {
                 <TableBody>
                   {filteredReports.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-gray-500 py-8">
-                        No reports found. Create your first event report to get started.
+                      <TableCell
+                        colSpan={5}
+                        className="text-center text-gray-500 py-8"
+                      >
+                        No reports found. Create your first event report to get
+                        started.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -542,9 +763,13 @@ export function EventReportManager() {
                               />
                             )}
                             <div>
-                              <div className="font-medium">{report.eventName}</div>
+                              <div className="font-medium">
+                                {report.eventName}
+                              </div>
                               {report.location && (
-                                <div className="text-sm text-gray-500">{report.location}</div>
+                                <div className="text-sm text-gray-500">
+                                  {report.location}
+                                </div>
                               )}
                             </div>
                           </div>
@@ -601,10 +826,11 @@ export function EventReportManager() {
           </TabsContent>
 
           <TabsContent value="all-reports" className="space-y-4 mt-4">
-            <AllFacultyReportsView reports={reports} onReportUpdate={(updatedReport) => {
-              const updated = reports.map(r => r.id === updatedReport.id ? updatedReport : r);
-              setReports(updated);
-            }} />
+            <AllFacultyReportsView
+              reports={visibleReports}
+              currentUser={displayName}
+              onReportsChange={setReports}
+            />
           </TabsContent>
         </Tabs>
       </CardContent>

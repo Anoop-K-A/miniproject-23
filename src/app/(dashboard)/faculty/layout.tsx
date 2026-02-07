@@ -1,17 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { RoleSwitcher } from "@/components/App/RoleSwitcher";
 import { useRouter } from "next/navigation";
+import { getDashboardPath } from "@/lib/roles";
 
 export default function FacultyLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { userRole, switchRole } = useAuth();
+  const { userRole, switchRole, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && userRole !== "faculty") {
+      router.replace(getDashboardPath(userRole));
+    }
+  }, [isAuthenticated, isLoading, router, userRole]);
 
   const handleRoleChange = (role: typeof userRole) => {
     switchRole(role);

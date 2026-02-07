@@ -2,27 +2,46 @@
 
 import { useRouter } from "next/navigation";
 import { SignUpForm } from "@/components/AuthPage/SignUpForm";
-import { useAuth, UserRole } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
 
-  const handleSubmit = (role: UserRole) => {
-    // Call auth register
-    register(role);
+  const handleSubmit = async (formData: any) => {
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+          role: formData.role,
+          department: formData.department,
+        }),
+      });
 
-    // Persist auth state (optional, depends on your setup)
-    document.cookie = `auth_authenticated=true; path=/`;
-    document.cookie = `auth_role=${role}; path=/`;
+      const data = await response.json();
 
-    // Redirect after registration
-    router.push("/dashboard");
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+
+      // Redirect to login after success
+      router.push("/login");
+    } catch (error) {
+      console.error("Register error:", error);
+      // Error is handled in the form
+    }
   };
 
   return (
- <SignUpForm
+    <SignUpForm
       onSignUpSuccess={handleSubmit}
       onSwitchToSignIn={() => router.push("/login")}
-    />  );
+    />
+  );
 }

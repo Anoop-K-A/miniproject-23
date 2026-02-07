@@ -1,0 +1,47 @@
+[
+  {
+    "id": "f1",
+    "username": "faculty@test.com",
+    "password": "password123",
+    "name": "Dr. John Doe",
+    "role": "faculty",
+    "department": "Computer Science",
+    "email": "faculty@test.com",
+    "phone": "+1 (555) 123-4567",
+    "facultyRole": "Associate Professor",
+    "courses": [
+      "CS101 - Intro to Programming",
+      "CS201 - Data Structures",
+      "CS301 - Algorithms"
+    ],
+    "specialization": "Artificial Intelligence & Machine Learning",
+    "experience": "12 years",
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "a1",
+    "username": "auditor@test.com",
+    "password": "password123",
+    "name": "Jane Smith",
+    "role": "auditor",
+    "department": "Audit",
+    "email": "auditor@test.com",
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "s1",
+    "username": "staff@test.com",
+    "password": "password123",
+    "name": "Bob Johnson",
+    "role": "staff-advisor",
+    "department": "Administration",
+    "email": "staff@test.com",
+    "status": "active",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]

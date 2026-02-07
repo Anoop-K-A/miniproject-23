@@ -1,11 +1,13 @@
 export interface Student {
   id: string;
+  advisorId?: string;
   name: string;
   rollNumber: string;
   email: string;
   phone: string;
   department: string;
   semester: string;
+  batchYear?: string;
   cgpa: number;
   attendance: number;
   careerInterest: string;

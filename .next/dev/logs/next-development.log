@@ -1,0 +1,414 @@
+[00:00:01.606] Server  LOG     ✓ Ready in 1107ms
+[00:00:07.126] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:24.118] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:08.014] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:07:08.074] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:07:08.204] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:07:08.271] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:07:09.373] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:07:09.433] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:08:44.812] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:08:44.877] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:09:02.514] Browser ERROR   In HTML, %s cannot be a descendant of <%s>.
+This will cause a hydration error.%s <div> p 
+
+  ...
+    <FocusScope asChild={true} loop={true} trapped={true} onMountAutoFocus={undefined} ...>
+      <Primitive.div tabIndex={-1} asChild={true} ref={function} ...>
+        <Slot tabIndex={-1} onKeyDown={function FocusScope.useCallback[handleKeyDown]} ref={function}>
+          <SlotClone tabIndex={-1} onKeyDown={function FocusScope.useCallback[handleKeyDown]} ref={function}>
+            <DismissableLayer role="dialog" id="radix-_r_3s_" aria-describedby="radix-_r_3u_" ...>
+              <Primitive.div role="dialog" id="radix-_r_3s_" aria-describedby="radix-_r_3u_" ...>
+                <div role="dialog" id="radix-_r_3s_" aria-describedby="radix-_r_3u_" aria-labelledby="radix-_r_3t_" ...>
+                  <DialogHeader>
+                    <div data-slot="dialog-header" className="flex flex-...">
+                      <DialogTitle>
+                      <DialogDescription>
+                        <DialogDescription data-slot="dialog-des..." className="text-muted...">
+                          <Primitive.p id="radix-_r_3u_" data-slot="dialog-des..." className="text-muted..." ref={null}>
+>                           <p
+>                             id="radix-_r_3u_"
+>                             data-slot="dialog-description"
+>                             className="text-muted-foreground text-sm"
+>                             ref={null}
+>                           >
+>                             <div className="flex items-center gap-2 mt-2">
+                  ...
+                  ...
+    ...
+
+[00:09:02.515] Browser ERROR   <%s> cannot contain a nested %s.
+See this log for the ancestor stack trace. p <div>
+[00:09:39.537] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:09:39.612] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:09:39.666] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:19:19.026] Server  LOG     ✓ Compiled in 912ms
+[00:19:30.091] Server  LOG     ✓ Compiled in 242ms
+[00:21:07.175] Server  LOG     ✓ Compiled in 273ms
+[00:40:16.515] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:16.516] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:16.516] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:16.516] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:16.516] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:16.615] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:18.019] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:18.019] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:18.234] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:18.234] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:18.234] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:18.645] Browser ERROR   uncaughtError: Error: ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+
+
+[00:40:18.760] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:19.115] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:22.125] Browser ERROR   uncaughtError: Error: ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+
+
+[00:40:22.265] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[00:40:22.265] Browser ERROR   ./src/components/EventReportManager/index.tsx:408:21
+Parsing ecmascript source code failed
+  406 |             />
+  407 |           </TabsContent>
+> 408 |               </div>
+      |                     ^
+> 409 |               <Select value={filterStatus} onValueChange={setFilterStatus}>
+      | ^^^^^^^^^^^^^^^
+  410 |                 <SelectTrigger className="w-full md:w-40">
+  411 |                   <SelectValue placeholder="Filter by Status" />
+  412 |                 </SelectTrigger>
+
+Expected '</', got 'jsx text'
+
+Import trace:
+  Server Component:
+    ./src/components/EventReportManager/index.tsx
+    ./src/app/(dashboard)/faculty/reports/page.tsx
+[01:08:57.125] Server  LOG     ✓ Compiled in 1320ms
+[01:08:58.541] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:18:03.839] Server  LOG     ✓ Compiled in 242ms
+[01:18:21.482] Server  LOG     ✓ Compiled in 206ms
+[01:18:41.129] Server  LOG     ✓ Compiled in 183ms
+[01:19:14.970] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:19:27.275] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:20:17.680] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:20:17.746] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:20:17.801] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:20:18.402] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:20:18.469] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:20:18.525] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:13.310] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:13.374] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:13.453] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:13.565] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:16.959] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:17.026] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:17.079] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:17.140] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:18.564] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:18.617] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:18.675] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:32:18.748] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[01:40:49.510] Server  LOG     ✓ Compiled in 845ms
+[01:41:15.574] Server  LOG     ✓ Compiled in 219ms
+[01:43:48.832] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:02:23.432] Server  LOG     ✓ Compiled in 695ms
+[03:13:37.578] Server  LOG     ✓ Compiled in 1754ms
+[03:13:43.761] Server  LOG     ✓ Compiled in 237ms
+[03:16:25.336] Server  LOG     ✓ Compiled in 265ms
+[03:16:52.289] Server  LOG     ✓ Compiled in 209ms
+[03:17:42.987] Server  LOG     ✓ Compiled in 284ms
+[03:22:01.460] Server  LOG     ✓ Compiled in 227ms
+[03:25:14.058] Server  LOG     ✓ Compiled in 886ms
+[03:26:03.326] Server  LOG     ✓ Compiled in 204ms
+[03:26:10.841] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:26:23.899] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:26:23.983] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:26:24.075] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:26:24.235] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:29:37.768] Server  LOG     ✓ Compiled in 1003ms
+[03:29:38.556] Browser ERROR   The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [3] []
+[03:30:45.311] Server  LOG     ✓ Compiled in 556ms
+[03:30:46.446] Server  LOG     ✓ Compiled in 467ms
+[03:35:28.517] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:35:28.679] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:35:28.781] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:35:28.912] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:35:33.266] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:35:33.410] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:35:33.570] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[03:35:33.836] Server  WARN    Error: Route "/api/course-files/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
