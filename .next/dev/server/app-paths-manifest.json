@@ -4,6 +4,7 @@
   "/(dashboard)/faculty/files/page": "app/(dashboard)/faculty/files/page.js",
   "/(dashboard)/faculty/reports/page": "app/(dashboard)/faculty/reports/page.js",
   "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/course-files/[id]/route": "app/api/course-files/[id]/route.js",
   "/api/course-files/route": "app/api/course-files/route.js",
   "/api/event-reports/route": "app/api/event-reports/route.js",
   "/page": "app/page.js"
