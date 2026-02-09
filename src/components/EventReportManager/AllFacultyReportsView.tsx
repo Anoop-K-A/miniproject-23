@@ -361,10 +361,10 @@ export function AllFacultyReportsView({
               <DialogTitle>Event Report Details & Peer Review</DialogTitle>
               <DialogDescription>
                 {selectedReport && (
-                  <div className="flex items-center gap-2 mt-2">
+                  <span className="flex items-center gap-2 mt-2">
                     <Calendar className="h-4 w-4" />
                     {selectedReport.eventName}
-                  </div>
+                  </span>
                 )}
               </DialogDescription>
             </DialogHeader>

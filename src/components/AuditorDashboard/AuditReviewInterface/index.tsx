@@ -23,6 +23,7 @@ export function AuditReviewInterface({
   type,
   item,
   facultyName,
+  facultyId,
   onBack,
   onReviewCompleted,
 }: AuditReviewInterfaceProps) {
@@ -120,9 +121,33 @@ export function AuditReviewInterface({
         }),
       });
 
+      if (facultyId) {
+        const threadId = `${type === "file" ? "course-file" : "event-report"}:${item.id}`;
+        await fetch("/api/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            facultyId,
+            auditorId: user?.id,
+            entityType: type === "file" ? "course-file" : "event-report",
+            entityId: item.id,
+            threadId,
+            senderRole: "auditor",
+            senderName: user?.name,
+            message:
+              auditorRemarks ||
+              `${type === "file" ? "Course file" : "Event report"} ${status.toLowerCase()}.`,
+            status: status.toLowerCase(),
+          }),
+        });
+      }
+
       toast.success(
         `${type === "file" ? "Course file" : "Event report"} ${reviewDecision}d successfully`,
       );
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
       onBack();
     } catch (error) {
       console.error("Review submit error:", error);

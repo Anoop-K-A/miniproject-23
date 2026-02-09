@@ -1981,6 +1981,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Faculty
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$FacultyPortfolio$2f$PortfolioTabs$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/FacultyDashboard/FacultyPortfolio/PortfolioTabs.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$FacultyPortfolio$2f$FileViewDialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/FacultyDashboard/FacultyPortfolio/FileViewDialog.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$FacultyPortfolio$2f$ReportViewDialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/FacultyDashboard/FacultyPortfolio/ReportViewDialog.tsx [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/card.tsx [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/badge.tsx [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/context/AuthContext.tsx [app-ssr] (ecmascript)");
+;
+;
+;
 ;
 ;
 ;
@@ -1989,12 +1995,15 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Faculty
 ;
 ;
 function FacultyPortfolio({ faculty, onBack }) {
+    const { user, userRole } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
     const [selectedFile, setSelectedFile] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const [selectedReport, setSelectedReport] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const [isFileViewOpen, setIsFileViewOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isReportViewOpen, setIsReportViewOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [courseFiles, setCourseFiles] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
     const [eventReports, setEventReports] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [messages, setMessages] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
+    const canViewMessages = userRole !== "faculty";
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const loadPortfolioData = async ()=>{
             try {
@@ -2011,13 +2020,27 @@ function FacultyPortfolio({ faculty, onBack }) {
                 const scopedReports = (reportsData.reports ?? []).filter((report)=>report.facultyId === faculty.id);
                 setCourseFiles(scopedFiles);
                 setEventReports(scopedReports);
+                if (canViewMessages) {
+                    const messagesResponse = await fetch(`/api/messages?facultyId=${faculty.id}`);
+                    const messagesData = await messagesResponse.json();
+                    if (messagesResponse.ok) {
+                        setMessages(messagesData.messages ?? []);
+                    } else {
+                        setMessages([]);
+                    }
+                } else {
+                    setMessages([]);
+                }
             } catch (error) {
                 console.error("Load faculty portfolio error:", error);
             }
         };
         loadPortfolioData();
+        if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+        ;
     }, [
-        faculty.id
+        faculty.id,
+        canViewMessages
     ]);
     const getStatusColor = (status)=>{
         switch(status){
@@ -2050,15 +2073,119 @@ function FacultyPortfolio({ faculty, onBack }) {
                 onBack: onBack
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
-                lineNumber: 80,
+                lineNumber: 121,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$FacultyPortfolio$2f$ProfileHeader$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ProfileHeader"], {
                 faculty: faculty
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
-                lineNumber: 81,
+                lineNumber: 122,
                 columnNumber: 7
+            }, this),
+            canViewMessages && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
+                    className: "pt-6 space-y-4",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "flex items-center justify-between",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                    className: "text-lg font-semibold",
+                                    children: "Auditor Messages"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                                    lineNumber: 127,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                    variant: "outline",
+                                    children: messages.length
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                                    lineNumber: 128,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                            lineNumber: 126,
+                            columnNumber: 13
+                        }, this),
+                        messages.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-sm text-gray-500",
+                            children: "No auditor messages yet."
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                            lineNumber: 131,
+                            columnNumber: 15
+                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "space-y-3",
+                            children: messages.map((msg)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "border rounded-lg p-3 bg-gray-50",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "flex items-center justify-between",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: "text-sm font-medium",
+                                                    children: msg.entityType === "course-file" ? "Course File" : "Event Report"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                                                    lineNumber: 140,
+                                                    columnNumber: 23
+                                                }, this),
+                                                msg.status && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                                    variant: "secondary",
+                                                    children: msg.status
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                                                    lineNumber: 146,
+                                                    columnNumber: 25
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                                            lineNumber: 139,
+                                            columnNumber: 21
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-sm text-gray-700 mt-2",
+                                            children: msg.message
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                                            lineNumber: 149,
+                                            columnNumber: 21
+                                        }, this),
+                                        msg.createdAt && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-xs text-gray-500 mt-2",
+                                            children: new Date(msg.createdAt).toLocaleString()
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                                            lineNumber: 151,
+                                            columnNumber: 23
+                                        }, this)
+                                    ]
+                                }, msg.id, true, {
+                                    fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                                    lineNumber: 135,
+                                    columnNumber: 19
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                            lineNumber: 133,
+                            columnNumber: 15
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                    lineNumber: 125,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
+                lineNumber: 124,
+                columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$FacultyPortfolio$2f$PortfolioTabs$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PortfolioTabs"], {
                 courseFiles: courseFiles,
@@ -2068,7 +2195,7 @@ function FacultyPortfolio({ faculty, onBack }) {
                 getStatusColor: getStatusColor
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
-                lineNumber: 82,
+                lineNumber: 162,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$FacultyPortfolio$2f$FileViewDialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FileViewDialog"], {
@@ -2078,7 +2205,7 @@ function FacultyPortfolio({ faculty, onBack }) {
                 getStatusColor: getStatusColor
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
-                lineNumber: 90,
+                lineNumber: 170,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$FacultyPortfolio$2f$ReportViewDialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ReportViewDialog"], {
@@ -2088,13 +2215,13 @@ function FacultyPortfolio({ faculty, onBack }) {
                 getStatusColor: getStatusColor
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
-                lineNumber: 97,
+                lineNumber: 177,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/FacultyDashboard/FacultyPortfolio/index.tsx",
-        lineNumber: 79,
+        lineNumber: 120,
         columnNumber: 5
     }, this);
 }
@@ -2963,6 +3090,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Faculty
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$PendingAlerts$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/FacultyDashboard/PendingAlerts.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$ActivitySection$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/FacultyDashboard/ActivitySection.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$AllFacultyMembers$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/FacultyDashboard/AllFacultyMembers.tsx [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/context/AuthContext.tsx [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/card.tsx [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/badge.tsx [app-ssr] (ecmascript)");
 "use client";
 ;
 ;
@@ -2972,15 +3102,87 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Faculty
 ;
 ;
 ;
+;
+;
+;
 function FacultyDashboard({ stats, facultyMembers }) {
+    const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
     const [selectedFaculty, setSelectedFaculty] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [currentStats, setCurrentStats] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(stats);
+    const [currentFacultyMembers, setCurrentFacultyMembers] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(facultyMembers);
+    const [messages, setMessages] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
+    const normalizeThreadId = (message)=>message.threadId ?? `${message.entityType}:${message.entityId}`;
+    const groupedThreads = messages.reduce((acc, message)=>{
+        const threadId = normalizeThreadId(message);
+        if (!acc[threadId]) {
+            acc[threadId] = [];
+        }
+        acc[threadId].push({
+            ...message,
+            threadId
+        });
+        return acc;
+    }, {});
+    const threads = Object.entries(groupedThreads).map(([threadId, threadMessages])=>{
+        const sortedMessages = [
+            ...threadMessages
+        ].sort((a, b)=>{
+            const aTime = new Date(a.createdAt ?? 0).getTime();
+            const bTime = new Date(b.createdAt ?? 0).getTime();
+            return aTime - bTime;
+        });
+        const lastMessage = sortedMessages[sortedMessages.length - 1];
+        return {
+            threadId,
+            messages: sortedMessages,
+            lastMessage
+        };
+    }).sort((a, b)=>{
+        const aTime = new Date(a.lastMessage?.createdAt ?? 0).getTime();
+        const bTime = new Date(b.lastMessage?.createdAt ?? 0).getTime();
+        return bTime - aTime;
+    });
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const refreshDashboard = async ()=>{
+            try {
+                const response = await fetch("/api/dashboard/faculty");
+                const data = await response.json();
+                if (response.ok) {
+                    if (data?.stats) {
+                        setCurrentStats(data.stats);
+                    }
+                    if (data?.facultyMembers) {
+                        setCurrentFacultyMembers(data.facultyMembers);
+                    }
+                }
+                if (user?.id) {
+                    const messagesResponse = await fetch(`/api/messages?facultyId=${user.id}`);
+                    const messagesData = await messagesResponse.json();
+                    if (messagesResponse.ok) {
+                        setMessages(messagesData.messages ?? []);
+                    } else {
+                        setMessages([]);
+                    }
+                } else {
+                    setMessages([]);
+                }
+            } catch (error) {
+                console.error("Faculty dashboard refresh error:", error);
+            }
+        };
+        refreshDashboard();
+        if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+        ;
+    }, [
+        user?.id
+    ]);
     if (selectedFaculty) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$FacultyPortfolio$2f$index$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FacultyPortfolio"], {
             faculty: selectedFaculty,
             onBack: ()=>setSelectedFaculty(null)
         }, void 0, false, {
             fileName: "[project]/src/components/FacultyDashboard/index.tsx",
-            lineNumber: 27,
+            lineNumber: 132,
             columnNumber: 7
         }, this);
     }
@@ -2989,44 +3191,179 @@ function FacultyDashboard({ stats, facultyMembers }) {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$DashboardHeader$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DashboardHeader"], {}, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/index.tsx",
-                lineNumber: 36,
+                lineNumber: 141,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$StatsOverview$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["StatsOverview"], {
-                stats: stats
+                stats: currentStats
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/index.tsx",
-                lineNumber: 37,
+                lineNumber: 142,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$PendingAlerts$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PendingAlerts"], {
-                pendingReports: stats.pendingReports
+                pendingReports: currentStats.pendingReports
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/index.tsx",
-                lineNumber: 38,
+                lineNumber: 143,
                 columnNumber: 7
             }, this),
+            user?.id && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
+                    className: "pt-6 space-y-4",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "flex items-center justify-between",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                    className: "text-lg font-semibold",
+                                    children: "Auditor Messages"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                    lineNumber: 148,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                    variant: "outline",
+                                    children: threads.length
+                                }, void 0, false, {
+                                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                    lineNumber: 149,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                            lineNumber: 147,
+                            columnNumber: 13
+                        }, this),
+                        threads.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-sm text-gray-500",
+                            children: "No auditor messages yet."
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                            lineNumber: 152,
+                            columnNumber: 15
+                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "space-y-3",
+                            children: threads.map((thread)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "border rounded-lg p-3 bg-gray-50",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "flex items-center justify-between",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: "text-sm font-medium",
+                                                    children: thread.lastMessage?.entityType === "course-file" ? "Course File" : "Event Report"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                                    lineNumber: 161,
+                                                    columnNumber: 23
+                                                }, this),
+                                                thread.lastMessage?.status && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                                    variant: "secondary",
+                                                    children: thread.lastMessage.status
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                                    lineNumber: 167,
+                                                    columnNumber: 25
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                            lineNumber: 160,
+                                            columnNumber: 21
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "mt-3 space-y-2",
+                                            children: thread.messages.map((msg)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "rounded-md bg-white p-2",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            className: "flex items-center justify-between text-xs text-gray-500",
+                                                            children: [
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                    children: msg.senderName || msg.senderRole || "Message"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                                                    lineNumber: 176,
+                                                                    columnNumber: 29
+                                                                }, this),
+                                                                msg.createdAt && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                    children: new Date(msg.createdAt).toLocaleString()
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                                                    lineNumber: 180,
+                                                                    columnNumber: 31
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                                            lineNumber: 175,
+                                                            columnNumber: 27
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                            className: "text-sm text-gray-700 mt-1",
+                                                            children: msg.message
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                                            lineNumber: 185,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    ]
+                                                }, msg.id, true, {
+                                                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                                    lineNumber: 174,
+                                                    columnNumber: 25
+                                                }, this))
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                            lineNumber: 172,
+                                            columnNumber: 21
+                                        }, this)
+                                    ]
+                                }, thread.threadId, true, {
+                                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                                    lineNumber: 156,
+                                    columnNumber: 19
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                            lineNumber: 154,
+                            columnNumber: 15
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                    lineNumber: 146,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/components/FacultyDashboard/index.tsx",
+                lineNumber: 145,
+                columnNumber: 9
+            }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$ActivitySection$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ActivitySection"], {
-                activities: stats.recentActivity,
-                facultyMembers: facultyMembers,
+                activities: currentStats.recentActivity,
+                facultyMembers: currentFacultyMembers,
                 onSelectFaculty: setSelectedFaculty
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/index.tsx",
-                lineNumber: 39,
+                lineNumber: 198,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$FacultyDashboard$2f$AllFacultyMembers$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AllFacultyMembers"], {
-                facultyMembers: facultyMembers,
+                facultyMembers: currentFacultyMembers,
                 onSelectFaculty: setSelectedFaculty
             }, void 0, false, {
                 fileName: "[project]/src/components/FacultyDashboard/index.tsx",
-                lineNumber: 44,
+                lineNumber: 203,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/FacultyDashboard/index.tsx",
-        lineNumber: 35,
+        lineNumber: 140,
         columnNumber: 5
     }, this);
 }

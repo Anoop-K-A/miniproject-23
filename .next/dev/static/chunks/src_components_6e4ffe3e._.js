@@ -1097,7 +1097,7 @@ const eventReportChecklist = [
         label: "Event details are complete and accurate"
     }
 ];
-function AuditReviewInterface({ type, item, facultyName, onBack, onReviewCompleted }) {
+function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onReviewCompleted }) {
     _s();
     const [checkedItems, setCheckedItems] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({});
     const [auditorRemarks, setAuditorRemarks] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
@@ -1167,7 +1167,30 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                     text: auditorRemarks
                 })
             });
+            if (facultyId) {
+                const threadId = `${type === "file" ? "course-file" : "event-report"}:${item.id}`;
+                await fetch("/api/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        facultyId,
+                        auditorId: user?.id,
+                        entityType: type === "file" ? "course-file" : "event-report",
+                        entityId: item.id,
+                        threadId,
+                        senderRole: "auditor",
+                        senderName: user?.name,
+                        message: auditorRemarks || `${type === "file" ? "Course file" : "Event report"} ${status.toLowerCase()}.`,
+                        status: status.toLowerCase()
+                    })
+                });
+            }
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success(`${type === "file" ? "Course file" : "Event report"} ${reviewDecision}d successfully`);
+            if ("TURBOPACK compile-time truthy", 1) {
+                window.dispatchEvent(new Event("dashboard:data-updated"));
+            }
             onBack();
         } catch (error) {
             console.error("Review submit error:", error);
@@ -1216,14 +1239,14 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                                 className: "h-4 w-4 mr-2"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 169,
+                                lineNumber: 194,
                                 columnNumber: 11
                             }, this),
                             "Back to Faculty List"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 168,
+                        lineNumber: 193,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1234,20 +1257,20 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                                 className: "h-4 w-4 mr-2"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 173,
+                                lineNumber: 198,
                                 columnNumber: 11
                             }, this),
                             "Download Audit Sheet"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 172,
+                        lineNumber: 197,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 167,
+                lineNumber: 192,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -1263,7 +1286,7 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                                         children: facultyName
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                        lineNumber: 183,
+                                        lineNumber: 208,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1271,13 +1294,13 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                                         children: type === "file" ? "Course File Review" : "Event Report Review"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                        lineNumber: 184,
+                                        lineNumber: 209,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 182,
+                                lineNumber: 207,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1288,28 +1311,28 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                                     children: reviewDecision === "approve" ? "Approved" : "Not Approved"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                    lineNumber: 189,
+                                    lineNumber: 214,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 188,
+                                lineNumber: 213,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 181,
+                        lineNumber: 206,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                    lineNumber: 180,
+                    lineNumber: 205,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 179,
+                lineNumber: 204,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1321,7 +1344,7 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                         onChecklistChange: handleChecklistChange
                     }, void 0, false, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 207,
+                        lineNumber: 232,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1333,7 +1356,7 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                                 onDownload: handleDownloadDocument
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 216,
+                                lineNumber: 241,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$AuditReviewInterface$2f$DocumentDetails$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DocumentDetails"], {
@@ -1341,7 +1364,7 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                                 item: item
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 223,
+                                lineNumber: 248,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$AuditReviewInterface$2f$AuditorRemarks$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AuditorRemarks"], {
@@ -1356,25 +1379,25 @@ function AuditReviewInterface({ type, item, facultyName, onBack, onReviewComplet
                                 checkedItems: checkedItems
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 226,
+                                lineNumber: 251,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 214,
+                        lineNumber: 239,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 205,
+                lineNumber: 230,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-        lineNumber: 165,
+        lineNumber: 190,
         columnNumber: 5
     }, this);
 }
@@ -2251,6 +2274,7 @@ function FacultyAuditPortfolio({ faculty, onBack }) {
             type: reviewType,
             item: reviewType === "file" ? selectedFile : selectedReport,
             facultyName: faculty.name,
+            facultyId: faculty.id,
             onBack: ()=>setIsReviewOpen(false),
             onReviewCompleted: handleReviewCompleted
         }, void 0, false, {
@@ -2266,14 +2290,14 @@ function FacultyAuditPortfolio({ faculty, onBack }) {
                 onBack: onBack
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/FacultyAuditPortfolio/index.tsx",
-                lineNumber: 125,
+                lineNumber: 126,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$FacultyAuditPortfolio$2f$FacultyHeader$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FacultyHeader"], {
                 faculty: faculty
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/FacultyAuditPortfolio/index.tsx",
-                lineNumber: 126,
+                lineNumber: 127,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$FacultyAuditPortfolio$2f$PortfolioTabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PortfolioTabs"], {
@@ -2284,13 +2308,13 @@ function FacultyAuditPortfolio({ faculty, onBack }) {
                 getStatusColor: getStatusColor
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/FacultyAuditPortfolio/index.tsx",
-                lineNumber: 127,
+                lineNumber: 128,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AuditorDashboard/FacultyAuditPortfolio/index.tsx",
-        lineNumber: 124,
+        lineNumber: 125,
         columnNumber: 5
     }, this);
 }
@@ -2811,6 +2835,10 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$c
 ;
 ;
 function ReviewStatistics({ stats }) {
+    const reviewedFiles = stats.approvedFiles + stats.rejectedFiles;
+    const reviewedReports = stats.approvedReports + stats.rejectedReports;
+    const courseFileApprovalRate = reviewedFiles > 0 ? Math.round(stats.approvedFiles / reviewedFiles * 100) : 0;
+    const eventReportApprovalRate = reviewedReports > 0 ? Math.round(stats.approvedReports / reviewedReports * 100) : 0;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardHeader"], {
@@ -2819,20 +2847,20 @@ function ReviewStatistics({ stats }) {
                         children: "Review Statistics"
                     }, void 0, false, {
                         fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                        lineNumber: 12,
+                        lineNumber: 29,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                         children: "Overall submission quality metrics"
                     }, void 0, false, {
                         fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                        lineNumber: 13,
+                        lineNumber: 30,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                lineNumber: 11,
+                lineNumber: 28,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2849,24 +2877,24 @@ function ReviewStatistics({ stats }) {
                                             children: "Course Files Approved"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                            lineNumber: 19,
+                                            lineNumber: 36,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             className: "text-sm font-medium",
                                             children: [
-                                                Math.round(stats.approvedFiles / stats.totalFiles * 100),
+                                                courseFileApprovalRate,
                                                 "%"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                            lineNumber: 20,
+                                            lineNumber: 37,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                    lineNumber: 18,
+                                    lineNumber: 35,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2874,22 +2902,22 @@ function ReviewStatistics({ stats }) {
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "bg-green-600 h-2 rounded-full",
                                         style: {
-                                            width: `${stats.approvedFiles / stats.totalFiles * 100}%`
+                                            width: `${courseFileApprovalRate}%`
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                        lineNumber: 23,
+                                        lineNumber: 42,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                    lineNumber: 22,
+                                    lineNumber: 41,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                            lineNumber: 17,
+                            lineNumber: 34,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2902,24 +2930,24 @@ function ReviewStatistics({ stats }) {
                                             children: "Event Reports Approved"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                            lineNumber: 32,
+                                            lineNumber: 51,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             className: "text-sm font-medium",
                                             children: [
-                                                Math.round(stats.approvedReports / stats.totalReports * 100),
+                                                eventReportApprovalRate,
                                                 "%"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                            lineNumber: 33,
+                                            lineNumber: 52,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                    lineNumber: 31,
+                                    lineNumber: 50,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2927,22 +2955,22 @@ function ReviewStatistics({ stats }) {
                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "bg-green-600 h-2 rounded-full",
                                         style: {
-                                            width: `${stats.approvedReports / stats.totalReports * 100}%`
+                                            width: `${eventReportApprovalRate}%`
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                        lineNumber: 36,
+                                        lineNumber: 57,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                    lineNumber: 35,
+                                    lineNumber: 56,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                            lineNumber: 30,
+                            lineNumber: 49,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2955,7 +2983,7 @@ function ReviewStatistics({ stats }) {
                                             children: "Overall Completion Rate"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                            lineNumber: 45,
+                                            lineNumber: 66,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2966,13 +2994,13 @@ function ReviewStatistics({ stats }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                            lineNumber: 46,
+                                            lineNumber: 67,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                    lineNumber: 44,
+                                    lineNumber: 65,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2984,35 +3012,35 @@ function ReviewStatistics({ stats }) {
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                        lineNumber: 49,
+                                        lineNumber: 72,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                                    lineNumber: 48,
+                                    lineNumber: 71,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                            lineNumber: 43,
+                            lineNumber: 64,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                    lineNumber: 16,
+                    lineNumber: 33,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-                lineNumber: 15,
+                lineNumber: 32,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AuditorDashboard/ReviewStatistics.tsx",
-        lineNumber: 10,
+        lineNumber: 27,
         columnNumber: 5
     }, this);
 }
@@ -3547,13 +3575,54 @@ var _s = __turbopack_context__.k.signature();
 function AuditorDashboard({ stats, facultyMembers, recentReviews }) {
     _s();
     const [selectedFaculty, setSelectedFaculty] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [currentStats, setCurrentStats] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(stats);
+    const [currentFacultyMembers, setCurrentFacultyMembers] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(facultyMembers);
+    const [currentRecentReviews, setCurrentRecentReviews] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(recentReviews);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "AuditorDashboard.useEffect": ()=>{
+            const refreshDashboard = {
+                "AuditorDashboard.useEffect.refreshDashboard": async ()=>{
+                    try {
+                        const response = await fetch("/api/dashboard/auditor");
+                        const data = await response.json();
+                        if (!response.ok) return;
+                        if (data?.stats) {
+                            setCurrentStats(data.stats);
+                        }
+                        if (data?.facultyMembers) {
+                            setCurrentFacultyMembers(data.facultyMembers);
+                        }
+                        if (data?.recentReviews) {
+                            setCurrentRecentReviews(data.recentReviews);
+                        }
+                    } catch (error) {
+                        console.error("Auditor dashboard refresh error:", error);
+                    }
+                }
+            }["AuditorDashboard.useEffect.refreshDashboard"];
+            refreshDashboard();
+            if ("TURBOPACK compile-time truthy", 1) {
+                const handler = {
+                    "AuditorDashboard.useEffect.handler": ()=>{
+                        refreshDashboard();
+                    }
+                }["AuditorDashboard.useEffect.handler"];
+                window.addEventListener("dashboard:data-updated", handler);
+                return ({
+                    "AuditorDashboard.useEffect": ()=>{
+                        window.removeEventListener("dashboard:data-updated", handler);
+                    }
+                })["AuditorDashboard.useEffect"];
+            }
+        }
+    }["AuditorDashboard.useEffect"], []);
     if (selectedFaculty) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$FacultyAuditPortfolio$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FacultyAuditPortfolio"], {
             faculty: selectedFaculty,
             onBack: ()=>setSelectedFaculty(null)
         }, void 0, false, {
             fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-            lineNumber: 30,
+            lineNumber: 68,
             columnNumber: 7
         }, this);
     }
@@ -3562,62 +3631,62 @@ function AuditorDashboard({ stats, facultyMembers, recentReviews }) {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$DashboardHeader$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DashboardHeader"], {}, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-                lineNumber: 39,
+                lineNumber: 77,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$StatsOverview$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StatsOverview"], {
-                stats: stats
+                stats: currentStats
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-                lineNumber: 40,
+                lineNumber: 78,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$PendingReviewsAlert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PendingReviewsAlert"], {
-                stats: stats
+                stats: currentStats
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-                lineNumber: 41,
+                lineNumber: 79,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "grid grid-cols-1 lg:grid-cols-2 gap-6",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$ReviewStatistics$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ReviewStatistics"], {
-                        stats: stats
+                        stats: currentStats
                     }, void 0, false, {
                         fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-                        lineNumber: 44,
+                        lineNumber: 82,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$RecentActivity$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["RecentActivity"], {
-                        reviews: recentReviews
+                        reviews: currentRecentReviews
                     }, void 0, false, {
                         fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-                        lineNumber: 45,
+                        lineNumber: 83,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-                lineNumber: 43,
+                lineNumber: 81,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$FacultySubmissionStatus$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FacultySubmissionStatus"], {
-                facultyMembers: facultyMembers,
+                facultyMembers: currentFacultyMembers,
                 onSelectFaculty: setSelectedFaculty
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-                lineNumber: 48,
+                lineNumber: 86,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AuditorDashboard/index.tsx",
-        lineNumber: 38,
+        lineNumber: 76,
         columnNumber: 5
     }, this);
 }
-_s(AuditorDashboard, "WFqvEr16pds5FdZeGBQGa/dTXNQ=");
+_s(AuditorDashboard, "m5GO8osf1uj/fo7bwNbAomnGCos=");
 _c = AuditorDashboard;
 var _c;
 __turbopack_context__.k.register(_c, "AuditorDashboard");

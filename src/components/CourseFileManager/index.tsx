@@ -94,6 +94,22 @@ export function CourseFileManager({
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isResponseOpen, setIsResponseOpen] = useState(false);
+  const [isMessageReplyOpen, setIsMessageReplyOpen] = useState(false);
+  const [messages, setMessages] = useState<
+    {
+      id: string;
+      facultyId: string;
+      auditorId?: string;
+      entityType: string;
+      entityId: string;
+      threadId?: string;
+      senderRole?: string;
+      senderName?: string;
+      message: string;
+      status?: string;
+      createdAt?: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -113,8 +129,44 @@ export function CourseFileManager({
       }
     };
 
+    const fetchMessages = async () => {
+      if (userRole !== "faculty" || !user?.id) {
+        setMessages([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/messages?facultyId=${user.id}`);
+        const data = await response.json();
+        if (!response.ok) {
+          setMessages([]);
+          return;
+        }
+        const scopedMessages = (data.messages ?? []).filter(
+          (message: { entityType: string }) =>
+            message.entityType === "course-file",
+        );
+        setMessages(scopedMessages);
+      } catch (error) {
+        console.error("Load messages error:", error);
+        setMessages([]);
+      }
+    };
+
     fetchFiles();
-  }, []);
+    fetchMessages();
+
+    if (typeof window !== "undefined") {
+      const handler = () => {
+        fetchFiles();
+        fetchMessages();
+      };
+      window.addEventListener("dashboard:data-updated", handler);
+      return () => {
+        window.removeEventListener("dashboard:data-updated", handler);
+      };
+    }
+  }, [user?.id, userRole]);
 
   const handleFileUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,6 +207,9 @@ export function CourseFileManager({
       setFiles(data.files);
       setUploadDialogOpen(false);
       toast.success("File uploaded successfully");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
 
       setSelectedFileType("");
       setCourseCode("");
@@ -180,6 +235,9 @@ export function CourseFileManager({
       }
       setFiles(data.files);
       toast.success("File deleted successfully");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("An error occurred while deleting");
@@ -220,9 +278,39 @@ export function CourseFileManager({
       if (updated) {
         setSelectedFile(updated);
       }
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
     } catch (error) {
       console.error("Response error:", error);
       toast.error("An error occurred while saving response");
+    }
+  };
+
+  const handleMessageReply = async (response: string) => {
+    if (!selectedFile || !user?.id) return;
+
+    const threadId = `course-file:${selectedFile.id}`;
+    const threadMessages = messagesByThread[threadId] ?? [];
+    const auditorId = threadMessages.find((msg) => msg.auditorId)?.auditorId;
+
+    await fetch("/api/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        facultyId: user.id,
+        auditorId,
+        entityType: "course-file",
+        entityId: selectedFile.id,
+        threadId,
+        senderRole: "faculty",
+        senderName: user.name,
+        message: response,
+      }),
+    });
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("dashboard:data-updated"));
     }
   };
 
@@ -251,6 +339,33 @@ export function CourseFileManager({
     new Set(facultyFiles.map((f) => f.status).filter(Boolean)),
   );
   const years = Array.from(new Set(facultyFiles.map((f) => f.academicYear)));
+
+  const normalizeThreadId = (message: {
+    threadId?: string;
+    entityType: string;
+    entityId: string;
+  }) => message.threadId ?? `${message.entityType}:${message.entityId}`;
+
+  const messagesByThread = useMemo(() => {
+    return messages.reduce<Record<string, typeof messages>>((acc, message) => {
+      const threadId = normalizeThreadId(message);
+      if (!acc[threadId]) {
+        acc[threadId] = [];
+      }
+      acc[threadId].push({ ...message, threadId });
+      return acc;
+    }, {});
+  }, [messages]);
+
+  const getThreadMessagesForFile = (fileId: string) => {
+    const threadId = `course-file:${fileId}`;
+    const threadMessages = messagesByThread[threadId] ?? [];
+    return [...threadMessages].sort((a, b) => {
+      const aTime = new Date(a.createdAt ?? 0).getTime();
+      const bTime = new Date(b.createdAt ?? 0).getTime();
+      return aTime - bTime;
+    });
+  };
 
   return (
     <Card>
@@ -482,6 +597,9 @@ export function CourseFileManager({
                         <TableCell className="flex items-center gap-2">
                           <FileText className="h-4 w-4 text-blue-600" />
                           <span>{file.fileName}</span>
+                          {messagesByThread[`course-file:${file.id}`] && (
+                            <span className="h-2 w-2 rounded-full bg-red-500" />
+                          )}
                         </TableCell>
                         <TableCell>
                           <div>
@@ -555,15 +673,15 @@ export function CourseFileManager({
 
             {/* View File Details Dialog */}
             <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>File Details</DialogTitle>
                   <DialogDescription>
                     {selectedFile && (
-                      <div className="flex items-center gap-2 mt-2">
+                      <span className="flex items-center gap-2 mt-2">
                         <FileText className="h-4 w-4" />
                         {selectedFile.fileName}
-                      </div>
+                      </span>
                     )}
                   </DialogDescription>
                 </DialogHeader>
@@ -690,6 +808,60 @@ export function CourseFileManager({
                       </div>
                     )}
 
+                    {(() => {
+                      const threadMessages = getThreadMessagesForFile(
+                        selectedFile.id,
+                      );
+
+                      if (threadMessages.length === 0) return null;
+
+                      return (
+                        <div className="border-t pt-4 mt-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="flex items-center gap-2">
+                              <MessageSquare className="h-5 w-5 text-gray-600" />
+                              Auditor Messages
+                            </h4>
+                            <Badge variant="outline">
+                              {threadMessages.length}
+                            </Badge>
+                          </div>
+                          <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
+                            {threadMessages.map((msg) => (
+                              <div
+                                key={msg.id}
+                                className="rounded-md border bg-white p-3"
+                              >
+                                <div className="flex items-center justify-between text-xs text-gray-500">
+                                  <span>
+                                    {msg.senderName ||
+                                      msg.senderRole ||
+                                      "Message"}
+                                  </span>
+                                  {msg.createdAt && (
+                                    <span>
+                                      {new Date(msg.createdAt).toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-700 mt-2">
+                                  {msg.message}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsMessageReplyOpen(true)}
+                          >
+                            <Reply className="h-4 w-4 mr-2" />
+                            Reply to Auditor
+                          </Button>
+                        </div>
+                      );
+                    })()}
+
                     <div className="flex gap-2 pt-4">
                       <Button
                         onClick={() => handleDownload(selectedFile)}
@@ -715,6 +887,12 @@ export function CourseFileManager({
               open={isResponseOpen}
               onOpenChange={setIsResponseOpen}
               onSubmit={handleResponse}
+              itemType="file"
+            />
+            <ResponseDialog
+              open={isMessageReplyOpen}
+              onOpenChange={setIsMessageReplyOpen}
+              onSubmit={handleMessageReply}
               itemType="file"
             />
           </TabsContent>

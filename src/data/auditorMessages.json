@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1770664856947",
+    "facultyId": "f1",
+    "auditorId": "a1",
+    "entityType": "course-file",
+    "entityId": "1770467243944",
+    "threadId": "course-file:1770467243944",
+    "senderRole": "auditor",
+    "senderName": "Jane Smith",
+    "message": "hjkkl",
+    "createdAt": "2026-02-09T19:20:56.947Z",
+    "updatedAt": "2026-02-09T19:20:56.947Z"
+  },
+  {
+    "id": "1770664847423",
+    "facultyId": "f1",
+    "auditorId": "a1",
+    "entityType": "course-file",
+    "entityId": "1770467243944",
+    "threadId": "course-file:1770467243944",
+    "senderRole": "auditor",
+    "senderName": "Jane Smith",
+    "message": "dhahbf",
+    "status": "approved",
+    "createdAt": "2026-02-09T19:20:47.423Z",
+    "updatedAt": "2026-02-09T19:20:47.423Z"
+  }
+]

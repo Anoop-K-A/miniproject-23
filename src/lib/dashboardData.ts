@@ -187,10 +187,13 @@ export async function getAuditorDashboardData() {
     (report) => report.status === "Rejected",
   ).length;
 
+  const reviewedFiles = approvedFiles + rejectedFiles;
+  const reviewedReports = approvedReports + rejectedReports;
+
   const completionRate =
     totalFiles + totalReports > 0
       ? Math.round(
-          ((approvedFiles + approvedReports) / (totalFiles + totalReports)) *
+          ((reviewedFiles + reviewedReports) / (totalFiles + totalReports)) *
             100,
         )
       : 0;

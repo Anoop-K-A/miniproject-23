@@ -2167,7 +2167,7 @@ function AllFacultyReportsView({ reports, currentUser, onReportsChange }) {
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogDescription"], {
-                                        children: selectedReport && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        children: selectedReport && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             className: "flex items-center gap-2 mt-2",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$calendar$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Calendar$3e$__["Calendar"], {
@@ -4148,6 +4148,9 @@ function EventReportManager({ initialReports = [], communities = [] }) {
             setReports(data.reports);
             setIsCreateOpen(false);
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Event report created successfully");
+            if ("TURBOPACK compile-time truthy", 1) {
+                window.dispatchEvent(new Event("dashboard:data-updated"));
+            }
             setNewReport({
                 eventName: "",
                 community: "",
@@ -4187,6 +4190,9 @@ function EventReportManager({ initialReports = [], communities = [] }) {
             }
             setReports(data.reports);
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Report submitted for review");
+            if ("TURBOPACK compile-time truthy", 1) {
+                window.dispatchEvent(new Event("dashboard:data-updated"));
+            }
         } catch (error) {
             console.error("Submit error:", error);
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error("An error occurred while submitting");
@@ -4204,6 +4210,9 @@ function EventReportManager({ initialReports = [], communities = [] }) {
             }
             setReports(data.reports);
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Report deleted successfully");
+            if ("TURBOPACK compile-time truthy", 1) {
+                window.dispatchEvent(new Event("dashboard:data-updated"));
+            }
         } catch (error) {
             console.error("Delete error:", error);
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error("An error occurred while deleting");
@@ -4277,6 +4286,9 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                         setSelectedReport(updated);
                     }
                     __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Response submitted successfully");
+                    if ("TURBOPACK compile-time truthy", 1) {
+                        window.dispatchEvent(new Event("dashboard:data-updated"));
+                    }
                 } catch (error) {
                     console.error("Response error:", error);
                     __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error("An error occurred while responding");
@@ -4285,7 +4297,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
             currentUser: displayName
         }, void 0, false, {
             fileName: "[project]/src/components/EventReportManager/index.tsx",
-            lineNumber: 343,
+            lineNumber: 352,
             columnNumber: 7
         }, this);
     }
@@ -4297,20 +4309,20 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                         children: "Community Event Reports"
                     }, void 0, false, {
                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                        lineNumber: 387,
+                        lineNumber: 399,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                         children: "Create and manage reports for community engagement and outreach events"
                     }, void 0, false, {
                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                        lineNumber: 388,
+                        lineNumber: 400,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                lineNumber: 386,
+                lineNumber: 398,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -4327,7 +4339,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                     children: "My Reports"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                    lineNumber: 395,
+                                    lineNumber: 407,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsTrigger"], {
@@ -4335,13 +4347,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                     children: "All Faculty Reports"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                    lineNumber: 396,
+                                    lineNumber: 408,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                            lineNumber: 394,
+                            lineNumber: 406,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -4358,7 +4370,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                     className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 402,
+                                                    lineNumber: 414,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -4368,13 +4380,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                     className: "pl-10"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 403,
+                                                    lineNumber: 415,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                            lineNumber: 401,
+                                            lineNumber: 413,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -4387,12 +4399,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                         placeholder: "Filter by Status"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                        lineNumber: 412,
+                                                        lineNumber: 424,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 411,
+                                                    lineNumber: 423,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -4402,7 +4414,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                             children: "All Status"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 415,
+                                                            lineNumber: 427,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -4410,7 +4422,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                             children: "Draft"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 416,
+                                                            lineNumber: 428,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -4418,7 +4430,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                             children: "Submitted"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 417,
+                                                            lineNumber: 429,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -4426,7 +4438,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                             children: "Approved"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 418,
+                                                            lineNumber: 430,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -4434,19 +4446,19 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                             children: "Rejected"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 419,
+                                                            lineNumber: 431,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 414,
+                                                    lineNumber: 426,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                            lineNumber: 410,
+                                            lineNumber: 422,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -4459,12 +4471,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                         placeholder: "Filter by Community"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                        lineNumber: 427,
+                                                        lineNumber: 439,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 426,
+                                                    lineNumber: 438,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -4474,7 +4486,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                             children: "All Communities"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 430,
+                                                            lineNumber: 442,
                                                             columnNumber: 19
                                                         }, this),
                                                         communityOptions.map((community)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -4482,19 +4494,19 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                 children: community
                                                             }, community, false, {
                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                lineNumber: 432,
+                                                                lineNumber: 444,
                                                                 columnNumber: 21
                                                             }, this))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 429,
+                                                    lineNumber: 441,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                            lineNumber: 422,
+                                            lineNumber: 434,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -4510,19 +4522,19 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                 className: "h-4 w-4 mr-2"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                lineNumber: 441,
+                                                                lineNumber: 453,
                                                                 columnNumber: 21
                                                             }, this),
                                                             "Create Report"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                        lineNumber: 440,
+                                                        lineNumber: 452,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 439,
+                                                    lineNumber: 451,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogContent"], {
@@ -4534,20 +4546,20 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                     children: "Create Event Report"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 447,
+                                                                    lineNumber: 459,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                                                     children: "Document a community engagement event with details and thumbnail"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 448,
+                                                                    lineNumber: 460,
                                                                     columnNumber: 21
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 446,
+                                                            lineNumber: 458,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -4562,7 +4574,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Event Thumbnail *"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 456,
+                                                                            lineNumber: 468,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4576,7 +4588,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         className: "w-full h-64 object-cover rounded-lg"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 460,
+                                                                                        lineNumber: 472,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -4595,18 +4607,18 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                             className: "h-4 w-4"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                            lineNumber: 478,
+                                                                                            lineNumber: 490,
                                                                                             columnNumber: 31
                                                                                         }, this)
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 465,
+                                                                                        lineNumber: 477,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                lineNumber: 459,
+                                                                                lineNumber: 471,
                                                                                 columnNumber: 27
                                                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                                                                 htmlFor: "thumbnail",
@@ -4616,7 +4628,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         className: "h-12 w-12 text-gray-400 mb-2"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 486,
+                                                                                        lineNumber: 498,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -4624,7 +4636,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         children: "Click to upload thumbnail image"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 487,
+                                                                                        lineNumber: 499,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -4632,7 +4644,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         children: "PNG, JPG up to 5MB"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 490,
+                                                                                        lineNumber: 502,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -4643,24 +4655,24 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         className: "hidden"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 493,
+                                                                                        lineNumber: 505,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                lineNumber: 482,
+                                                                                lineNumber: 494,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 457,
+                                                                            lineNumber: 469,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 455,
+                                                                    lineNumber: 467,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4671,7 +4683,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Event Name *"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 507,
+                                                                            lineNumber: 519,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -4685,13 +4697,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             required: true
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 508,
+                                                                            lineNumber: 520,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 506,
+                                                                    lineNumber: 518,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4702,7 +4714,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Community *"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 524,
+                                                                            lineNumber: 536,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -4718,12 +4730,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         placeholder: "Select community type"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 532,
+                                                                                        lineNumber: 544,
                                                                                         columnNumber: 27
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 531,
+                                                                                    lineNumber: 543,
                                                                                     columnNumber: 25
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -4732,24 +4744,24 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                             children: community
                                                                                         }, community, false, {
                                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                            lineNumber: 536,
+                                                                                            lineNumber: 548,
                                                                                             columnNumber: 29
                                                                                         }, this))
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 534,
+                                                                                    lineNumber: 546,
                                                                                     columnNumber: 25
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 525,
+                                                                            lineNumber: 537,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 523,
+                                                                    lineNumber: 535,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4760,7 +4772,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Event Date *"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 546,
+                                                                            lineNumber: 558,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -4774,13 +4786,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             required: true
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 547,
+                                                                            lineNumber: 559,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 545,
+                                                                    lineNumber: 557,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4794,7 +4806,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                     children: "Location"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 564,
+                                                                                    lineNumber: 576,
                                                                                     columnNumber: 25
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -4807,13 +4819,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                     placeholder: "e.g., Community Center"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 565,
+                                                                                    lineNumber: 577,
                                                                                     columnNumber: 25
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 563,
+                                                                            lineNumber: 575,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4824,7 +4836,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                     children: "Number of Participants"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 578,
+                                                                                    lineNumber: 590,
                                                                                     columnNumber: 25
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -4839,19 +4851,19 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                     placeholder: "0"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 581,
+                                                                                    lineNumber: 593,
                                                                                     columnNumber: 25
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 577,
+                                                                            lineNumber: 589,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 562,
+                                                                    lineNumber: 574,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4862,7 +4874,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Duration"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 599,
+                                                                            lineNumber: 611,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -4875,13 +4887,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             placeholder: "e.g., 3 hours"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 600,
+                                                                            lineNumber: 612,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 598,
+                                                                    lineNumber: 610,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4892,7 +4904,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Event Description *"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 615,
+                                                                            lineNumber: 627,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$textarea$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Textarea"], {
@@ -4907,7 +4919,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             required: true
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 616,
+                                                                            lineNumber: 628,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4915,13 +4927,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Provide comprehensive details about the event, activities conducted, and community impact."
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 629,
+                                                                            lineNumber: 641,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 614,
+                                                                    lineNumber: 626,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4932,7 +4944,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Objectives"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 637,
+                                                                            lineNumber: 649,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$textarea$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Textarea"], {
@@ -4946,13 +4958,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             rows: 3
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 638,
+                                                                            lineNumber: 650,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 636,
+                                                                    lineNumber: 648,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4963,7 +4975,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Outcomes & Impact"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 654,
+                                                                            lineNumber: 666,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$textarea$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Textarea"], {
@@ -4977,13 +4989,13 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             rows: 3
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 655,
+                                                                            lineNumber: 667,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 653,
+                                                                    lineNumber: 665,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4994,7 +5006,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             children: "Gallery Images (optional)"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 671,
+                                                                            lineNumber: 683,
                                                                             columnNumber: 23
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5010,7 +5022,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                                 className: "w-full h-24 object-cover rounded-lg"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                                lineNumber: 677,
+                                                                                                lineNumber: 689,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -5023,23 +5035,23 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                                     className: "h-4 w-4"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                                    lineNumber: 689,
+                                                                                                    lineNumber: 701,
                                                                                                     columnNumber: 35
                                                                                                 }, this)
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                                lineNumber: 682,
+                                                                                                lineNumber: 694,
                                                                                                 columnNumber: 33
                                                                                             }, this)
                                                                                         ]
                                                                                     }, index, true, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 676,
+                                                                                        lineNumber: 688,
                                                                                         columnNumber: 31
                                                                                     }, this))
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                lineNumber: 674,
+                                                                                lineNumber: 686,
                                                                                 columnNumber: 27
                                                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                                                                 htmlFor: "gallery",
@@ -5049,7 +5061,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         className: "h-12 w-12 text-gray-400 mb-2"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 699,
+                                                                                        lineNumber: 711,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5057,7 +5069,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         children: "Click to upload gallery images"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 700,
+                                                                                        lineNumber: 712,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5065,7 +5077,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         children: "PNG, JPG up to 5MB each"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 703,
+                                                                                        lineNumber: 715,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -5077,24 +5089,24 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         className: "hidden"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 706,
+                                                                                        lineNumber: 718,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                lineNumber: 695,
+                                                                                lineNumber: 707,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 672,
+                                                                            lineNumber: 684,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 670,
+                                                                    lineNumber: 682,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5107,43 +5119,43 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                 className: "h-4 w-4 mr-2"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                lineNumber: 721,
+                                                                                lineNumber: 733,
                                                                                 columnNumber: 25
                                                                             }, this),
                                                                             "Save as Draft"
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                        lineNumber: 720,
+                                                                        lineNumber: 732,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 719,
+                                                                    lineNumber: 731,
                                                                     columnNumber: 21
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 453,
+                                                            lineNumber: 465,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 445,
+                                                    lineNumber: 457,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                            lineNumber: 438,
+                                            lineNumber: 450,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                    lineNumber: 400,
+                                    lineNumber: 412,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5157,28 +5169,28 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                             children: "Event"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 735,
+                                                            lineNumber: 747,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                                             children: "Community"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 736,
+                                                            lineNumber: 748,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                                             children: "Date"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 737,
+                                                            lineNumber: 749,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                                             children: "Status"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 738,
+                                                            lineNumber: 750,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -5186,18 +5198,18 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                             children: "Actions"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                            lineNumber: 739,
+                                                            lineNumber: 751,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 734,
+                                                    lineNumber: 746,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                lineNumber: 733,
+                                                lineNumber: 745,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableBody"], {
@@ -5208,12 +5220,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                         children: "No reports found. Create your first event report to get started."
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                        lineNumber: 745,
+                                                        lineNumber: 757,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                    lineNumber: 744,
+                                                    lineNumber: 756,
                                                     columnNumber: 21
                                                 }, this) : filteredReports.map((report)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableRow"], {
                                                         children: [
@@ -5227,7 +5239,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             className: "h-12 w-12 rounded object-cover"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 759,
+                                                                            lineNumber: 771,
                                                                             columnNumber: 31
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5237,7 +5249,7 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                     children: report.eventName
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 766,
+                                                                                    lineNumber: 778,
                                                                                     columnNumber: 31
                                                                                 }, this),
                                                                                 report.location && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5245,24 +5257,24 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                     children: report.location
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 770,
+                                                                                    lineNumber: 782,
                                                                                     columnNumber: 33
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 765,
+                                                                            lineNumber: 777,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 757,
+                                                                    lineNumber: 769,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                lineNumber: 756,
+                                                                lineNumber: 768,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -5271,12 +5283,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                     children: report.community
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 778,
+                                                                    lineNumber: 790,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                lineNumber: 777,
+                                                                lineNumber: 789,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -5287,19 +5299,19 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                             className: "h-4 w-4 text-gray-400"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 782,
+                                                                            lineNumber: 794,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         new Date(report.eventDate).toLocaleDateString()
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 781,
+                                                                    lineNumber: 793,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                lineNumber: 780,
+                                                                lineNumber: 792,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -5308,12 +5320,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                     children: report.status
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 787,
+                                                                    lineNumber: 799,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                lineNumber: 786,
+                                                                lineNumber: 798,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -5328,12 +5340,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                 className: "h-4 w-4"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                lineNumber: 798,
+                                                                                lineNumber: 810,
                                                                                 columnNumber: 31
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                            lineNumber: 793,
+                                                                            lineNumber: 805,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         report.status === "Draft" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -5346,12 +5358,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         className: "h-4 w-4 text-green-600"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 807,
+                                                                                        lineNumber: 819,
                                                                                         columnNumber: 35
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 802,
+                                                                                    lineNumber: 814,
                                                                                     columnNumber: 33
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -5362,12 +5374,12 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                                         className: "h-4 w-4 text-red-600"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                        lineNumber: 814,
+                                                                                        lineNumber: 826,
                                                                                         columnNumber: 35
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                                    lineNumber: 809,
+                                                                                    lineNumber: 821,
                                                                                     columnNumber: 33
                                                                                 }, this)
                                                                             ]
@@ -5375,40 +5387,40 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                    lineNumber: 792,
+                                                                    lineNumber: 804,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                                lineNumber: 791,
+                                                                lineNumber: 803,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, report.id, true, {
                                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                        lineNumber: 755,
+                                                        lineNumber: 767,
                                                         columnNumber: 23
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                                lineNumber: 742,
+                                                lineNumber: 754,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                        lineNumber: 732,
+                                        lineNumber: 744,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                    lineNumber: 731,
+                                    lineNumber: 743,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                            lineNumber: 399,
+                            lineNumber: 411,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -5420,29 +5432,29 @@ function EventReportManager({ initialReports = [], communities = [] }) {
                                 onReportsChange: setReports
                             }, void 0, false, {
                                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                                lineNumber: 829,
+                                lineNumber: 841,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/EventReportManager/index.tsx",
-                            lineNumber: 828,
+                            lineNumber: 840,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/EventReportManager/index.tsx",
-                    lineNumber: 393,
+                    lineNumber: 405,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/EventReportManager/index.tsx",
-                lineNumber: 392,
+                lineNumber: 404,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/EventReportManager/index.tsx",
-        lineNumber: 385,
+        lineNumber: 397,
         columnNumber: 5
     }, this);
 }

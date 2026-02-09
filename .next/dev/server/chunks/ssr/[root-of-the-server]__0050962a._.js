@@ -218,7 +218,9 @@ async function getAuditorDashboardData() {
     const pendingReports = eventReports.filter((report)=>report.status === "Submitted" || report.status === "Draft").length;
     const rejectedFiles = courseFiles.filter((file)=>file.status === "Rejected").length;
     const rejectedReports = eventReports.filter((report)=>report.status === "Rejected").length;
-    const completionRate = totalFiles + totalReports > 0 ? Math.round((approvedFiles + approvedReports) / (totalFiles + totalReports) * 100) : 0;
+    const reviewedFiles = approvedFiles + rejectedFiles;
+    const reviewedReports = approvedReports + rejectedReports;
+    const completionRate = totalFiles + totalReports > 0 ? Math.round((reviewedFiles + reviewedReports) / (totalFiles + totalReports) * 100) : 0;
     const stats = {
         totalFaculty: facultyUsers.length,
         totalFiles,

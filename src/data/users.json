@@ -21,6 +21,27 @@
     "updatedAt": "2024-01-01T00:00:00.000Z"
   },
   {
+    "id": "f2",
+    "username": "faculty2@test.com",
+    "password": "password123",
+    "name": "Dr. Emily Carter",
+    "role": "faculty",
+    "department": "Information Systems",
+    "email": "faculty2@test.com",
+    "phone": "+1 (555) 987-6543",
+    "facultyRole": "Assistant Professor",
+    "courses": [
+      "IS101 - Fundamentals of Information Systems",
+      "IS210 - Database Concepts",
+      "IS320 - Systems Analysis"
+    ],
+    "specialization": "Data Management and Analytics",
+    "experience": "7 years",
+    "status": "active",
+    "createdAt": "2024-01-02T00:00:00.000Z",
+    "updatedAt": "2024-01-02T00:00:00.000Z"
+  },
+  {
     "id": "a1",
     "username": "auditor@test.com",
     "password": "password123",

@@ -230,6 +230,9 @@ export function EventReportManager({
       setReports(data.reports);
       setIsCreateOpen(false);
       toast.success("Event report created successfully");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
 
       setNewReport({
         eventName: "",
@@ -271,6 +274,9 @@ export function EventReportManager({
       }
       setReports(data.reports);
       toast.success("Report submitted for review");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("An error occurred while submitting");
@@ -289,6 +295,9 @@ export function EventReportManager({
       }
       setReports(data.reports);
       toast.success("Report deleted successfully");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("An error occurred while deleting");
@@ -371,6 +380,9 @@ export function EventReportManager({
               setSelectedReport(updated);
             }
             toast.success("Response submitted successfully");
+            if (typeof window !== "undefined") {
+              window.dispatchEvent(new Event("dashboard:data-updated"));
+            }
           } catch (error) {
             console.error("Response error:", error);
             toast.error("An error occurred while responding");

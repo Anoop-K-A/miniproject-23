@@ -1,11 +1,18 @@
 {
   "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(dashboard)/auditor/dashboard/page": "app/(dashboard)/auditor/dashboard/page.js",
   "/(dashboard)/faculty/dashboard/page": "app/(dashboard)/faculty/dashboard/page.js",
   "/(dashboard)/faculty/files/page": "app/(dashboard)/faculty/files/page.js",
   "/(dashboard)/faculty/reports/page": "app/(dashboard)/faculty/reports/page.js",
+  "/api/audits/route": "app/api/audits/route.js",
   "/api/auth/login/route": "app/api/auth/login/route.js",
   "/api/course-files/[id]/route": "app/api/course-files/[id]/route.js",
   "/api/course-files/route": "app/api/course-files/route.js",
+  "/api/dashboard/auditor/route": "app/api/dashboard/auditor/route.js",
+  "/api/dashboard/faculty/route": "app/api/dashboard/faculty/route.js",
+  "/api/event-reports/[id]/route": "app/api/event-reports/[id]/route.js",
   "/api/event-reports/route": "app/api/event-reports/route.js",
+  "/api/messages/route": "app/api/messages/route.js",
+  "/api/remarks/route": "app/api/remarks/route.js",
   "/page": "app/page.js"
 }

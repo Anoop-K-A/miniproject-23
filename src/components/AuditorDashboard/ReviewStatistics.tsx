@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { DashboardStats } from "./types";
 
 interface ReviewStatisticsProps {
@@ -6,6 +12,17 @@ interface ReviewStatisticsProps {
 }
 
 export function ReviewStatistics({ stats }: ReviewStatisticsProps) {
+  const reviewedFiles = stats.approvedFiles + stats.rejectedFiles;
+  const reviewedReports = stats.approvedReports + stats.rejectedReports;
+  const courseFileApprovalRate =
+    reviewedFiles > 0
+      ? Math.round((stats.approvedFiles / reviewedFiles) * 100)
+      : 0;
+  const eventReportApprovalRate =
+    reviewedReports > 0
+      ? Math.round((stats.approvedReports / reviewedReports) * 100)
+      : 0;
+
   return (
     <Card>
       <CardHeader>
@@ -17,12 +34,14 @@ export function ReviewStatistics({ stats }: ReviewStatisticsProps) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm">Course Files Approved</span>
-              <span className="text-sm font-medium">{Math.round((stats.approvedFiles / stats.totalFiles) * 100)}%</span>
+              <span className="text-sm font-medium">
+                {courseFileApprovalRate}%
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-green-600 h-2 rounded-full" 
-                style={{ width: `${(stats.approvedFiles / stats.totalFiles) * 100}%` }}
+              <div
+                className="bg-green-600 h-2 rounded-full"
+                style={{ width: `${courseFileApprovalRate}%` }}
               ></div>
             </div>
           </div>
@@ -30,12 +49,14 @@ export function ReviewStatistics({ stats }: ReviewStatisticsProps) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm">Event Reports Approved</span>
-              <span className="text-sm font-medium">{Math.round((stats.approvedReports / stats.totalReports) * 100)}%</span>
+              <span className="text-sm font-medium">
+                {eventReportApprovalRate}%
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-green-600 h-2 rounded-full" 
-                style={{ width: `${(stats.approvedReports / stats.totalReports) * 100}%` }}
+              <div
+                className="bg-green-600 h-2 rounded-full"
+                style={{ width: `${eventReportApprovalRate}%` }}
               ></div>
             </div>
           </div>
@@ -43,11 +64,13 @@ export function ReviewStatistics({ stats }: ReviewStatisticsProps) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm">Overall Completion Rate</span>
-              <span className="text-sm font-medium">{stats.completionRate}%</span>
+              <span className="text-sm font-medium">
+                {stats.completionRate}%
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-600 h-2 rounded-full" 
+              <div
+                className="bg-blue-600 h-2 rounded-full"
                 style={{ width: `${stats.completionRate}%` }}
               ></div>
             </div>

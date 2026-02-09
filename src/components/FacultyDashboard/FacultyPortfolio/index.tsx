@@ -5,8 +5,12 @@ import { PortfolioTabs } from "./PortfolioTabs";
 import { FileViewDialog } from "./FileViewDialog";
 import { ReportViewDialog } from "./ReportViewDialog";
 import { CourseFile, EventReport, FacultyPortfolioProps } from "./types";
+import { Card, CardContent } from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import { useAuth } from "@/context/AuthContext";
 
 export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
+  const { user, userRole } = useAuth();
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
   const [selectedReport, setSelectedReport] = useState<EventReport | null>(
     null,
@@ -15,6 +19,19 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const [isReportViewOpen, setIsReportViewOpen] = useState(false);
   const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
   const [eventReports, setEventReports] = useState<EventReport[]>([]);
+  const [messages, setMessages] = useState<
+    {
+      id: string;
+      facultyId: string;
+      auditorId?: string;
+      entityType: string;
+      entityId: string;
+      message: string;
+      status?: string;
+      createdAt?: string;
+    }[]
+  >([]);
+  const canViewMessages = userRole !== "faculty";
 
   useEffect(() => {
     const loadPortfolioData = async () => {
@@ -40,13 +57,37 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
 
         setCourseFiles(scopedFiles);
         setEventReports(scopedReports);
+
+        if (canViewMessages) {
+          const messagesResponse = await fetch(
+            `/api/messages?facultyId=${faculty.id}`,
+          );
+          const messagesData = await messagesResponse.json();
+          if (messagesResponse.ok) {
+            setMessages(messagesData.messages ?? []);
+          } else {
+            setMessages([]);
+          }
+        } else {
+          setMessages([]);
+        }
       } catch (error) {
         console.error("Load faculty portfolio error:", error);
       }
     };
 
     loadPortfolioData();
-  }, [faculty.id]);
+
+    if (typeof window !== "undefined") {
+      const handler = () => {
+        loadPortfolioData();
+      };
+      window.addEventListener("dashboard:data-updated", handler);
+      return () => {
+        window.removeEventListener("dashboard:data-updated", handler);
+      };
+    }
+  }, [faculty.id, canViewMessages]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -79,6 +120,45 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
     <div className="space-y-6">
       <BackButton onBack={onBack} />
       <ProfileHeader faculty={faculty} />
+      {canViewMessages && (
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Auditor Messages</h3>
+              <Badge variant="outline">{messages.length}</Badge>
+            </div>
+            {messages.length === 0 ? (
+              <p className="text-sm text-gray-500">No auditor messages yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className="border rounded-lg p-3 bg-gray-50"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        {msg.entityType === "course-file"
+                          ? "Course File"
+                          : "Event Report"}
+                      </span>
+                      {msg.status && (
+                        <Badge variant="secondary">{msg.status}</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-700 mt-2">{msg.message}</p>
+                    {msg.createdAt && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        {new Date(msg.createdAt).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
       <PortfolioTabs
         courseFiles={courseFiles}
         eventReports={eventReports}
