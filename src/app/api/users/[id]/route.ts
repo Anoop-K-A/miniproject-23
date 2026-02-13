@@ -42,15 +42,16 @@ interface RemarkRecord {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const payload = await request.json();
     const users = await readJsonFile<UserRecord[]>("users.json");
     const updatedAt = new Date().toISOString();
 
     const updatedUsers = users.map((user) =>
-      user.id === params.id
+      user.id === id
         ? {
             ...user,
             ...payload,
@@ -72,9 +73,10 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const users = await readJsonFile<UserRecord[]>("users.json");
     const courseFiles =
       await readJsonFile<CourseFileRecord[]>("courseFiles.json");
@@ -84,25 +86,23 @@ export async function DELETE(
     const remarks = await readJsonFile<RemarkRecord[]>("remarks.json");
     const students = await readJsonFile<Student[]>("students.json");
 
-    const updatedUsers = users.filter((user) => user.id !== params.id);
+    const updatedUsers = users.filter((user) => user.id !== id);
 
     const removedFileIds = courseFiles
-      .filter((file) => file.facultyId === params.id)
+      .filter((file) => file.facultyId === id)
       .map((file) => file.id);
     const removedReportIds = eventReports
-      .filter((report) => report.facultyId === params.id)
+      .filter((report) => report.facultyId === id)
       .map((report) => report.id);
 
-    const updatedFiles = courseFiles.filter(
-      (file) => file.facultyId !== params.id,
-    );
+    const updatedFiles = courseFiles.filter((file) => file.facultyId !== id);
     const updatedReports = eventReports.filter(
-      (report) => report.facultyId !== params.id,
+      (report) => report.facultyId !== id,
     );
 
     const updatedAudits = audits.filter(
       (audit) =>
-        audit.auditorId !== params.id &&
+        audit.auditorId !== id &&
         !(
           (audit.entityType === "course-file" &&
             removedFileIds.includes(audit.entityId)) ||
@@ -113,7 +113,7 @@ export async function DELETE(
 
     const updatedRemarks = remarks.filter(
       (remark) =>
-        remark.authorId !== params.id &&
+        remark.authorId !== id &&
         !(
           (remark.entityType === "course-file" &&
             removedFileIds.includes(remark.entityId)) ||
@@ -123,7 +123,7 @@ export async function DELETE(
     );
 
     const updatedStudents = students.filter(
-      (student) => student.advisorId !== params.id,
+      (student) => student.advisorId !== id,
     );
 
     await writeJsonFile("users.json", updatedUsers);

@@ -1,0 +1,289 @@
+import { Activity, Edit, Search, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { AdminUser, AdminUserStatus } from "./types";
+
+interface UsersTableProps {
+  users: AdminUser[];
+  searchQuery: string;
+  filterRole: string;
+  filterStatus: string;
+  onSearchChange: (value: string) => void;
+  onFilterRoleChange: (value: string) => void;
+  onFilterStatusChange: (value: string) => void;
+  onEdit: (user: AdminUser) => void;
+  onDelete: (user: AdminUser) => void;
+  onRoleChange: (userId: string, role: AdminUser["role"]) => void;
+  onStatusChange: (userId: string, status: AdminUserStatus) => void;
+  onApprove: (userId: string) => void;
+  onReject: (userId: string) => void;
+}
+
+function getStatusColor(status: AdminUserStatus) {
+  switch (status) {
+    case "active":
+      return "bg-green-100 text-green-700";
+    case "inactive":
+      return "bg-gray-100 text-gray-700";
+    case "suspended":
+      return "bg-red-100 text-red-700";
+    case "pending":
+      return "bg-amber-100 text-amber-700";
+    case "rejected":
+      return "bg-rose-100 text-rose-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+}
+
+export function UsersTable({
+  users,
+  searchQuery,
+  filterRole,
+  filterStatus,
+  onSearchChange,
+  onFilterRoleChange,
+  onFilterStatusChange,
+  onEdit,
+  onDelete,
+  onRoleChange,
+  onStatusChange,
+  onApprove,
+  onReject,
+}: UsersTableProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <CardTitle className="flex items-center gap-2">All Users</CardTitle>
+            <CardDescription>{users.length} users</CardDescription>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-10 w-full sm:w-64"
+              />
+            </div>
+            <Select value={filterRole} onValueChange={onFilterRoleChange}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Filter by role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                <SelectItem value="faculty">Faculty</SelectItem>
+                <SelectItem value="auditor">Auditor</SelectItem>
+                <SelectItem value="staff-advisor">Staff Advisor</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterStatus} onValueChange={onFilterStatusChange}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Engagement</TableHead>
+                <TableHead>Last Active</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-gray-500 py-10"
+                  >
+                    No users found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                          {user.name
+                            .split(" ")
+                            .map((part) => part[0])
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .join("")}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{user.name}</p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="text-sm">{user.department || "-"}</p>
+                        <p className="text-xs text-gray-500">
+                          {user.designation || ""}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={user.role}
+                        onValueChange={(value) =>
+                          onRoleChange(user.id, value as AdminUser["role"])
+                        }
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="faculty">Faculty</SelectItem>
+                          <SelectItem value="auditor">Auditor</SelectItem>
+                          <SelectItem value="staff-advisor">
+                            Staff Advisor
+                          </SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={user.status}
+                        onValueChange={(value) =>
+                          onStatusChange(user.id, value as AdminUserStatus)
+                        }
+                      >
+                        <SelectTrigger className="w-[130px]">
+                          <Badge
+                            variant="secondary"
+                            className={getStatusColor(user.status)}
+                          >
+                            {user.status}
+                          </Badge>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="suspended">Suspended</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Activity className="h-3 w-3 text-gray-400" />
+                          <span className="text-xs text-gray-500">
+                            {user.courseFilesCount} files,{" "}
+                            {user.eventReportsCount} reports
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Progress
+                            value={user.completionRate}
+                            className="h-1.5 w-20"
+                          />
+                          <span className="text-xs font-medium">
+                            {user.completionRate}%
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-gray-600">
+                        {user.lastActive || "-"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end items-center gap-2">
+                        {user.status === "pending" &&
+                          user.role === "faculty" && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => onApprove(user.id)}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onReject(user.id)}
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onEdit(user)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onDelete(user)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

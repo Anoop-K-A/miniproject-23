@@ -13,20 +13,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await verifyCredentials(email, password);
-    if (!user) {
+    const result = await verifyCredentials(email, password);
+    if (!result) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 },
       );
     }
 
+    const normalizedStatus = result.status?.toLowerCase();
+    const isApproved =
+      !normalizedStatus ||
+      normalizedStatus === "active" ||
+      normalizedStatus === "approved" ||
+      normalizedStatus === "approval";
+
+    if (!isApproved) {
+      return NextResponse.json(
+        { error: "Account pending approval" },
+        { status: 403 },
+      );
+    }
+
     return NextResponse.json({
-      id: user.id,
-      username: user.username,
-      name: user.name,
-      role: user.role,
-      department: user.department,
+      id: result.user.id,
+      username: result.user.username,
+      name: result.user.name,
+      role: result.user.role,
+      department: result.user.department,
     });
   } catch (error) {
     console.error("Login error:", error);

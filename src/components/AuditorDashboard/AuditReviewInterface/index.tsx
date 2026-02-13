@@ -10,6 +10,12 @@ import { DocumentDetails } from "./DocumentDetails";
 import { AuditorRemarks } from "./AuditorRemarks";
 import { AuditReviewInterfaceProps, ChecklistItem } from "./types";
 import { useAuth } from "@/context/AuthContext";
+import {
+  downloadFromDataUrl,
+  downloadJsonFile,
+  downloadTextFile,
+  sanitizeFileName,
+} from "@/lib/download";
 
 const courseFileChecklist: ChecklistItem[] = [
   { id: "format", label: "Document format is correct and readable" },
@@ -181,9 +187,31 @@ export function AuditReviewInterface({
   };
 
   const handleDownloadDocument = () => {
-    const itemName =
-      type === "file" ? (item as any).fileName : (item as any).eventName;
-    toast.success(`Downloading ${itemName}`);
+    if (type === "file") {
+      const fileItem = item as { fileName: string; documentUrl?: string };
+      const safeName = sanitizeFileName(fileItem.fileName, "course-file");
+      if (fileItem.documentUrl) {
+        downloadFromDataUrl(fileItem.documentUrl, safeName);
+        toast.success(`Downloading ${fileItem.fileName}`);
+        return;
+      }
+
+      const baseName = safeName.replace(/\.[^/.]+$/, "");
+      const summaryName = `${baseName || "course-file"}-summary.txt`;
+      const summary = [
+        `File Name: ${fileItem.fileName}`,
+        "Document data is not available in storage.",
+      ].join("\n");
+      downloadTextFile(summary, summaryName);
+      toast.success(`Downloaded summary for ${fileItem.fileName}`);
+      return;
+    }
+
+    const reportItem = item as { eventName: string };
+    const safeName = sanitizeFileName(reportItem.eventName, "event-report");
+    const fileName = `${safeName || "event-report"}.json`;
+    downloadJsonFile(item, fileName);
+    toast.success(`Downloading ${reportItem.eventName}`);
   };
 
   return (

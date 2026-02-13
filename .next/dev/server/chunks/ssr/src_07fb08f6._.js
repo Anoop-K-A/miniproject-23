@@ -10,6 +10,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/button.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$graduation$2d$cap$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__GraduationCap$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/graduation-cap.js [app-ssr] (ecmascript) <export default as GraduationCap>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$shield$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Shield$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/shield.js [app-ssr] (ecmascript) <export default as Shield>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$shield$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__ShieldCheck$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/shield-check.js [app-ssr] (ecmascript) <export default as ShieldCheck>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/users.js [app-ssr] (ecmascript) <export default as Users>");
 ;
 ;
@@ -30,6 +31,11 @@ function RoleSwitcher({ currentRole, onRoleChange }) {
             role: "staff-advisor",
             label: "Staff Advisor Portal",
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"]
+        },
+        {
+            role: "admin",
+            label: "Admin Portal",
+            icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$shield$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__ShieldCheck$3e$__["ShieldCheck"]
         }
     ];
     const visibleRoles = roles.filter(({ role })=>role === currentRole);
@@ -46,19 +52,19 @@ function RoleSwitcher({ currentRole, onRoleChange }) {
                         className: "h-4 w-4"
                     }, void 0, false, {
                         fileName: "[project]/src/components/App/RoleSwitcher.tsx",
-                        lineNumber: 34,
+                        lineNumber: 35,
                         columnNumber: 11
                     }, this),
                     label
                 ]
             }, role, true, {
                 fileName: "[project]/src/components/App/RoleSwitcher.tsx",
-                lineNumber: 26,
+                lineNumber: 27,
                 columnNumber: 9
             }, this))
     }, void 0, false, {
         fileName: "[project]/src/components/App/RoleSwitcher.tsx",
-        lineNumber: 24,
+        lineNumber: 25,
         columnNumber: 5
     }, this);
 }
@@ -81,14 +87,19 @@ __turbopack_context__.s([
 const ROLE_PATHS = {
     faculty: "/faculty",
     auditor: "/auditor",
-    "staff-advisor": "/staff-advisor"
+    "staff-advisor": "/staff-advisor",
+    admin: "/admin"
 };
 const VALID_ROLES = [
     "faculty",
     "auditor",
-    "staff-advisor"
+    "staff-advisor",
+    "admin"
 ];
 function getDashboardPath(role) {
+    if (role === "admin") {
+        return ROLE_PATHS.admin;
+    }
     return `${ROLE_PATHS[role]}/dashboard`;
 }
 function isValidRole(role) {
@@ -103,6 +114,9 @@ function getRoleFromPath(pathname) {
     }
     if (pathname.startsWith(ROLE_PATHS["staff-advisor"])) {
         return "staff-advisor";
+    }
+    if (pathname.startsWith(ROLE_PATHS.admin)) {
+        return "admin";
     }
     return null;
 }

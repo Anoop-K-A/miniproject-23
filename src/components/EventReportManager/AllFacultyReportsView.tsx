@@ -46,6 +46,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { EventReport, PeerReview } from "./types";
+import { downloadJsonFile, sanitizeFileName } from "@/lib/download";
 
 interface AllFacultyReportsViewProps {
   reports: EventReport[];
@@ -161,6 +162,9 @@ export function AllFacultyReportsView({
   };
 
   const handleDownload = (report: EventReport) => {
+    const safeName = sanitizeFileName(report.eventName, "event-report");
+    const fileName = `${safeName || "event-report"}.json`;
+    downloadJsonFile(report, fileName);
     toast.success(`Downloading ${report.eventName} report`);
   };
 

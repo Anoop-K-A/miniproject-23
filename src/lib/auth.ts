@@ -21,6 +21,11 @@ export interface AuthUser {
   department?: string;
 }
 
+export interface AuthResult {
+  user: AuthUser;
+  status?: string;
+}
+
 export async function findUserByUsername(username: string) {
   const users = await readJsonFile<UserRecord[]>("users.json");
   return users.find((user) => user.username === username);
@@ -34,10 +39,13 @@ export async function verifyCredentials(username: string, password: string) {
 
   const { id, name, role, department } = user;
   return {
-    id,
-    username: user.username,
-    name,
-    role,
-    department,
-  } satisfies AuthUser;
+    user: {
+      id,
+      username: user.username,
+      name,
+      role,
+      department,
+    },
+    status: user.status,
+  } satisfies AuthResult;
 }

@@ -19,7 +19,7 @@ interface UserRecord {
   id: string;
   username: string;
   name: string;
-  role: "faculty" | "auditor" | "staff-advisor";
+  role: "faculty" | "auditor" | "staff-advisor" | "admin";
   department?: string;
   email?: string;
   phone?: string;

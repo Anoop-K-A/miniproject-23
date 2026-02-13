@@ -50,13 +50,12 @@ export async function POST(request: NextRequest) {
       name: fullName,
       role: normalizedRole,
       department,
-      status: "active",
+      status: normalizedRole === "faculty" ? "pending" : "active",
       createdAt: timestamp,
       updatedAt: timestamp,
     };
 
     // Save user
-    users.push(newUser);
     users.push(newUser);
     await writeJsonFile("users.json", users);
 

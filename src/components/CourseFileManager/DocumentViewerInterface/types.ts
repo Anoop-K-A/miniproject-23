@@ -11,6 +11,7 @@ export interface PeerReview {
 export interface CourseFile {
   id: string;
   fileName: string;
+  documentUrl?: string;
   courseCode: string;
   courseName: string;
   fileType: string;

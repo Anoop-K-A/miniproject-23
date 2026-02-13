@@ -1,5 +1,17 @@
 [
   {
+    "id": "admin-1",
+    "username": "admin@college.edu",
+    "password": "Admin@123",
+    "name": "Admin User",
+    "role": "admin",
+    "department": "Administration",
+    "email": "admin@college.edu",
+    "status": "active",
+    "createdAt": "2026-02-13T00:00:00.000Z",
+    "updatedAt": "2026-02-13T00:00:00.000Z"
+  },
+  {
     "id": "f1",
     "username": "faculty@test.com",
     "password": "password123",
@@ -64,5 +76,16 @@
     "status": "active",
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "1770985873707",
+    "username": "anoopka6.7.2004@gmail.com",
+    "password": "password123",
+    "name": "anoop",
+    "role": "faculty",
+    "department": "computer science and engineering",
+    "status": "active",
+    "createdAt": "2026-02-13T12:31:13.707Z",
+    "updatedAt": "2026-02-13T12:46:51.868Z"
   }
 ]

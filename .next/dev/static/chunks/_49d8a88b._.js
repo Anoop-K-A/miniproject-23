@@ -17,14 +17,19 @@ __turbopack_context__.s([
 const ROLE_PATHS = {
     faculty: "/faculty",
     auditor: "/auditor",
-    "staff-advisor": "/staff-advisor"
+    "staff-advisor": "/staff-advisor",
+    admin: "/admin"
 };
 const VALID_ROLES = [
     "faculty",
     "auditor",
-    "staff-advisor"
+    "staff-advisor",
+    "admin"
 ];
 function getDashboardPath(role) {
+    if (role === "admin") {
+        return ROLE_PATHS.admin;
+    }
     return `${ROLE_PATHS[role]}/dashboard`;
 }
 function isValidRole(role) {
@@ -39,6 +44,9 @@ function getRoleFromPath(pathname) {
     }
     if (pathname.startsWith(ROLE_PATHS["staff-advisor"])) {
         return "staff-advisor";
+    }
+    if (pathname.startsWith(ROLE_PATHS.admin)) {
+        return "admin";
     }
     return null;
 }

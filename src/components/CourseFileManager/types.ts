@@ -11,6 +11,7 @@ export interface CourseFile {
   id: string;
   facultyId?: string;
   fileName: string;
+  documentUrl?: string;
   courseCode: string;
   courseName: string;
   fileType: string;

@@ -56,6 +56,11 @@ import { PeerReviewDialog } from "@/components/shared/dialogs/PeerReviewDialog";
 import { AllFacultyFilesView } from "./AllFacultyFilesView";
 import { CourseFile } from "./types";
 import { useAuth } from "@/context/AuthContext";
+import {
+  downloadFromDataUrl,
+  downloadTextFile,
+  sanitizeFileName,
+} from "@/lib/download";
 
 interface CourseFileManagerProps {
   initialFiles?: CourseFile[];
@@ -85,6 +90,9 @@ export function CourseFileManager({
   const [courseName, setCourseName] = useState("");
   const [semester, setSemester] = useState("");
   const [fileName, setFileName] = useState("");
+  const [uploadedFileDataUrl, setUploadedFileDataUrl] = useState<string | null>(
+    null,
+  );
   const [selectedYear, setSelectedYear] = useState(
     new Date().getFullYear().toString(),
   );
@@ -176,6 +184,11 @@ export function CourseFileManager({
       return;
     }
 
+    if (!uploadedFileDataUrl) {
+      toast.error("Please choose a file to upload");
+      return;
+    }
+
     try {
       const response = await fetch("/api/course-files", {
         method: "POST",
@@ -187,6 +200,7 @@ export function CourseFileManager({
           facultyName: user?.name ?? "",
           department: user?.department ?? "",
           fileName,
+          documentUrl: uploadedFileDataUrl,
           courseCode,
           courseName,
           fileType: selectedFileType,
@@ -216,6 +230,7 @@ export function CourseFileManager({
       setCourseName("");
       setSemester("");
       setFileName("");
+      setUploadedFileDataUrl(null);
       setSelectedYear(new Date().getFullYear().toString());
     } catch (error) {
       console.error("File upload error:", error);
@@ -245,7 +260,28 @@ export function CourseFileManager({
   };
 
   const handleDownload = (file: CourseFile) => {
-    toast.success(`Downloading ${file.fileName}`);
+    const safeName = sanitizeFileName(file.fileName, "course-file");
+    if (file.documentUrl) {
+      downloadFromDataUrl(file.documentUrl, safeName);
+      toast.success(`Downloading ${file.fileName}`);
+      return;
+    }
+
+    const baseName = safeName.replace(/\.[^/.]+$/, "");
+    const summaryName = `${baseName || "course-file"}-summary.txt`;
+    const summary = [
+      `File Name: ${file.fileName}`,
+      `Course: ${file.courseCode} - ${file.courseName}`,
+      `Type: ${file.fileType}`,
+      `Semester: ${file.semester}`,
+      `Academic Year: ${file.academicYear}`,
+      `Uploaded: ${file.uploadDate}`,
+      `Faculty: ${file.facultyName}`,
+      `Department: ${file.department}`,
+      `Status: ${file.status ?? "Unknown"}`,
+    ].join("\n");
+    downloadTextFile(summary, summaryName);
+    toast.success(`Downloaded summary for ${file.fileName}`);
   };
 
   const handleView = (file: CourseFile) => {
@@ -468,9 +504,24 @@ export function CourseFileManager({
                         type="file"
                         required
                         accept=".pdf,.doc,.docx,.ppt,.pptx"
-                        onChange={(e) =>
-                          setFileName(e.target.files?.[0]?.name || "")
-                        }
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) {
+                            setFileName("");
+                            setUploadedFileDataUrl(null);
+                            return;
+                          }
+                          setFileName(file.name);
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setUploadedFileDataUrl(
+                              typeof reader.result === "string"
+                                ? reader.result
+                                : null,
+                            );
+                          };
+                          reader.readAsDataURL(file);
+                        }}
                       />
                     </div>
                     <div>

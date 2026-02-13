@@ -64,7 +64,7 @@ export function SignUpForm({
     }
 
     try {
-      toast.success("Account created successfully! Please sign in.");
+      toast.success("Account created! Await admin approval before signing in.");
       onSignUpSuccess(formData);
     } catch (error) {
       console.error("Register error:", error);

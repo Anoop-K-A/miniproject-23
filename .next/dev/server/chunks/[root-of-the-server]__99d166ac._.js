@@ -106,6 +106,7 @@ async function POST(request) {
             id: Date.now().toString(),
             facultyId: payload.facultyId,
             fileName: payload.fileName,
+            documentUrl: payload.documentUrl,
             courseCode: payload.courseCode,
             courseName: payload.courseName,
             fileType: payload.fileType,

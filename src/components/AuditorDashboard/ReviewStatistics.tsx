@@ -44,6 +44,12 @@ export function ReviewStatistics({ stats }: ReviewStatisticsProps) {
                 style={{ width: `${courseFileApprovalRate}%` }}
               ></div>
             </div>
+            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mt-2">
+              <span>Approved: {stats.approvedFiles}</span>
+              <span>Rejected: {stats.rejectedFiles}</span>
+              <span>Pending: {stats.pendingFiles}</span>
+              <span>Total: {stats.totalFiles}</span>
+            </div>
           </div>
 
           <div>
@@ -58,6 +64,12 @@ export function ReviewStatistics({ stats }: ReviewStatisticsProps) {
                 className="bg-green-600 h-2 rounded-full"
                 style={{ width: `${eventReportApprovalRate}%` }}
               ></div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mt-2">
+              <span>Approved: {stats.approvedReports}</span>
+              <span>Rejected: {stats.rejectedReports}</span>
+              <span>Pending: {stats.pendingReports}</span>
+              <span>Total: {stats.totalReports}</span>
             </div>
           </div>
 

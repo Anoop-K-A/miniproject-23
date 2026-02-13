@@ -31,6 +31,11 @@ import { DocumentViewerInterface } from "@/components/DocumentViewerInterface";
 import { PeerReviewDialog } from "@/components/shared/dialogs/PeerReviewDialog";
 import { ResponseDialog } from "@/components/shared/dialogs/ResponseDialog";
 import { CourseFile, PeerReview } from "./types";
+import {
+  downloadFromDataUrl,
+  downloadTextFile,
+  sanitizeFileName,
+} from "@/lib/download";
 
 interface AllFacultyFilesViewProps {
   files: CourseFile[];
@@ -59,7 +64,28 @@ export function AllFacultyFilesView({
   };
 
   const handleDownload = (file: CourseFile) => {
-    toast.success(`Downloading ${file.fileName}`);
+    const safeName = sanitizeFileName(file.fileName, "course-file");
+    if (file.documentUrl) {
+      downloadFromDataUrl(file.documentUrl, safeName);
+      toast.success(`Downloading ${file.fileName}`);
+      return;
+    }
+
+    const baseName = safeName.replace(/\.[^/.]+$/, "");
+    const summaryName = `${baseName || "course-file"}-summary.txt`;
+    const summary = [
+      `File Name: ${file.fileName}`,
+      `Course: ${file.courseCode} - ${file.courseName}`,
+      `Type: ${file.fileType}`,
+      `Semester: ${file.semester}`,
+      `Academic Year: ${file.academicYear}`,
+      `Uploaded: ${file.uploadDate}`,
+      `Faculty: ${file.facultyName}`,
+      `Department: ${file.department}`,
+      `Status: ${file.status ?? "Unknown"}`,
+    ].join("\n");
+    downloadTextFile(summary, summaryName);
+    toast.success(`Downloaded summary for ${file.fileName}`);
   };
 
   const handlePeerReview = async (review: string) => {

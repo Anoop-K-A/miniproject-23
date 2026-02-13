@@ -53,6 +53,7 @@ import { AllFacultyReportsView } from "./AllFacultyReportsView";
 import { EventReportBlogViewer } from "./EventReportBlogViewer";
 import { EventReport } from "./types";
 import { useAuth } from "@/context/AuthContext";
+import { downloadJsonFile, sanitizeFileName } from "@/lib/download";
 
 interface EventReportManagerProps {
   initialReports?: EventReport[];
@@ -310,6 +311,9 @@ export function EventReportManager({
   };
 
   const handleDownload = (report: EventReport) => {
+    const safeName = sanitizeFileName(report.eventName, "event-report");
+    const fileName = `${safeName || "event-report"}.json`;
+    downloadJsonFile(report, fileName);
     toast.success(`Downloading ${report.eventName} report`);
   };
 

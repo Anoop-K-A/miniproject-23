@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Shield, Users } from "lucide-react";
+import { GraduationCap, Shield, ShieldCheck, Users } from "lucide-react";
 import type { UserRole } from "@/lib/roles";
 
 interface RoleSwitcherProps {
@@ -16,6 +16,7 @@ export function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcherProps) {
     { role: "faculty", label: "Faculty Portal", icon: GraduationCap },
     { role: "auditor", label: "Auditor Portal", icon: Shield },
     { role: "staff-advisor", label: "Staff Advisor Portal", icon: Users },
+    { role: "admin", label: "Admin Portal", icon: ShieldCheck },
   ];
 
   const visibleRoles = roles.filter(({ role }) => role === currentRole);
