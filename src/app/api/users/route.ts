@@ -6,7 +6,8 @@ interface UserRecord {
   username: string;
   password: string;
   name: string;
-  role: "faculty" | "auditor" | "staff-advisor" | string;
+  role: "faculty" | "auditor" | "staff-advisor" | "admin" | string;
+  roles?: ("faculty" | "auditor" | "staff-advisor" | "admin")[];
   department?: string;
   email?: string;
   phone?: string;
@@ -34,12 +35,15 @@ export async function POST(request: NextRequest) {
     const users = await readJsonFile<UserRecord[]>("users.json");
     const timestamp = new Date().toISOString();
 
+    const rolesArray = payload.roles || [payload.role || "faculty"];
+
     const newUser: UserRecord = {
       id: Date.now().toString(),
       username: payload.username,
       password: payload.password ?? "",
       name: payload.name ?? payload.username,
       role: payload.role ?? "faculty",
+      roles: rolesArray,
       department: payload.department,
       email: payload.email ?? payload.username,
       phone: payload.phone,

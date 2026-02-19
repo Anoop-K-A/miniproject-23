@@ -1513,7 +1513,7 @@ function AdminStats({ users }) {
     const activeUsers = users.filter((u)=>u.status === "active").length;
     const pendingUsers = users.filter((u)=>u.status === "pending").length;
     const suspendedUsers = users.filter((u)=>u.status === "suspended").length;
-    const facultyCount = users.filter((u)=>u.role === "faculty").length;
+    const facultyCount = users.filter((u)=>(u.roles?.includes("faculty") || u.role === "faculty") && u.role !== "admin").length;
     const avgEngagement = totalUsers ? Math.round(users.reduce((sum, u)=>sum + u.completionRate, 0) / totalUsers) : 0;
     const statCards = [
         {
@@ -1560,7 +1560,7 @@ function AdminStats({ users }) {
                                 children: stat.value
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AdminDashboard/AdminStats.tsx",
-                                lineNumber: 39,
+                                lineNumber: 43,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1568,28 +1568,28 @@ function AdminStats({ users }) {
                                 children: stat.label
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AdminDashboard/AdminStats.tsx",
-                                lineNumber: 42,
+                                lineNumber: 46,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AdminDashboard/AdminStats.tsx",
-                        lineNumber: 38,
+                        lineNumber: 42,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/AdminDashboard/AdminStats.tsx",
-                    lineNumber: 37,
+                    lineNumber: 41,
                     columnNumber: 11
                 }, this)
             }, stat.label, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminStats.tsx",
-                lineNumber: 36,
+                lineNumber: 40,
                 columnNumber: 9
             }, this))
     }, void 0, false, {
         fileName: "[project]/src/components/AdminDashboard/AdminStats.tsx",
-        lineNumber: 34,
+        lineNumber: 38,
         columnNumber: 5
     }, this);
 }
@@ -3161,9 +3161,28 @@ function buildPermissions(role) {
         view_analytics: role !== "faculty"
     };
 }
-function mapApiUser(user) {
+function formatLastActive(isoDate) {
+    if (!isoDate) return "-";
+    try {
+        const date = new Date(isoDate);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        if (diffMins < 1) return "Just now";
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString();
+    } catch  {
+        return "-";
+    }
+}
+function mapApiUserWithEngagement(user, engagementMap = {}) {
     const role = normalizeRole(user.role);
     const name = user.name ?? user.username;
+    const engagement = engagementMap[user.id] ?? {};
     return {
         id: user.id,
         name,
@@ -3173,11 +3192,11 @@ function mapApiUser(user) {
         designation: ROLE_LABELS[role],
         role,
         status: normalizeStatus(user.status),
-        lastActive: "-",
+        lastActive: formatLastActive(user.lastActiveAt),
         joinedDate: user.createdAt?.split("T")[0],
-        courseFilesCount: 0,
-        eventReportsCount: 0,
-        completionRate: 0,
+        courseFilesCount: engagement.uploadsCount ?? 0,
+        eventReportsCount: engagement.activityParticipationCount ?? 0,
+        completionRate: engagement.score ?? 0,
         weeklyActivity: [
             0,
             0,
@@ -3205,13 +3224,21 @@ function AdminDashboard() {
     const [showNotifications, setShowNotifications] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const fetchUsers = async ()=>{
         try {
-            const response = await fetch("/api/users");
-            const data = await response.json();
-            if (!response.ok) {
-                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error(data.error || "Failed to load users");
+            const [usersResponse, engagementResponse] = await Promise.all([
+                fetch("/api/users"),
+                fetch("/api/engagements")
+            ]);
+            const usersData = await usersResponse.json();
+            const engagementData = await engagementResponse.json();
+            if (!usersResponse.ok) {
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error(usersData.error || "Failed to load users");
                 return;
             }
-            const mappedUsers = data.users.map(mapApiUser);
+            const engagementMap = (engagementData.engagements ?? []).reduce((acc, eng)=>{
+                acc[eng.facultyId] = eng;
+                return acc;
+            }, {});
+            const mappedUsers = usersData.users.map((user)=>mapApiUserWithEngagement(user, engagementMap));
             setUsers(mappedUsers);
         } catch (error) {
             console.error("Load users error:", error);
@@ -3295,7 +3322,8 @@ function AdminDashboard() {
                 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error(data.error || "Failed to add user");
                 return;
             }
-            setUsers(data.users.map(mapApiUser));
+            const engagementMap = {};
+            setUsers(data.users.map((user)=>mapApiUserWithEngagement(user, engagementMap)));
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success(`User ${payload.name} added successfully`);
             pushNotification(`User ${payload.name} added`, "success");
         } catch (error) {
@@ -3317,7 +3345,8 @@ function AdminDashboard() {
                 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error(data.error || "Update failed");
                 return null;
             }
-            const mappedUsers = data.users.map(mapApiUser);
+            const engagementMap = {};
+            const mappedUsers = data.users.map((user)=>mapApiUserWithEngagement(user, engagementMap));
             setUsers(mappedUsers);
             return mappedUsers.find((user)=>user.id === id) ?? null;
         } catch (error) {
@@ -3350,7 +3379,8 @@ function AdminDashboard() {
                 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error(data.error || "Delete failed");
                 return;
             }
-            setUsers(data.users.map(mapApiUser));
+            const engagementMap = {};
+            setUsers(data.users.map((user)=>mapApiUserWithEngagement(user, engagementMap)));
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("User deleted successfully");
             pushNotification("User deleted", "warning");
         } catch (error) {
@@ -3410,14 +3440,14 @@ function AdminDashboard() {
                 onAddUser: handleAddUser
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 339,
+                lineNumber: 395,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AdminDashboard$2f$AdminStats$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AdminStats"], {
                 users: users
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 351,
+                lineNumber: 407,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AdminDashboard$2f$UsersTable$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["UsersTable"], {
@@ -3442,7 +3472,7 @@ function AdminDashboard() {
                 onReject: handleReject
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 353,
+                lineNumber: 409,
                 columnNumber: 7
             }, this),
             selectedUser && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AdminDashboard$2f$EditUserDialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["EditUserDialog"], {
@@ -3452,7 +3482,7 @@ function AdminDashboard() {
                 onUpdateUser: handleUpdateUser
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 376,
+                lineNumber: 432,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AlertDialog"], {
@@ -3466,7 +3496,7 @@ function AdminDashboard() {
                                     children: "Are you sure?"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                                    lineNumber: 390,
+                                    lineNumber: 446,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AlertDialogDescription"], {
@@ -3477,13 +3507,13 @@ function AdminDashboard() {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                                    lineNumber: 391,
+                                    lineNumber: 447,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                            lineNumber: 389,
+                            lineNumber: 445,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AlertDialogFooter"], {
@@ -3492,7 +3522,7 @@ function AdminDashboard() {
                                     children: "Cancel"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                                    lineNumber: 397,
+                                    lineNumber: 453,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AlertDialogAction"], {
@@ -3507,30 +3537,30 @@ function AdminDashboard() {
                                     children: "Delete"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                                    lineNumber: 398,
+                                    lineNumber: 454,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                            lineNumber: 396,
+                            lineNumber: 452,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                    lineNumber: 388,
+                    lineNumber: 444,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 384,
+                lineNumber: 440,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-        lineNumber: 338,
+        lineNumber: 394,
         columnNumber: 5
     }, this);
 }

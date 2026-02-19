@@ -25,7 +25,6 @@ export function AuthPage({ onLogin }: AuthPageProps) {
           email: formData.email,
           password: formData.password,
           fullName: formData.fullName,
-          role: formData.role,
           department: formData.department,
         }),
       });

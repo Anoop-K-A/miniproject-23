@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { CourseFile } from "@/components/CourseFileManager/types";
+import { recomputeEngagementForFaculty } from "@/lib/engagements";
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,6 +35,11 @@ export async function POST(request: NextRequest) {
 
     const updatedFiles = [newFile, ...files];
     await writeJsonFile("courseFiles.json", updatedFiles);
+
+    // Recompute engagement after file upload
+    if (payload.facultyId) {
+      await recomputeEngagementForFaculty(payload.facultyId);
+    }
 
     return NextResponse.json({ files: updatedFiles });
   } catch (error) {

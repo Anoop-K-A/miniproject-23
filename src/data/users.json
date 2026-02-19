@@ -5,11 +5,15 @@
     "password": "Admin@123",
     "name": "Admin User",
     "role": "admin",
+    "roles": [
+      "admin"
+    ],
     "department": "Administration",
     "email": "admin@college.edu",
     "status": "active",
     "createdAt": "2026-02-13T00:00:00.000Z",
-    "updatedAt": "2026-02-13T00:00:00.000Z"
+    "updatedAt": "2026-02-18T10:24:05.555Z",
+    "lastActiveAt": "2026-02-18T10:26:49.539Z"
   },
   {
     "id": "f1",
@@ -17,6 +21,9 @@
     "password": "password123",
     "name": "Dr. John Doe",
     "role": "faculty",
+    "roles": [
+      "faculty"
+    ],
     "department": "Computer Science",
     "email": "faculty@test.com",
     "phone": "+1 (555) 123-4567",
@@ -30,7 +37,8 @@
     "experience": "12 years",
     "status": "active",
     "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "lastActiveAt": "2026-02-18T10:01:23.112Z"
   },
   {
     "id": "f2",
@@ -38,6 +46,9 @@
     "password": "password123",
     "name": "Dr. Emily Carter",
     "role": "faculty",
+    "roles": [
+      "faculty"
+    ],
     "department": "Information Systems",
     "email": "faculty2@test.com",
     "phone": "+1 (555) 987-6543",
@@ -59,23 +70,16 @@
     "password": "password123",
     "name": "Jane Smith",
     "role": "auditor",
+    "roles": [
+      "faculty",
+      "auditor"
+    ],
     "department": "Audit",
     "email": "auditor@test.com",
     "status": "active",
     "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
-  },
-  {
-    "id": "s1",
-    "username": "staff@test.com",
-    "password": "password123",
-    "name": "Bob Johnson",
-    "role": "staff-advisor",
-    "department": "Administration",
-    "email": "staff@test.com",
-    "status": "active",
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "lastActiveAt": "2026-02-18T10:00:47.080Z"
   },
   {
     "id": "1770985873707",
@@ -83,9 +87,31 @@
     "password": "password123",
     "name": "anoop",
     "role": "faculty",
+    "roles": [
+      "faculty"
+    ],
     "department": "computer science and engineering",
     "status": "active",
     "createdAt": "2026-02-13T12:31:13.707Z",
-    "updatedAt": "2026-02-13T12:46:51.868Z"
+    "updatedAt": "2026-02-18T08:50:40.701Z",
+    "lastActiveAt": "2026-02-18T10:46:35.715Z"
+  },
+  {
+    "id": "1771405829166",
+    "username": "aaa@gmail.com",
+    "password": "123456",
+    "name": "anoop ka",
+    "role": "faculty",
+    "roles": [
+      "faculty",
+      "auditor",
+      "staff-advisor"
+    ],
+    "department": "computer science and engineering",
+    "status": "active",
+    "createdAt": "2026-02-18T09:10:29.166Z",
+    "updatedAt": "2026-02-18T10:25:54.594Z",
+    "lastActiveAt": "2026-02-18T10:46:50.843Z",
+    "email": "aaa@gmail.com"
   }
 ]

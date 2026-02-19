@@ -14,15 +14,16 @@ interface RemarkRecord {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const payload = await request.json();
     const remarks = await readJsonFile<RemarkRecord[]>("remarks.json");
     const updatedAt = new Date().toISOString();
 
     const updatedRemarks = remarks.map((remark) =>
-      remark.id === params.id
+      remark.id === id
         ? {
             ...remark,
             ...payload,
@@ -44,11 +45,12 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const remarks = await readJsonFile<RemarkRecord[]>("remarks.json");
-    const updatedRemarks = remarks.filter((remark) => remark.id !== params.id);
+    const updatedRemarks = remarks.filter((remark) => remark.id !== id);
     await writeJsonFile("remarks.json", updatedRemarks);
     return NextResponse.json({ remarks: updatedRemarks });
   } catch (error) {

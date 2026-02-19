@@ -20,6 +20,7 @@ interface UserRecord {
   username: string;
   name: string;
   role: "faculty" | "auditor" | "staff-advisor" | "admin";
+  roles?: ("faculty" | "auditor" | "staff-advisor" | "admin")[];
   department?: string;
   email?: string;
   phone?: string;
@@ -86,7 +87,11 @@ export async function getFacultyDashboardData(
   username?: string | null,
 ): Promise<FacultyDashboardData> {
   const users = await readJsonFile<UserRecord[]>("users.json");
-  const facultyUsers = users.filter((user) => user.role === "faculty");
+  const facultyUsers = users.filter(
+    (user) =>
+      (user.roles?.includes("faculty") || user.role === "faculty") &&
+      user.role !== "admin",
+  );
   const courseFiles =
     await readJsonFile<CourseFileRecord[]>("courseFiles.json");
   const eventReports =
@@ -165,7 +170,11 @@ export async function getAuditorDashboardData() {
     await readJsonFile<EventReportRecord[]>("eventReports.json");
   const audits = await readJsonFile<AuditRecord[]>("audits.json");
 
-  const facultyUsers = users.filter((user) => user.role === "faculty");
+  const facultyUsers = users.filter(
+    (user) =>
+      (user.roles?.includes("faculty") || user.role === "faculty") &&
+      user.role !== "admin",
+  );
   const totalFiles = courseFiles.length;
   const totalReports = eventReports.length;
   const approvedFiles = courseFiles.filter(
@@ -312,7 +321,11 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
         )
       : 0;
 
-  const facultyUsers = users.filter((user) => user.role === "faculty");
+  const facultyUsers = users.filter(
+    (user) =>
+      (user.roles?.includes("faculty") || user.role === "faculty") &&
+      user.role !== "admin",
+  );
   const approvedFiles = courseFiles.filter(
     (file) => file.status === "Approved",
   ).length;

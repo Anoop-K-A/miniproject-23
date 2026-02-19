@@ -4,14 +4,15 @@ import type { Student } from "@/components/StaffAdvisorDashboard/types";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const payload = await request.json();
     const students = await readJsonFile<Student[]>("students.json");
 
     const updatedStudents = students.map((student) => {
-      if (student.id !== params.id) return student;
+      if (student.id !== id) return student;
 
       const newActivity = {
         id: `act-${Date.now()}`,

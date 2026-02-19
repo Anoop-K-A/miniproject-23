@@ -15,8 +15,8 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 ;
 ;
 ;
-function RoleSwitcher({ currentRole, onRoleChange }) {
-    const roles = [
+function RoleSwitcher({ currentRole, assignedRoles, onRoleChange }) {
+    const allRoles = [
         {
             role: "faculty",
             label: "Faculty Portal",
@@ -38,11 +38,13 @@ function RoleSwitcher({ currentRole, onRoleChange }) {
             icon: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$shield$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__ShieldCheck$3e$__["ShieldCheck"]
         }
     ];
-    const visibleRoles = roles.filter(({ role })=>role === currentRole);
+    // Always show faculty role (everyone can upload as faculty)
+    // Plus show any other assigned roles
+    const visibleRoles = allRoles.filter(({ role })=>role === "faculty" || assignedRoles.includes(role));
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "mb-6 flex flex-wrap gap-3",
         children: visibleRoles.map(({ role, label, icon: Icon })=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
-                variant: "default",
+                variant: currentRole === role ? "default" : "outline",
                 onClick: ()=>{
                     onRoleChange(role);
                 },
@@ -52,19 +54,19 @@ function RoleSwitcher({ currentRole, onRoleChange }) {
                         className: "h-4 w-4"
                     }, void 0, false, {
                         fileName: "[project]/src/components/App/RoleSwitcher.tsx",
-                        lineNumber: 35,
+                        lineNumber: 44,
                         columnNumber: 11
                     }, this),
                     label
                 ]
             }, role, true, {
                 fileName: "[project]/src/components/App/RoleSwitcher.tsx",
-                lineNumber: 27,
+                lineNumber: 36,
                 columnNumber: 9
             }, this))
     }, void 0, false, {
         fileName: "[project]/src/components/App/RoleSwitcher.tsx",
-        lineNumber: 25,
+        lineNumber: 34,
         columnNumber: 5
     }, this);
 }
@@ -142,17 +144,18 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$roles$2e$ts__$
 ;
 ;
 function AuditorLayout({ children }) {
-    const { userRole, switchRole, isAuthenticated, isLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
+    const { userRole, switchRole, isAuthenticated, isLoading, assignedRoles } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAuth"])();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        if (!isLoading && isAuthenticated && userRole !== "auditor") {
+        if (!isLoading && isAuthenticated && !assignedRoles.includes("auditor")) {
             router.replace((0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$roles$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getDashboardPath"])(userRole));
         }
     }, [
         isAuthenticated,
         isLoading,
         router,
-        userRole
+        userRole,
+        assignedRoles
     ]);
     const handleRoleChange = (role)=>{
         switchRole(role);
@@ -164,17 +167,18 @@ function AuditorLayout({ children }) {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$App$2f$RoleSwitcher$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["RoleSwitcher"], {
                 currentRole: userRole,
+                assignedRoles: assignedRoles,
                 onRoleChange: handleRoleChange
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/auditor/layout.tsx",
-                lineNumber: 31,
+                lineNumber: 32,
                 columnNumber: 7
             }, this),
             children
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(dashboard)/auditor/layout.tsx",
-        lineNumber: 30,
+        lineNumber: 31,
         columnNumber: 5
     }, this);
 }

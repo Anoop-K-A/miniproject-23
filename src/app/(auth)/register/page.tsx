@@ -19,7 +19,6 @@ export default function RegisterPage() {
           email: formData.email,
           password: formData.password,
           fullName: formData.fullName,
-          role: formData.role,
           department: formData.department,
         }),
       });

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/anoop/miniproject-23/src/app/%28dashboard%29/faculty/layout.tsx"],"sourcesContent":["\"use client\";\r\n\r\nimport React from \"react\";\r\n\r\nexport default function FacultyLayout({\r\n  children,\r\n}: {\r\n  children: React.ReactNode;\r\n}) {\r\n  return (\r\n    <div className=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8\">\r\n      {children}\r\n    </div>\r\n  );\r\n}\r\n"],"names":[],"mappings":";;;;;AAAA;;AAIe,SAAS,cAAc,EACpC,QAAQ,EAGT;IACC,qBACE,6LAAC;QAAI,WAAU;kBACZ;;;;;;AAGP;KAVwB"}}]
+}

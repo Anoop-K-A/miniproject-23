@@ -58,7 +58,7 @@ export function SignInForm({
 
       toast.success("Sign in successful!");
 
-      // Call callback with user role
+      // Call callback with user role and roles
       const callback = onLogin || onSignInSuccess;
       if (callback) {
         callback({
@@ -66,6 +66,7 @@ export function SignInForm({
           username: data.username,
           name: data.name,
           role: data.role,
+          roles: data.roles || [data.role],
           department: data.department,
         });
       }

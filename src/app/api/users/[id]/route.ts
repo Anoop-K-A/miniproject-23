@@ -7,7 +7,8 @@ interface UserRecord {
   username: string;
   password: string;
   name: string;
-  role: "faculty" | "auditor" | "staff-advisor" | string;
+  role: "faculty" | "auditor" | "staff-advisor" | "admin" | string;
+  roles?: ("faculty" | "auditor" | "staff-advisor" | "admin")[];
   department?: string;
   email?: string;
   phone?: string;
@@ -38,6 +39,13 @@ interface RemarkRecord {
   authorId: string;
   entityType: string;
   entityId: string;
+}
+
+interface EngagementRecord {
+  id: string;
+  facultyId: string;
+  score: number;
+  [key: string]: any;
 }
 
 export async function PATCH(
@@ -85,6 +93,9 @@ export async function DELETE(
     const audits = await readJsonFile<AuditRecord[]>("audits.json");
     const remarks = await readJsonFile<RemarkRecord[]>("remarks.json");
     const students = await readJsonFile<Student[]>("students.json");
+    const engagements = await readJsonFile<EngagementRecord[]>(
+      "engagements.json",
+    ).catch(() => []);
 
     const updatedUsers = users.filter((user) => user.id !== id);
 
@@ -126,12 +137,17 @@ export async function DELETE(
       (student) => student.advisorId !== id,
     );
 
+    const updatedEngagements = engagements.filter(
+      (engagement) => engagement.facultyId !== id,
+    );
+
     await writeJsonFile("users.json", updatedUsers);
     await writeJsonFile("courseFiles.json", updatedFiles);
     await writeJsonFile("eventReports.json", updatedReports);
     await writeJsonFile("audits.json", updatedAudits);
     await writeJsonFile("remarks.json", updatedRemarks);
     await writeJsonFile("students.json", updatedStudents);
+    await writeJsonFile("engagements.json", updatedEngagements);
 
     return NextResponse.json({ users: updatedUsers });
   } catch (error) {

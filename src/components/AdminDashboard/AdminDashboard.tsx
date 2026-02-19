@@ -25,12 +25,14 @@ interface ApiUser {
   password?: string;
   name?: string;
   role?: string;
+  roles?: string[];
   department?: string;
   email?: string;
   phone?: string;
   status?: string;
   createdAt?: string;
   updatedAt?: string;
+  lastActiveAt?: string;
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -91,9 +93,35 @@ function buildPermissions(role: UserRole) {
   };
 }
 
-function mapApiUser(user: ApiUser): AdminUser {
+function formatLastActive(isoDate?: string): string {
+  if (!isoDate) return "-";
+  try {
+    const date = new Date(isoDate);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  } catch {
+    return "-";
+  }
+}
+
+function mapApiUserWithEngagement(
+  user: ApiUser,
+  engagementMap: Record<string, any> = {},
+): AdminUser {
   const role = normalizeRole(user.role);
   const name = user.name ?? user.username;
+  const engagement = engagementMap[user.id] ?? {};
+  const roles = (user as any).roles as UserRole[] | undefined;
+
   return {
     id: user.id,
     name,
@@ -102,12 +130,13 @@ function mapApiUser(user: ApiUser): AdminUser {
     department: user.department,
     designation: ROLE_LABELS[role],
     role,
+    roles: roles || [role],
     status: normalizeStatus(user.status),
-    lastActive: "-",
+    lastActive: formatLastActive(user.lastActiveAt),
     joinedDate: user.createdAt?.split("T")[0],
-    courseFilesCount: 0,
-    eventReportsCount: 0,
-    completionRate: 0,
+    courseFilesCount: engagement.uploadsCount ?? 0,
+    eventReportsCount: engagement.activityParticipationCount ?? 0,
+    completionRate: engagement.score ?? 0,
     weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
     permissions: buildPermissions(role),
   };
@@ -116,7 +145,6 @@ function mapApiUser(user: ApiUser): AdminUser {
 export function AdminDashboard() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -128,13 +156,30 @@ export function AdminDashboard() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("/api/users");
-      const data = await response.json();
-      if (!response.ok) {
-        toast.error(data.error || "Failed to load users");
+      const [usersResponse, engagementResponse] = await Promise.all([
+        fetch("/api/users"),
+        fetch("/api/engagements"),
+      ]);
+
+      const usersData = await usersResponse.json();
+      const engagementData = await engagementResponse.json();
+
+      if (!usersResponse.ok) {
+        toast.error(usersData.error || "Failed to load users");
         return;
       }
-      const mappedUsers = (data.users as ApiUser[]).map(mapApiUser);
+
+      const engagementMap = (engagementData.engagements ?? []).reduce(
+        (acc: Record<string, any>, eng: any) => {
+          acc[eng.facultyId] = eng;
+          return acc;
+        },
+        {},
+      );
+
+      const mappedUsers = (usersData.users as ApiUser[]).map((user) =>
+        mapApiUserWithEngagement(user, engagementMap),
+      );
       setUsers(mappedUsers);
     } catch (error) {
       console.error("Load users error:", error);
@@ -164,16 +209,12 @@ export function AdminDashboard() {
       );
     }
 
-    if (filterRole !== "all") {
-      next = next.filter((user) => user.role === filterRole);
-    }
-
     if (filterStatus !== "all") {
       next = next.filter((user) => user.status === filterStatus);
     }
 
     return next;
-  }, [users, searchQuery, filterRole, filterStatus]);
+  }, [users, searchQuery, filterStatus]);
 
   const pushNotification = (
     message: string,
@@ -195,10 +236,11 @@ export function AdminDashboard() {
     password: string;
     phone?: string;
     department?: string;
-    designation?: string;
     role: AdminUser["role"];
+    roles?: UserRole[];
   }) => {
     try {
+      const rolesArray = payload.roles || [payload.role];
       const response = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -207,6 +249,7 @@ export function AdminDashboard() {
           password: payload.password,
           name: payload.name,
           role: payload.role,
+          roles: rolesArray,
           department: payload.department,
           email: payload.email,
           phone: payload.phone,
@@ -218,7 +261,12 @@ export function AdminDashboard() {
         toast.error(data.error || "Failed to add user");
         return;
       }
-      setUsers((data.users as ApiUser[]).map(mapApiUser));
+      const engagementMap: Record<string, any> = {};
+      setUsers(
+        (data.users as ApiUser[]).map((user) =>
+          mapApiUserWithEngagement(user, engagementMap),
+        ),
+      );
       toast.success(`User ${payload.name} added successfully`);
       pushNotification(`User ${payload.name} added`, "success");
     } catch (error) {
@@ -239,7 +287,10 @@ export function AdminDashboard() {
         toast.error(data.error || "Update failed");
         return null;
       }
-      const mappedUsers = (data.users as ApiUser[]).map(mapApiUser);
+      const engagementMap: Record<string, any> = {};
+      const mappedUsers = (data.users as ApiUser[]).map((user) =>
+        mapApiUserWithEngagement(user, engagementMap),
+      );
       setUsers(mappedUsers);
       return mappedUsers.find((user) => user.id === id) ?? null;
     } catch (error) {
@@ -255,8 +306,8 @@ export function AdminDashboard() {
     email: string;
     phone?: string;
     department?: string;
-    designation?: string;
     role: AdminUser["role"];
+    roles?: UserRole[];
     status: AdminUserStatus;
   }) => {
     const updated = await updateUser(payload.id, {
@@ -265,6 +316,7 @@ export function AdminDashboard() {
       phone: payload.phone,
       department: payload.department,
       role: payload.role,
+      roles: payload.roles || [payload.role],
       status: payload.status,
     });
 
@@ -284,23 +336,17 @@ export function AdminDashboard() {
         toast.error(data.error || "Delete failed");
         return;
       }
-      setUsers((data.users as ApiUser[]).map(mapApiUser));
+      const engagementMap: Record<string, any> = {};
+      setUsers(
+        (data.users as ApiUser[]).map((user) =>
+          mapApiUserWithEngagement(user, engagementMap),
+        ),
+      );
       toast.success("User deleted successfully");
       pushNotification("User deleted", "warning");
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Failed to delete user");
-    }
-  };
-
-  const handleRoleChange = async (
-    userId: string,
-    newRole: AdminUser["role"],
-  ) => {
-    const updated = await updateUser(userId, { role: newRole });
-    if (updated) {
-      toast.success(`Role updated to ${ROLE_LABELS[newRole]}`);
-      pushNotification(`Role updated to ${ROLE_LABELS[newRole]}`, "info");
     }
   };
 
@@ -353,10 +399,8 @@ export function AdminDashboard() {
       <UsersTable
         users={filteredUsers}
         searchQuery={searchQuery}
-        filterRole={filterRole}
         filterStatus={filterStatus}
         onSearchChange={setSearchQuery}
-        onFilterRoleChange={setFilterRole}
         onFilterStatusChange={setFilterStatus}
         onEdit={(user) => {
           setSelectedUser(user);
@@ -366,7 +410,6 @@ export function AdminDashboard() {
           setUserToDelete(user);
           setIsDeleteDialogOpen(true);
         }}
-        onRoleChange={handleRoleChange}
         onStatusChange={handleStatusChange}
         onApprove={handleApprove}
         onReject={handleReject}

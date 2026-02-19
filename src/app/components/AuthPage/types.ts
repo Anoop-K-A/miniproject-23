@@ -8,7 +8,6 @@ export interface SignUpFormData {
   password: string;
   confirmPassword: string;
   fullName: string;
-  role: string;
   department: string;
 }
 

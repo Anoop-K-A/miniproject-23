@@ -14,15 +14,16 @@ interface AuditRecord {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const payload = await request.json();
     const audits = await readJsonFile<AuditRecord[]>("audits.json");
     const updatedAt = new Date().toISOString();
 
     const updatedAudits = audits.map((audit) =>
-      audit.id === params.id
+      audit.id === id
         ? {
             ...audit,
             ...payload,
@@ -44,11 +45,12 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const audits = await readJsonFile<AuditRecord[]>("audits.json");
-    const updatedAudits = audits.filter((audit) => audit.id !== params.id);
+    const updatedAudits = audits.filter((audit) => audit.id !== id);
     await writeJsonFile("audits.json", updatedAudits);
     return NextResponse.json({ audits: updatedAudits });
   } catch (error) {

@@ -34,7 +34,6 @@ export function SignUpForm({
     password: "",
     confirmPassword: "",
     fullName: "",
-    role: "",
     department: "",
   });
 
@@ -46,7 +45,6 @@ export function SignUpForm({
       !formData.password ||
       !formData.confirmPassword ||
       !formData.fullName ||
-      !formData.role ||
       !formData.department
     ) {
       toast.error("Please fill in all fields");
@@ -119,25 +117,6 @@ export function SignUpForm({
                 className="pl-10"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select
-              value={formData.role}
-              onValueChange={(value) =>
-                setFormData({ ...formData, role: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Faculty">Faculty</SelectItem>
-                <SelectItem value="Auditor">Auditor</SelectItem>
-                <SelectItem value="StaffAdvisor">Staff Advisor</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="space-y-2">

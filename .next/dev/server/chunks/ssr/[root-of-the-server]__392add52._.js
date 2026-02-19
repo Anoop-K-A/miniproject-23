@@ -23,16 +23,30 @@ const AuthContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project
 function AuthProvider({ children }) {
     const [isAuthenticated, setIsAuthenticated] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [userRole, setUserRole] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("faculty");
+    const [assignedRoles, setAssignedRoles] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([
+        "faculty"
+    ]);
     const [user, setUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
     // Load from localStorage on mount
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const savedAuth = localStorage.getItem("auth_authenticated");
         const savedRole = localStorage.getItem("auth_role");
+        const savedRoles = localStorage.getItem("auth_roles");
         const savedUser = localStorage.getItem("auth_user");
         if (savedAuth === "true" && savedRole) {
             setIsAuthenticated(true);
             setUserRole(savedRole);
+        }
+        if (savedRoles) {
+            try {
+                const roles = JSON.parse(savedRoles);
+                setAssignedRoles(roles);
+            } catch  {
+                setAssignedRoles([
+                    "faculty"
+                ]);
+            }
         }
         if (savedUser) {
             try {
@@ -47,16 +61,26 @@ function AuthProvider({ children }) {
         setIsAuthenticated(true);
         setUserRole(authUser.role);
         setUser(authUser);
+        // Use roles array if available, otherwise default to single role in array
+        const roles = authUser.roles || [
+            authUser.role
+        ];
+        setAssignedRoles(roles);
         localStorage.setItem("auth_authenticated", "true");
         localStorage.setItem("auth_role", authUser.role);
+        localStorage.setItem("auth_roles", JSON.stringify(roles));
         localStorage.setItem("auth_user", JSON.stringify(authUser));
     };
     const logout = ()=>{
         setIsAuthenticated(false);
         setUserRole("faculty");
+        setAssignedRoles([
+            "faculty"
+        ]);
         setUser(null);
         localStorage.removeItem("auth_authenticated");
         localStorage.removeItem("auth_role");
+        localStorage.removeItem("auth_roles");
         localStorage.removeItem("auth_user");
     };
     const switchRole = (role)=>{
@@ -73,13 +97,20 @@ function AuthProvider({ children }) {
     };
     const register = (role)=>{
         setUserRole(role);
+        setAssignedRoles([
+            role
+        ]);
         setIsAuthenticated(true);
         localStorage.setItem("auth_authenticated", "true");
         localStorage.setItem("auth_role", role);
+        localStorage.setItem("auth_roles", JSON.stringify([
+            role
+        ]));
     };
     const value = {
         isAuthenticated,
         userRole,
+        assignedRoles,
         user,
         login,
         register,
@@ -92,7 +123,7 @@ function AuthProvider({ children }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/src/context/AuthContext.tsx",
-        lineNumber: 106,
+        lineNumber: 128,
         columnNumber: 10
     }, this);
 }

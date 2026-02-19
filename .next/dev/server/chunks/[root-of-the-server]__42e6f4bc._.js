@@ -128,6 +128,7 @@ async function DELETE(_request, { params }) {
         const audits = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("audits.json");
         const remarks = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("remarks.json");
         const students = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("students.json");
+        const engagements = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("engagements.json").catch(()=>[]);
         const updatedUsers = users.filter((user)=>user.id !== id);
         const removedFileIds = courseFiles.filter((file)=>file.facultyId === id).map((file)=>file.id);
         const removedReportIds = eventReports.filter((report)=>report.facultyId === id).map((report)=>report.id);
@@ -136,12 +137,14 @@ async function DELETE(_request, { params }) {
         const updatedAudits = audits.filter((audit)=>audit.auditorId !== id && !(audit.entityType === "course-file" && removedFileIds.includes(audit.entityId) || audit.entityType === "event-report" && removedReportIds.includes(audit.entityId)));
         const updatedRemarks = remarks.filter((remark)=>remark.authorId !== id && !(remark.entityType === "course-file" && removedFileIds.includes(remark.entityId) || remark.entityType === "event-report" && removedReportIds.includes(remark.entityId)));
         const updatedStudents = students.filter((student)=>student.advisorId !== id);
+        const updatedEngagements = engagements.filter((engagement)=>engagement.facultyId !== id);
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["writeJsonFile"])("users.json", updatedUsers);
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["writeJsonFile"])("courseFiles.json", updatedFiles);
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["writeJsonFile"])("eventReports.json", updatedReports);
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["writeJsonFile"])("audits.json", updatedAudits);
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["writeJsonFile"])("remarks.json", updatedRemarks);
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["writeJsonFile"])("students.json", updatedStudents);
+        await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["writeJsonFile"])("engagements.json", updatedEngagements);
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
             users: updatedUsers
         });

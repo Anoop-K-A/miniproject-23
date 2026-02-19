@@ -95,9 +95,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__
 ;
 async function POST(request) {
     try {
-        const { email, password, fullName, role, department } = await request.json();
+        const { email, password, fullName, department } = await request.json();
         // Validate inputs
-        if (!email || !password || !fullName || !role || !department) {
+        if (!email || !password || !fullName || !department) {
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
                 error: "All fields are required"
             }, {
@@ -122,7 +122,7 @@ async function POST(request) {
         }
         // Generate unique id
         const id = Date.now().toString();
-        const normalizedRole = role === "Auditor" ? "auditor" : role === "StaffAdvisor" || role === "Staff Advisor" ? "staff-advisor" : "faculty";
+        const normalizedRole = "faculty";
         const timestamp = new Date().toISOString();
         const newUser = {
             id,
@@ -131,7 +131,7 @@ async function POST(request) {
             name: fullName,
             role: normalizedRole,
             department,
-            status: normalizedRole === "faculty" ? "pending" : "active",
+            status: "pending",
             createdAt: timestamp,
             updatedAt: timestamp
         };

@@ -108,7 +108,7 @@ function toTimeAgo(isoDate) {
 }
 async function getFacultyDashboardData(username) {
     const users = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("users.json");
-    const facultyUsers = users.filter((user)=>user.role === "faculty");
+    const facultyUsers = users.filter((user)=>(user.roles?.includes("faculty") || user.role === "faculty") && user.role !== "admin");
     const courseFiles = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("courseFiles.json");
     const eventReports = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("eventReports.json");
     const selectedUser = username ? facultyUsers.find((user)=>user.username === username) : facultyUsers[0];
@@ -159,7 +159,7 @@ async function getAuditorDashboardData() {
     const courseFiles = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("courseFiles.json");
     const eventReports = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("eventReports.json");
     const audits = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("audits.json");
-    const facultyUsers = users.filter((user)=>user.role === "faculty");
+    const facultyUsers = users.filter((user)=>(user.roles?.includes("faculty") || user.role === "faculty") && user.role !== "admin");
     const totalFiles = courseFiles.length;
     const totalReports = eventReports.length;
     const approvedFiles = courseFiles.filter((file)=>file.status === "Approved").length;
@@ -233,7 +233,7 @@ async function getStaffAdvisorDashboardData(username) {
     const inProcess = scopedStudents.filter((student)=>student.placementStatus === "In Process").length;
     const averageCGPA = totalStudents > 0 ? Math.round(scopedStudents.reduce((sum, student)=>sum + student.cgpa, 0) / totalStudents * 10) / 10 : 0;
     const averageAttendance = totalStudents > 0 ? Math.round(scopedStudents.reduce((sum, student)=>sum + student.attendance, 0) / totalStudents) : 0;
-    const facultyUsers = users.filter((user)=>user.role === "faculty");
+    const facultyUsers = users.filter((user)=>(user.roles?.includes("faculty") || user.role === "faculty") && user.role !== "admin");
     const approvedFiles = courseFiles.filter((file)=>file.status === "Approved").length;
     const approvedReports = eventReports.filter((report)=>report.status === "Approved").length;
     const stats = {

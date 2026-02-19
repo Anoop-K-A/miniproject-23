@@ -24,6 +24,7 @@ export interface AdminUser {
   department?: string;
   designation?: string;
   role: UserRole;
+  roles?: UserRole[];
   status: AdminUserStatus;
   lastActive?: string;
   joinedDate?: string;

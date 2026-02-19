@@ -7,6 +7,7 @@ export interface UserRecord {
   password: string;
   name: string;
   role: UserRole;
+  roles?: UserRole[];
   department?: string;
   status?: string;
   createdAt?: string;
@@ -18,6 +19,7 @@ export interface AuthUser {
   username: string;
   name: string;
   role: UserRole;
+  roles?: UserRole[];
   department?: string;
 }
 
@@ -37,13 +39,14 @@ export async function verifyCredentials(username: string, password: string) {
     return null;
   }
 
-  const { id, name, role, department } = user;
+  const { id, name, role, roles, department } = user;
   return {
     user: {
       id,
       username: user.username,
       name,
       role,
+      roles: roles || [role],
       department,
     },
     status: user.status,

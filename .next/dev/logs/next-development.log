@@ -1,95 +1,72 @@
-[00:01:11.279] Server  LOG     ✓ Ready in 44s
-[00:01:14.439] Server  LOG     ○ Compiling / ...
-[00:01:18.848] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:02:33.077] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:16.914] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:04:16.562] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:11:15.660] Server  LOG     ✓ Compiled in 1142ms
-[00:11:21.601] Server  LOG     ✓ Compiled in 209ms
-[00:11:30.191] Server  LOG     ✓ Compiled in 230ms
-[00:11:37.284] Server  LOG     ✓ Compiled in 228ms
-[00:11:42.376] Server  LOG     ✓ Compiled in 396ms
-[00:12:52.730] Server  LOG     ✓ Compiled in 252ms
-[00:13:31.717] Server  LOG     ✓ Compiled in 330ms
-[00:28:31.498] Server  LOG     ✓ Compiled in 915ms
-[00:28:35.805] Server  LOG     ✓ Compiled in 924ms
-[00:29:25.574] Server  LOG     ✓ Compiled in 225ms
-[00:29:32.272] Server  LOG     ✓ Compiled in 286ms
-[00:31:18.846] Server  LOG     ✓ Compiled in 358ms
-[00:31:32.665] Server  LOG     ✓ Compiled in 320ms
-[00:31:43.118] Server  LOG     ✓ Compiled in 240ms
-[00:32:14.587] Server  LOG     ✓ Compiled in 342ms
-[00:32:57.817] Server  LOG     ✓ Compiled in 418ms
-[00:33:32.853] Server  LOG     ✓ Compiled in 227ms
-[00:34:39.048] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:36:09.584] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:36:09.683] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:36:09.764] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:36:09.827] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:36:09.906] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:36:16.193] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:36:36.377] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:40:34.548] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:40:34.618] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:40:34.692] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:40:34.759] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:40:34.859] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:40:34.913] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:42:21.747] Server  LOG     ✓ Compiled in 1265ms
-[00:44:13.738] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:13.882] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:13.989] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:14.059] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:14.119] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:14.176] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:19.686] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:19.760] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:19.825] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:19.888] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:19.958] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:20.026] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:27.274] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:27.368] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:27.444] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:27.533] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:27.606] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:27.698] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:31.409] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:31.466] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:31.526] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:31.614] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:31.684] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:31.773] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:44:35.813] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:46:51.203] Server  LOG     ✓ Compiled in 598ms
-[00:48:06.970] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:07.052] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:07.179] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:07.234] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:07.303] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:07.373] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:09.318] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:09.383] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:09.444] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:09.505] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:09.577] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:09.629] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:13.157] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:13.243] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:13.309] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:13.363] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:13.431] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:13.478] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:20.520] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:48:27.071] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:27.163] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:27.235] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:27.287] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:27.345] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:27.423] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:27.911] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:27.966] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:28.019] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:28.088] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:28.143] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:48:28.214] Server  WARN    Error: Route "/api/users/[id]" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:00:28.213] Server  LOG     ✓ Ready in 17.5s
+[00:00:31.900] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:38:07.200] Server  LOG     ✓ Compiled in 129ms
+[00:38:14.762] Server  LOG     ✓ Compiled in 309ms
+[00:38:22.148] Server  LOG     ✓ Compiled in 283ms
+[00:42:48.961] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:46:00.999] Server  LOG     ✓ Compiled in 267ms
+[00:46:07.253] Server  LOG     ✓ Compiled in 245ms
+[00:47:20.475] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:49:13.778] Server  LOG     ✓ Compiled in 267ms
+[00:52:36.637] Server  LOG     ✓ Compiled in 196ms
+[00:52:39.786] Server  LOG     ✓ Compiled in 184ms
+[00:52:47.609] Server  LOG     ✓ Compiled in 322ms
+[00:52:48.536] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:05:48.187] Server  LOG     ✓ Compiled in 255ms
+[01:05:49.144] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'includes')
+[01:05:58.641] Server  LOG     ✓ Compiled in 263ms
+[01:06:07.946] Server  LOG     ✓ Compiled in 282ms
+[01:06:13.918] Server  LOG     ✓ Compiled in 234ms
+[01:06:15.430] Server  LOG     ✓ Compiled in 191ms
+[01:12:44.120] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.125] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/context/AuthContext.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[01:12:44.141] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.145] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.146] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/context/AuthContext.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[01:12:44.146] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.147] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.147] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/context/AuthContext.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[01:12:44.148] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.149] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.149] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/context/AuthContext.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[01:12:44.149] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.150] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:44.151] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/context/AuthContext.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[01:12:44.153] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[01:12:45.815] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:13:36.946] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:13:37.981] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:16:03.764] Server  LOG     ✓ Compiled in 410ms
+[01:25:18.057] Server  LOG     ✓ Compiled in 375ms
+[01:32:52.201] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:34:05.362] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:37:07.995] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:42:09.139] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:42:09.139] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:46:39.148] Server  LOG     ✓ Compiled in 1209ms
+[01:46:55.669] Server  LOG     ✓ Compiled in 402ms
+[01:47:04.991] Server  LOG     ✓ Compiled in 305ms
+[01:47:17.088] Server  LOG     ✓ Compiled in 236ms
+[01:51:38.407] Server  LOG     ✓ Compiled in 641ms
+[01:51:43.685] Server  LOG     ✓ Compiled in 264ms
+[01:51:58.713] Server  LOG     ✓ Compiled in 238ms
+[01:52:10.803] Server  LOG     ✓ Compiled in 238ms
+[01:52:31.847] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:56:48.897] Server  LOG     ✓ Compiled in 363ms
+[01:59:48.945] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:03:05.136] Server  LOG     ✓ Compiled in 336ms
+[02:03:11.760] Server  LOG     ✓ Compiled in 903ms
+[02:03:15.489] Server  LOG     ✓ Compiled in 375ms
+[02:03:30.692] Server  LOG     ✓ Compiled in 284ms
+[02:03:38.481] Server  LOG     ✓ Compiled in 204ms
+[02:03:50.174] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:10:42.047] Server  LOG     ✓ Compiled in 226ms
+[02:11:04.265] Server  LOG     ✓ Compiled in 297ms
+[02:14:41.344] Server  LOG     ✓ Compiled in 192ms
+[02:14:54.142] Server  LOG     ✓ Compiled in 214ms
+[02:15:07.065] Server  LOG     ✓ Compiled in 278ms
+[02:18:33.535] Server  LOG     ✓ Compiled in 214ms
+[02:18:56.385] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:14.372] Server  LOG     ✓ Compiled in 179ms
+[02:22:02.832] Server  LOG     ✓ Compiled in 784ms
+[02:24:52.606] Server  LOG     ✓ Compiled in 300ms

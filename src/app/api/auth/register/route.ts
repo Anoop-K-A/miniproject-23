@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
       password,
       name: fullName,
       role: normalizedRole,
+      roles: [normalizedRole],
       department,
       status: normalizedRole === "faculty" ? "pending" : "active",
       createdAt: timestamp,

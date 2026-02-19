@@ -10,7 +10,11 @@ export function AdminStats({ users }: AdminStatsProps) {
   const activeUsers = users.filter((u) => u.status === "active").length;
   const pendingUsers = users.filter((u) => u.status === "pending").length;
   const suspendedUsers = users.filter((u) => u.status === "suspended").length;
-  const facultyCount = users.filter((u) => u.role === "faculty").length;
+  const facultyCount = users.filter(
+    (u) =>
+      (u.roles?.includes("faculty") || u.role === "faculty") &&
+      u.role !== "admin",
+  ).length;
   const avgEngagement = totalUsers
     ? Math.round(
         users.reduce((sum, u) => sum + u.completionRate, 0) / totalUsers,

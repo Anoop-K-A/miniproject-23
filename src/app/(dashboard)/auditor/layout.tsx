@@ -11,14 +11,15 @@ export default function AuditorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userRole, switchRole, isAuthenticated, isLoading } = useAuth();
+  const { userRole, switchRole, isAuthenticated, isLoading, assignedRoles } =
+    useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated && userRole !== "auditor") {
+    if (!isLoading && isAuthenticated && !assignedRoles.includes("auditor")) {
       router.replace(getDashboardPath(userRole));
     }
-  }, [isAuthenticated, isLoading, router, userRole]);
+  }, [isAuthenticated, isLoading, router, userRole, assignedRoles]);
 
   const handleRoleChange = (role: typeof userRole) => {
     switchRole(role);
@@ -28,7 +29,11 @@ export default function AuditorLayout({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <RoleSwitcher currentRole={userRole} onRoleChange={handleRoleChange} />
+      <RoleSwitcher
+        currentRole={userRole}
+        assignedRoles={assignedRoles}
+        onRoleChange={handleRoleChange}
+      />
       {children}
     </div>
   );

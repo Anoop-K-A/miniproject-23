@@ -30,14 +30,11 @@ import type { AdminUser, AdminUserStatus } from "./types";
 interface UsersTableProps {
   users: AdminUser[];
   searchQuery: string;
-  filterRole: string;
   filterStatus: string;
   onSearchChange: (value: string) => void;
-  onFilterRoleChange: (value: string) => void;
   onFilterStatusChange: (value: string) => void;
   onEdit: (user: AdminUser) => void;
   onDelete: (user: AdminUser) => void;
-  onRoleChange: (userId: string, role: AdminUser["role"]) => void;
   onStatusChange: (userId: string, status: AdminUserStatus) => void;
   onApprove: (userId: string) => void;
   onReject: (userId: string) => void;
@@ -63,14 +60,11 @@ function getStatusColor(status: AdminUserStatus) {
 export function UsersTable({
   users,
   searchQuery,
-  filterRole,
   filterStatus,
   onSearchChange,
-  onFilterRoleChange,
   onFilterStatusChange,
   onEdit,
   onDelete,
-  onRoleChange,
   onStatusChange,
   onApprove,
   onReject,
@@ -93,18 +87,6 @@ export function UsersTable({
                 className="pl-10 w-full sm:w-64"
               />
             </div>
-            <Select value={filterRole} onValueChange={onFilterRoleChange}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Filter by role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="faculty">Faculty</SelectItem>
-                <SelectItem value="auditor">Auditor</SelectItem>
-                <SelectItem value="staff-advisor">Staff Advisor</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
             <Select value={filterStatus} onValueChange={onFilterStatusChange}>
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Filter by status" />
@@ -128,7 +110,6 @@ export function UsersTable({
               <TableRow>
                 <TableHead>User</TableHead>
                 <TableHead>Department</TableHead>
-                <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Engagement</TableHead>
                 <TableHead>Last Active</TableHead>
@@ -139,7 +120,7 @@ export function UsersTable({
               {users.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={6}
                     className="text-center text-gray-500 py-10"
                   >
                     No users found.
@@ -167,30 +148,7 @@ export function UsersTable({
                     <TableCell>
                       <div>
                         <p className="text-sm">{user.department || "-"}</p>
-                        <p className="text-xs text-gray-500">
-                          {user.designation || ""}
-                        </p>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={user.role}
-                        onValueChange={(value) =>
-                          onRoleChange(user.id, value as AdminUser["role"])
-                        }
-                      >
-                        <SelectTrigger className="w-[140px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="faculty">Faculty</SelectItem>
-                          <SelectItem value="auditor">Auditor</SelectItem>
-                          <SelectItem value="staff-advisor">
-                            Staff Advisor
-                          </SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </TableCell>
                     <TableCell>
                       <Select

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { EventReport } from "@/components/EventReportManager/types";
+import { recomputeEngagementForFaculty } from "@/lib/engagements";
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +40,11 @@ export async function POST(request: NextRequest) {
 
     const updatedReports = [newReport, ...reports];
     await writeJsonFile("eventReports.json", updatedReports);
+
+    // Recompute engagement after report creation
+    if (payload.facultyId) {
+      await recomputeEngagementForFaculty(payload.facultyId);
+    }
 
     return NextResponse.json({ reports: updatedReports });
   } catch (error) {

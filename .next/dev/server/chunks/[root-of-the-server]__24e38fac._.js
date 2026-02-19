@@ -102,13 +102,16 @@ async function verifyCredentials(username, password) {
     if (!user || user.password !== password) {
         return null;
     }
-    const { id, name, role, department } = user;
+    const { id, name, role, roles, department } = user;
     return {
         user: {
             id,
             username: user.username,
             name,
             role,
+            roles: roles || [
+                role
+            ],
             department
         },
         status: user.status
@@ -124,6 +127,8 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/server.js [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$auth$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/auth.ts [app-route] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/jsonDb.ts [app-route] (ecmascript)");
+;
 ;
 ;
 async function POST(request) {
@@ -154,11 +159,26 @@ async function POST(request) {
                 status: 403
             });
         }
+        // Update lastActiveAt timestamp
+        try {
+            const users = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("users.json");
+            const updatedUsers = users.map((user)=>user.id === result.user.id ? {
+                    ...user,
+                    lastActiveAt: new Date().toISOString()
+                } : user);
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["writeJsonFile"])("users.json", updatedUsers);
+        } catch (error) {
+            console.error("Failed to update lastActiveAt:", error);
+        // Continue with response even if this fails
+        }
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
             id: result.user.id,
             username: result.user.username,
             name: result.user.name,
             role: result.user.role,
+            roles: result.user.roles || [
+                result.user.role
+            ],
             department: result.user.department
         });
     } catch (error) {

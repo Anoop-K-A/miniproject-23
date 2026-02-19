@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { UserPlus } from "lucide-react";
+import { UserPlus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,13 +14,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import type { AdminUser } from "./types";
+import type { UserRole } from "@/lib/roles";
 
 interface AddUserDialogProps {
   isOpen: boolean;
@@ -32,6 +32,7 @@ interface AddUserDialogProps {
     department?: string;
     designation?: string;
     role: AdminUser["role"];
+    roles?: UserRole[];
   }) => void;
 }
 
@@ -46,20 +47,45 @@ export function AddUserDialog({
     password: "",
     phone: "",
     department: "",
-    designation: "",
-    role: "faculty" as AdminUser["role"],
   });
+  const [selectedRoles, setSelectedRoles] = useState<Set<UserRole>>(
+    new Set(["faculty"]),
+  );
+
+  const roleOptions: Array<{ value: UserRole; label: string }> = [
+    { value: "faculty", label: "Faculty" },
+    { value: "auditor", label: "Auditor" },
+    { value: "staff-advisor", label: "Staff Advisor" },
+    { value: "admin", label: "Admin" },
+  ];
+
+  const selectedRoleLabels = roleOptions
+    .filter((option) => selectedRoles.has(option.value))
+    .map((option) => option.label);
+
+  const toggleRole = (role: UserRole) => {
+    const newRoles = new Set(selectedRoles);
+    if (newRoles.has(role)) {
+      newRoles.delete(role);
+    } else {
+      newRoles.add(role);
+    }
+    setSelectedRoles(newRoles);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const rolesArray = Array.from(selectedRoles);
+    const primaryRole = rolesArray[0] || "faculty";
+
     onAddUser({
       name: formData.name,
       email: formData.email,
       password: formData.password,
       phone: formData.phone || undefined,
       department: formData.department || undefined,
-      designation: formData.designation || undefined,
-      role: formData.role,
+      role: primaryRole,
+      roles: rolesArray,
     });
     onOpenChange(false);
     setFormData({
@@ -68,9 +94,8 @@ export function AddUserDialog({
       password: "",
       phone: "",
       department: "",
-      designation: "",
-      role: "faculty",
     });
+    setSelectedRoles(new Set(["faculty"]));
   };
 
   return (
@@ -149,38 +174,42 @@ export function AddUserDialog({
               }
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="designation">Designation</Label>
-            <Input
-              id="designation"
-              placeholder="Associate Professor"
-              value={formData.designation}
-              onChange={(e) =>
-                setFormData({ ...formData, designation: e.target.value })
-              }
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="role">Role *</Label>
-            <Select
-              value={formData.role}
-              onValueChange={(value) =>
-                setFormData({
-                  ...formData,
-                  role: value as AdminUser["role"],
-                })
-              }
-            >
-              <SelectTrigger id="role">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="faculty">Faculty</SelectItem>
-                <SelectItem value="auditor">Auditor</SelectItem>
-                <SelectItem value="staff-advisor">Staff Advisor</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="space-y-3">
+            <Label>Roles *</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <span className="text-left">
+                    {selectedRoleLabels.length === 0
+                      ? "Select roles..."
+                      : selectedRoleLabels.join(", ")}
+                  </span>
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-3" align="start">
+                <div className="space-y-2">
+                  {roleOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      className="flex items-center space-x-2"
+                    >
+                      <Checkbox
+                        id={`add-role-${option.value}`}
+                        checked={selectedRoles.has(option.value)}
+                        onCheckedChange={() => toggleRole(option.value)}
+                      />
+                      <label
+                        htmlFor={`add-role-${option.value}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                      >
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <DialogFooter>
             <Button

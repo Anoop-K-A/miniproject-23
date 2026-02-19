@@ -10,7 +10,6 @@ export interface SignUpFormData {
   password: string;
   confirmPassword: string;
   fullName: string;
-  role: string;
   department: string;
 }
 
@@ -19,6 +18,7 @@ export interface AuthUser {
   username: string;
   name: string;
   role: UserRole;
+  roles?: UserRole[];
   department?: string;
 }
 
