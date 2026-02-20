@@ -13,7 +13,7 @@
     "status": "active",
     "createdAt": "2026-02-13T00:00:00.000Z",
     "updatedAt": "2026-02-18T10:24:05.555Z",
-    "lastActiveAt": "2026-02-18T10:26:49.539Z"
+    "lastActiveAt": "2026-02-20T05:54:13.470Z"
   },
   {
     "id": "f1",
@@ -22,7 +22,8 @@
     "name": "Dr. John Doe",
     "role": "faculty",
     "roles": [
-      "faculty"
+      "faculty",
+      "staff-advisor"
     ],
     "department": "Computer Science",
     "email": "faculty@test.com",
@@ -37,8 +38,8 @@
     "experience": "12 years",
     "status": "active",
     "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z",
-    "lastActiveAt": "2026-02-18T10:01:23.112Z"
+    "updatedAt": "2026-02-20T05:54:25.238Z",
+    "lastActiveAt": "2026-02-20T05:54:42.985Z"
   },
   {
     "id": "f2",
@@ -94,7 +95,7 @@
     "status": "active",
     "createdAt": "2026-02-13T12:31:13.707Z",
     "updatedAt": "2026-02-18T08:50:40.701Z",
-    "lastActiveAt": "2026-02-18T10:46:35.715Z"
+    "lastActiveAt": "2026-02-20T05:55:35.713Z"
   },
   {
     "id": "1771405829166",
@@ -111,7 +112,7 @@
     "status": "active",
     "createdAt": "2026-02-18T09:10:29.166Z",
     "updatedAt": "2026-02-18T10:25:54.594Z",
-    "lastActiveAt": "2026-02-18T10:46:50.843Z",
+    "lastActiveAt": "2026-02-20T05:55:45.065Z",
     "email": "aaa@gmail.com"
   }
 ]

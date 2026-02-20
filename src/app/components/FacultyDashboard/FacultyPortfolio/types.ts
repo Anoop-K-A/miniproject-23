@@ -12,12 +12,26 @@ export interface FacultyMember {
 
 export interface CourseFile {
   id: string;
+  facultyId?: string;
   fileName: string;
+  documentUrl?: string;
+  courseCode: string;
+  courseName: string;
   fileType: string;
   uploadDate: string;
-  courseName: string;
   semester: string;
-  status: "Draft" | "Submitted" | "Approved" | "Rejected";
+  academicYear?: string;
+  size?: string;
+  status?: "Pending" | "Approved" | "Rejected" | "Draft" | "Submitted";
+  adminRemarks?: string;
+  reviewedBy?: string;
+  reviewedDate?: string;
+  facultyResponse?: string;
+  responseDate?: string;
+  facultyName?: string;
+  department?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface EventReport {
