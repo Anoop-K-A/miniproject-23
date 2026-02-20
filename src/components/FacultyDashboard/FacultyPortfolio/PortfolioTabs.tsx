@@ -2,13 +2,16 @@ import { Card, CardContent } from "../../ui/card";
 import { Alert, AlertDescription } from "../../ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { FileText, Calendar } from "lucide-react";
-import { CourseFile, EventReport } from "./types";
+import { CourseFile, EventReport, Student } from "./types";
 import { EventReportCard } from "./EventReportCard";
 import { CourseCodeCards } from "./CourseCodeCards";
+import { StudentListTab } from "./StudentListTab";
 
 interface PortfolioTabsProps {
   courseFiles: CourseFile[];
   eventReports: EventReport[];
+  students?: Student[];
+  showStudents?: boolean;
   onViewFile: (file: CourseFile) => void;
   onViewReport: (report: EventReport) => void;
   getStatusColor: (status: string) => string;
@@ -17,13 +20,19 @@ interface PortfolioTabsProps {
 export function PortfolioTabs({
   courseFiles,
   eventReports,
+  students = [],
+  showStudents = false,
   onViewFile,
   onViewReport,
   getStatusColor,
 }: PortfolioTabsProps) {
+  const tabCount = showStudents ? 3 : 2;
+  const tabsClassName =
+    tabCount === 3 ? "grid w-full grid-cols-3" : "grid w-full grid-cols-2";
+
   return (
     <Tabs defaultValue="course-files" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className={tabsClassName}>
         <TabsTrigger value="course-files" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
           Course Files ({courseFiles.length})
@@ -32,6 +41,11 @@ export function PortfolioTabs({
           <Calendar className="h-4 w-4" />
           Event Reports ({eventReports.length})
         </TabsTrigger>
+        {showStudents && (
+          <TabsTrigger value="students" className="flex items-center gap-2">
+            Students ({students.length})
+          </TabsTrigger>
+        )}
       </TabsList>
 
       {/* Course Files Tab - Grouped by Course Code */}
@@ -126,6 +140,12 @@ export function PortfolioTabs({
           </>
         )}
       </TabsContent>
+
+      {showStudents && (
+        <TabsContent value="students" className="space-y-4 mt-6">
+          <StudentListTab students={students} />
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

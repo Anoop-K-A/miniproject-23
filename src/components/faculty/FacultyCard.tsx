@@ -18,13 +18,23 @@ export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
       <CardContent className="pt-6">
         <div className="flex items-start gap-3 mb-4">
           <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
-            {faculty.name.split(" ").map((n) => n[0]).join("")}
+            {faculty.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")}
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{faculty.name}</p>
-            <Badge variant="outline" className="mt-1 text-xs">
-              {faculty.role}
-            </Badge>
+            <div className="mt-1 flex flex-wrap gap-2">
+              <Badge variant="outline" className="text-xs">
+                {faculty.role}
+              </Badge>
+              {faculty.isStaffAdvisor && (
+                <Badge variant="outline" className="text-xs">
+                  Staff Advisor
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
@@ -40,7 +50,9 @@ export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
         </div>
 
         <div className="mt-3 pt-3 border-t">
-          <p className="text-xs text-gray-500 mb-2">Courses: {faculty.courses.length}</p>
+          <p className="text-xs text-gray-500 mb-2">
+            Courses: {faculty.courses.length}
+          </p>
           <div className="flex flex-wrap gap-1">
             {faculty.courses.slice(0, 2).map((course, idx) => (
               <Badge

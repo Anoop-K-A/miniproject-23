@@ -4,13 +4,19 @@ import { ProfileHeader } from "./ProfileHeader";
 import { PortfolioTabs } from "./PortfolioTabs";
 import { FileViewDialog } from "./FileViewDialog";
 import { ReportViewDialog } from "./ReportViewDialog";
-import { CourseFile, EventReport, FacultyPortfolioProps } from "./types";
+import {
+  CourseFile,
+  EventReport,
+  FacultyPortfolioProps,
+  Student,
+} from "./types";
 import { Card, CardContent } from "../../ui/card";
 import { Badge } from "../../ui/badge";
 import { useAuth } from "@/context/AuthContext";
 
 export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const { user, userRole } = useAuth();
+  const showStudents = faculty.isStaffAdvisor === true;
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
   const [selectedReport, setSelectedReport] = useState<EventReport | null>(
     null,
@@ -19,6 +25,7 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const [isReportViewOpen, setIsReportViewOpen] = useState(false);
   const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
   const [eventReports, setEventReports] = useState<EventReport[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
   const [messages, setMessages] = useState<
     {
       id: string;
@@ -36,13 +43,24 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   useEffect(() => {
     const loadPortfolioData = async () => {
       try {
-        const [filesResponse, reportsResponse] = await Promise.all([
+        const requests = [
           fetch("/api/course-files"),
           fetch("/api/event-reports"),
-        ]);
+        ];
+        if (showStudents) {
+          requests.push(fetch("/api/students"));
+        }
+        const responses = await Promise.all(requests);
+
+        const filesResponse = responses[0];
+        const reportsResponse = responses[1];
+        const studentsResponse = responses[2];
 
         const filesData = await filesResponse.json();
         const reportsData = await reportsResponse.json();
+        const studentsData = studentsResponse
+          ? await studentsResponse.json()
+          : null;
 
         if (!filesResponse.ok || !reportsResponse.ok) {
           return;
@@ -57,6 +75,24 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
 
         setCourseFiles(scopedFiles);
         setEventReports(scopedReports);
+
+        if (showStudents && studentsResponse?.ok) {
+          const allStudents: Student[] = studentsData?.students ?? [];
+          const advisorStudents = allStudents.filter(
+            (student) => student.advisorId === faculty.id,
+          );
+          const scopedStudents =
+            advisorStudents.length > 0
+              ? advisorStudents
+              : allStudents.filter(
+                  (student) =>
+                    student.department?.toLowerCase() ===
+                    faculty.department.toLowerCase(),
+                );
+          setStudents(scopedStudents);
+        } else {
+          setStudents([]);
+        }
 
         if (canViewMessages) {
           const messagesResponse = await fetch(
@@ -87,7 +123,7 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
         window.removeEventListener("dashboard:data-updated", handler);
       };
     }
-  }, [faculty.id, canViewMessages]);
+  }, [faculty.id, faculty.department, showStudents, canViewMessages]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -162,6 +198,8 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
       <PortfolioTabs
         courseFiles={courseFiles}
         eventReports={eventReports}
+        students={students}
+        showStudents={showStudents}
         onViewFile={handleViewFile}
         onViewReport={handleViewReport}
         getStatusColor={getStatusColor}

@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function StaffAdvisorDashboardPage() {
   const cookieStore = await cookies();
   const username = cookieStore.get("auth_user")?.value ?? null;
-  const { stats, careerStats, students } =
+  const { stats, careerStats, students, batchCourseOverview } =
     await getStaffAdvisorDashboardData(username);
   return (
     <main className="space-y-6">
@@ -15,6 +15,7 @@ export default async function StaffAdvisorDashboardPage() {
         stats={stats}
         careerStats={careerStats}
         students={students}
+        batchCourseOverview={batchCourseOverview}
       />
     </main>
   );

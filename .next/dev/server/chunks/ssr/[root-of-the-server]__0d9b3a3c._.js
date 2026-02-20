@@ -183,6 +183,7 @@ async function getFacultyDashboardData(username) {
             name: user.name,
             department: user.department ?? "",
             role: user.facultyRole ?? "Faculty",
+            isStaffAdvisor: user.roles?.includes("staff-advisor") ?? false,
             email: user.email ?? user.username,
             phone: user.phone ?? "",
             courses: user.courses ?? [],
@@ -276,6 +277,68 @@ async function getStaffAdvisorDashboardData(username) {
     const facultyUsers = users.filter((user)=>(user.roles?.includes("faculty") || user.role === "faculty") && user.role !== "admin");
     const approvedFiles = courseFiles.filter((file)=>file.status === "Approved").length;
     const approvedReports = eventReports.filter((report)=>report.status === "Approved").length;
+    const batchYears = Array.from(new Set(scopedStudents.map((student)=>student.batchYear).filter(Boolean)));
+    const overallCourseFiles = batchYears.length > 0 ? courseFiles.filter((file)=>file.academicYear && batchYears.includes(file.academicYear)) : [];
+    const overallApproved = overallCourseFiles.filter((file)=>file.status === "Approved").length;
+    const overallInReview = overallCourseFiles.filter((file)=>file.status === "Pending" || file.status === "Submitted").length;
+    const overallRejected = overallCourseFiles.filter((file)=>file.status === "Rejected").length;
+    const overallCompletionRate = overallCourseFiles.length > 0 ? Math.round(overallApproved / overallCourseFiles.length * 100) : 0;
+    const batchCourseOverview = {
+        overall: {
+            batchYear: "All",
+            totalFiles: overallCourseFiles.length,
+            approvedFiles: overallApproved,
+            inReviewFiles: overallInReview,
+            rejectedFiles: overallRejected,
+            completionRate: overallCompletionRate
+        },
+        groups: batchYears.map((year)=>{
+            const batchCourseFiles = courseFiles.filter((file)=>file.academicYear === year);
+            const approvedBatchFiles = batchCourseFiles.filter((file)=>file.status === "Approved").length;
+            const inReviewBatchFiles = batchCourseFiles.filter((file)=>file.status === "Pending" || file.status === "Submitted").length;
+            const rejectedBatchFiles = batchCourseFiles.filter((file)=>file.status === "Rejected").length;
+            const completionRate = batchCourseFiles.length > 0 ? Math.round(approvedBatchFiles / batchCourseFiles.length * 100) : 0;
+            const batchFacultyMap = new Map();
+            batchCourseFiles.forEach((file)=>{
+                if (!file.facultyId) return;
+                const facultyUser = facultyUsers.find((user)=>user.id === file.facultyId);
+                if (!facultyUser) return;
+                if (!batchFacultyMap.has(file.facultyId)) {
+                    batchFacultyMap.set(file.facultyId, {
+                        id: facultyUser.id,
+                        name: facultyUser.name,
+                        department: facultyUser.department ?? "",
+                        role: facultyUser.facultyRole ?? "Faculty",
+                        filesTotal: 0,
+                        filesApproved: 0,
+                        filesInReview: 0,
+                        filesRejected: 0
+                    });
+                }
+                const entry = batchFacultyMap.get(file.facultyId);
+                if (!entry) return;
+                entry.filesTotal += 1;
+                if (file.status === "Approved") {
+                    entry.filesApproved += 1;
+                } else if (file.status === "Rejected") {
+                    entry.filesRejected += 1;
+                } else {
+                    entry.filesInReview += 1;
+                }
+            });
+            return {
+                progress: {
+                    batchYear: year,
+                    totalFiles: batchCourseFiles.length,
+                    approvedFiles: approvedBatchFiles,
+                    inReviewFiles: inReviewBatchFiles,
+                    rejectedFiles: rejectedBatchFiles,
+                    completionRate
+                },
+                faculty: Array.from(batchFacultyMap.values()).sort((a, b)=>a.name.localeCompare(b.name))
+            };
+        })
+    };
     const stats = {
         totalStudents,
         batchYear,
@@ -297,7 +360,8 @@ async function getStaffAdvisorDashboardData(username) {
     return {
         stats,
         careerStats,
-        students: scopedStudents
+        students: scopedStudents,
+        batchCourseOverview
     };
 }
 }),
@@ -323,13 +387,14 @@ const dynamic = "force-dynamic";
 async function StaffAdvisorDashboardPage() {
     const cookieStore = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$headers$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cookies"])();
     const username = cookieStore.get("auth_user")?.value ?? null;
-    const { stats, careerStats, students } = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$dashboardData$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getStaffAdvisorDashboardData"])(username);
+    const { stats, careerStats, students, batchCourseOverview } = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$dashboardData$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getStaffAdvisorDashboardData"])(username);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
         className: "space-y-6",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$index$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["StaffAdvisorDashboard"], {
             stats: stats,
             careerStats: careerStats,
-            students: students
+            students: students,
+            batchCourseOverview: batchCourseOverview
         }, void 0, false, {
             fileName: "[project]/src/app/(dashboard)/staff-advisor/dashboard/page.tsx",
             lineNumber: 14,

@@ -1,4 +1,176 @@
-[00:00:47.202] Server  LOG     ✓ Ready in 34.5s
-[00:01:01.696] Server  LOG     ○ Compiling / ...
-[00:01:03.528] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:03.552] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:17.155] Server  LOG     ✓ Ready in 11.7s
+[00:00:20.559] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:15:15.211] Server  LOG     ✓ Compiled in 466ms
+[00:16:27.689] Server  LOG     ✓ Compiled in 841ms
+[00:19:56.392] Server  LOG     ✓ Compiled in 260ms
+[00:20:05.957] Server  LOG     ✓ Compiled in 240ms
+[00:20:07.595] Server  LOG     ✓ Compiled in 253ms
+[00:26:21.681] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:31:20.056] Server  LOG     ✓ Compiled in 312ms
+[00:36:28.936] Server  LOG     ✓ Compiled in 366ms
+[00:48:01.111] Server  LOG     ✓ Compiled in 308ms
+[01:06:19.801] Server  LOG     ✓ Compiled in 830ms
+[01:06:20.705] Server  LOG     ✓ Compiled in 296ms
+[01:20:53.929] Server  LOG     ✓ Compiled in 2s
+[01:20:59.855] Server  LOG     ✓ Compiled in 245ms
+[01:24:03.670] Server  LOG     ✓ Compiled in 1024ms
+[01:27:04.579] Server  LOG     ✓ Compiled in 259ms
+[01:30:04.895] Server  LOG     ✓ Compiled in 285ms
+[01:31:17.526] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:37:39.997] Server  LOG     ✓ Compiled in 281ms
+[01:39:06.001] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:41:33.900] Server  LOG     ✓ Compiled in 592ms
+[01:41:48.543] Server  LOG     ✓ Compiled in 197ms
+[01:41:58.267] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:49:22.009] Server  LOG     ✓ Compiled in 791ms
+[01:50:08.980] Server  LOG     ✓ Compiled in 255ms
+[01:50:21.309] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:50:26.918] Browser ERROR   Internal React error: Expected static flag was missing. Please notify the React team.
+[01:53:00.973] Server  LOG     ✓ Compiled in 357ms
+[02:03:03.443] Server  LOG     ✓ Compiled in 318ms
+[02:03:03.726] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'batchYear')
+[02:03:05.151] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:03:43.948] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:10:05.376] Server  LOG     ✓ Compiled in 512ms
+[02:10:05.733] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'length')
+[02:10:17.252] Server  LOG     ✓ Compiled in 215ms
+[02:10:21.023] Server  LOG     ✓ Compiled in 238ms
+[02:10:29.782] Server  LOG     ✓ Compiled in 251ms
+[02:11:10.897] Server  LOG     ✓ Compiled in 256ms
+[02:11:47.757] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:11:47.796] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:11:48.107] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'overall')
+[02:11:48.368] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:13:14.095] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:22:13.616] Server  LOG     ✓ Compiled in 2.6s
+[02:22:15.739] Browser ERROR   ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx:36:15
+Parsing ecmascript source code failed
+  34 |           <div className="w-full bg-gray-200 rounded-full h-2">
+  35 |             <div
+> 36 |               <div className="space-y-4">
+     |               ^
+  37 |                 <div className="flex items-center justify-between">
+  38 |                   <h4 className="text-sm font-medium">Batches Overview</h4>
+  39 |                   <Badge variant="outline">{groups.length}</Badge>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+[02:23:14.725] Browser ERROR   ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx:36:15
+Parsing ecmascript source code failed
+  34 |           <div className="w-full bg-gray-200 rounded-full h-2">
+  35 |             <div
+> 36 |               <div className="space-y-4">
+     |               ^
+  37 |                 <div className="flex items-center justify-between">
+  38 |                   <h4 className="text-sm font-medium">Batches Overview</h4>
+  39 |                   <Badge variant="outline">{groups.length}</Badge>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+[02:23:33.735] Browser ERROR   ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx:36:15
+Parsing ecmascript source code failed
+  34 |           <div className="w-full bg-gray-200 rounded-full h-2">
+  35 |             <div
+> 36 |               <div className="space-y-4">
+     |               ^
+  37 |                 <div className="flex items-center justify-between">
+  38 |                   <h4 className="text-sm font-medium">Batches Overview</h4>
+  39 |                   <Badge variant="outline">{groups.length}</Badge>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+[02:23:33.735] Browser ERROR   ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx:36:15
+Parsing ecmascript source code failed
+  34 |           <div className="w-full bg-gray-200 rounded-full h-2">
+  35 |             <div
+> 36 |               <div className="space-y-4">
+     |               ^
+  37 |                 <div className="flex items-center justify-between">
+  38 |                   <h4 className="text-sm font-medium">Batches Overview</h4>
+  39 |                   <Badge variant="outline">{groups.length}</Badge>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+[02:25:14.726] Browser ERROR   ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx:36:15
+Parsing ecmascript source code failed
+  34 |           <div className="w-full bg-gray-200 rounded-full h-2">
+  35 |             <div
+> 36 |               <div className="space-y-4">
+     |               ^
+  37 |                 <div className="flex items-center justify-between">
+  38 |                   <h4 className="text-sm font-medium">Batches Overview</h4>
+  39 |                   <Badge variant="outline">{groups.length}</Badge>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component Browser]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/StaffAdvisorDashboard/BatchCourseProgress.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Client Component SSR]
+    ./src/components/StaffAdvisorDashboard/index.tsx [Server Component]
+    ./src/app/(dashboard)/staff-advisor/dashboard/page.tsx [Server Component]
+[02:28:12.124] Server  LOG     ✓ Compiled in 628ms
+[02:28:14.721] Server  LOG     ✓ Compiled in 282ms
+[02:33:12.178] Server  LOG     ✓ Compiled in 511ms
+[02:33:16.380] Server  LOG     ✓ Compiled in 527ms
+[02:33:17.578] Server  LOG     ✓ Compiled in 434ms
+[02:36:47.028] Server  LOG     ✓ Compiled in 396ms
+[02:37:28.202] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:39:03.105] Server  LOG     ✓ Compiled in 675ms
+[02:39:06.578] Server  LOG     ✓ Compiled in 270ms
+[02:39:09.422] Server  LOG     ✓ Compiled in 279ms
+[02:42:00.500] Server  LOG     ✓ Compiled in 631ms

@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "id": "1771616136272",
+    "name": "anoop",
+    "rollNumber": "72",
+    "email": "anoopka6.7.2004@gmail.com",
+    "phone": "+1 (555) 123-4567",
+    "department": "computer science and engineering",
+    "semester": "Spring",
+    "batchYear": "2023",
+    "cgpa": 0,
+    "attendance": 0,
+    "careerInterest": "Not set",
+    "skillsAcquired": [],
+    "placementStatus": "Not Started",
+    "activityPoints": 140,
+    "activities": [
+      {
+        "id": "act-1771616151620",
+        "name": "dfg",
+        "community": "bn",
+        "points": 85,
+        "date": "2026-02-20"
+      },
+      {
+        "id": "act-1771616174312",
+        "name": "fghjk",
+        "community": "fh",
+        "points": 55,
+        "date": "2026-02-20"
+      }
+    ],
+    "createdAt": "2026-02-20T19:35:36.272Z",
+    "updatedAt": "2026-02-20T19:36:14.312Z"
+  }
+]

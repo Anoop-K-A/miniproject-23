@@ -3,11 +3,38 @@ export interface FacultyMember {
   name: string;
   department: string;
   role: string;
+  isStaffAdvisor?: boolean;
   email: string;
   phone: string;
   courses: string[];
   specialization: string;
   experience: string;
+}
+
+export interface Student {
+  id: string;
+  advisorId?: string;
+  name: string;
+  rollNumber: string;
+  email: string;
+  phone: string;
+  department: string;
+  semester: string;
+  batchYear?: string;
+  cgpa: number;
+  attendance: number;
+  careerInterest: string;
+  skillsAcquired: string[];
+  placementStatus: "Placed" | "In Process" | "Not Started";
+  companyName?: string;
+  activityPoints: number;
+  activities: Array<{
+    id: string;
+    name: string;
+    community: string;
+    points: number;
+    date: string;
+  }>;
 }
 
 export interface CourseFile {

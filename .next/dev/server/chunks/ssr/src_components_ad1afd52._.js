@@ -182,6 +182,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 ;
 ;
 function StatsOverview({ stats }) {
+    const placementRate = stats.totalStudents > 0 ? Math.round(stats.placedStudents / stats.totalStudents * 100) : 0;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4",
         children: [
@@ -198,7 +199,7 @@ function StatsOverview({ stats }) {
                                         children: "Total Students"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 16,
+                                        lineNumber: 21,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -206,7 +207,7 @@ function StatsOverview({ stats }) {
                                         children: stats.totalStudents
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 17,
+                                        lineNumber: 22,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -217,13 +218,13 @@ function StatsOverview({ stats }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 18,
+                                        lineNumber: 23,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                lineNumber: 15,
+                                lineNumber: 20,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -232,28 +233,28 @@ function StatsOverview({ stats }) {
                                     className: "h-6 w-6 text-blue-600"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                    lineNumber: 21,
+                                    lineNumber: 28,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                lineNumber: 20,
+                                lineNumber: 27,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                        lineNumber: 14,
+                        lineNumber: 19,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                    lineNumber: 13,
+                    lineNumber: 18,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                lineNumber: 12,
+                lineNumber: 17,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -269,7 +270,7 @@ function StatsOverview({ stats }) {
                                         children: "Placed Students"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 31,
+                                        lineNumber: 38,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -277,24 +278,24 @@ function StatsOverview({ stats }) {
                                         children: stats.placedStudents
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 32,
+                                        lineNumber: 39,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "text-xs text-green-600 mt-1",
                                         children: [
-                                            Math.round(stats.placedStudents / stats.totalStudents * 100),
+                                            placementRate,
                                             "% placement rate"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 33,
+                                        lineNumber: 40,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                lineNumber: 30,
+                                lineNumber: 37,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -303,28 +304,28 @@ function StatsOverview({ stats }) {
                                     className: "h-6 w-6 text-green-600"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                    lineNumber: 38,
+                                    lineNumber: 45,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                lineNumber: 37,
+                                lineNumber: 44,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                        lineNumber: 29,
+                        lineNumber: 36,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                    lineNumber: 28,
+                    lineNumber: 35,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                lineNumber: 27,
+                lineNumber: 34,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -340,7 +341,7 @@ function StatsOverview({ stats }) {
                                         children: "Average CGPA"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 48,
+                                        lineNumber: 55,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -348,7 +349,7 @@ function StatsOverview({ stats }) {
                                         children: stats.averageCGPA
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 49,
+                                        lineNumber: 56,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -356,13 +357,13 @@ function StatsOverview({ stats }) {
                                         children: "Batch performance"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 50,
+                                        lineNumber: 57,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                lineNumber: 47,
+                                lineNumber: 54,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -371,28 +372,28 @@ function StatsOverview({ stats }) {
                                     className: "h-6 w-6 text-purple-600"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                    lineNumber: 55,
+                                    lineNumber: 60,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                lineNumber: 54,
+                                lineNumber: 59,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                        lineNumber: 46,
+                        lineNumber: 53,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                    lineNumber: 45,
+                    lineNumber: 52,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                lineNumber: 44,
+                lineNumber: 51,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -408,7 +409,7 @@ function StatsOverview({ stats }) {
                                         children: "Avg Attendance"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 65,
+                                        lineNumber: 70,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -419,7 +420,7 @@ function StatsOverview({ stats }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 66,
+                                        lineNumber: 71,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -427,13 +428,13 @@ function StatsOverview({ stats }) {
                                         children: "Overall batch"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                        lineNumber: 67,
+                                        lineNumber: 72,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                lineNumber: 64,
+                                lineNumber: 69,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -442,34 +443,34 @@ function StatsOverview({ stats }) {
                                     className: "h-6 w-6 text-orange-600"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                    lineNumber: 72,
+                                    lineNumber: 75,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                                lineNumber: 71,
+                                lineNumber: 74,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                        lineNumber: 63,
+                        lineNumber: 68,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                    lineNumber: 62,
+                    lineNumber: 67,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-                lineNumber: 61,
+                lineNumber: 66,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/StaffAdvisorDashboard/StatsOverview.tsx",
-        lineNumber: 11,
+        lineNumber: 16,
         columnNumber: 5
     }, this);
 }
@@ -1469,6 +1470,7 @@ __turbopack_context__.s([
     ()=>StudentList
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/card.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/button.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/input.tsx [app-ssr] (ecmascript)");
@@ -1477,7 +1479,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$l
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$search$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Search$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/search.js [app-ssr] (ecmascript) <export default as Search>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/plus.js [app-ssr] (ecmascript) <export default as Plus>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$StudentCard$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/StaffAdvisorDashboard/StudentCard.tsx [app-ssr] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
 ;
 ;
 ;
@@ -1487,9 +1488,98 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 ;
-function StudentList({ students, stats, onSelectStudent }) {
+const emptyForm = {
+    name: "",
+    rollNumber: "",
+    email: "",
+    phone: "",
+    department: "",
+    semester: "",
+    batchYear: ""
+};
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function StudentList({ students, stats, onSelectStudent, onAddStudent }) {
     const [searchTerm, setSearchTerm] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const [isDialogOpen, setIsDialogOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [form, setForm] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
+        ...emptyForm,
+        batchYear: stats.batchYear
+    });
+    const [errors, setErrors] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({});
     const filteredStudents = students.filter((student)=>student.name.toLowerCase().includes(searchTerm.toLowerCase()) || student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) || student.careerInterest.toLowerCase().includes(searchTerm.toLowerCase()));
+    const handleChange = (field, value)=>{
+        setForm((prev)=>({
+                ...prev,
+                [field]: value
+            }));
+        setErrors((prev)=>({
+                ...prev,
+                [field]: undefined
+            }));
+    };
+    const validate = ()=>{
+        const nextErrors = {};
+        const trimmedRoll = form.rollNumber.trim();
+        const trimmedEmail = form.email.trim();
+        if (!form.name.trim()) {
+            nextErrors.name = "Name is required.";
+        }
+        if (!trimmedRoll) {
+            nextErrors.rollNumber = "Roll number is required.";
+        }
+        if (!trimmedEmail) {
+            nextErrors.email = "Email is required.";
+        } else if (!emailRegex.test(trimmedEmail)) {
+            nextErrors.email = "Enter a valid email.";
+        }
+        if (!form.department.trim()) {
+            nextErrors.department = "Department is required.";
+        }
+        if (!form.semester.trim()) {
+            nextErrors.semester = "Semester is required.";
+        }
+        if (!form.batchYear.trim()) {
+            nextErrors.batchYear = "Batch year is required.";
+        }
+        if (trimmedRoll && students.some((student)=>student.rollNumber.toLowerCase() === trimmedRoll.toLowerCase())) {
+            nextErrors.rollNumber = "Roll number already exists.";
+        }
+        if (trimmedEmail && students.some((student)=>student.email.toLowerCase() === trimmedEmail.toLowerCase())) {
+            nextErrors.email = "Email already exists.";
+        }
+        setErrors(nextErrors);
+        return Object.keys(nextErrors).length === 0;
+    };
+    const handleSubmit = (event)=>{
+        event.preventDefault();
+        if (!validate()) {
+            return;
+        }
+        const newStudent = {
+            id: form.rollNumber.trim(),
+            name: form.name.trim(),
+            rollNumber: form.rollNumber.trim(),
+            email: form.email.trim(),
+            phone: form.phone.trim() || "",
+            department: form.department.trim(),
+            semester: form.semester.trim(),
+            batchYear: form.batchYear.trim(),
+            cgpa: 0,
+            attendance: 0,
+            careerInterest: "Not set",
+            skillsAcquired: [],
+            placementStatus: "Not Started",
+            activityPoints: 0,
+            activities: []
+        };
+        onAddStudent(newStudent);
+        setForm({
+            ...emptyForm,
+            batchYear: stats.batchYear
+        });
+        setErrors({});
+        setIsDialogOpen(false);
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardHeader"], {
@@ -1505,23 +1595,25 @@ function StudentList({ students, stats, onSelectStudent }) {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                    lineNumber: 31,
+                                    lineNumber: 164,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardDescription"], {
                                     children: "Manage and track student progress and placements"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                    lineNumber: 32,
+                                    lineNumber: 165,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                            lineNumber: 30,
+                            lineNumber: 163,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Dialog"], {
+                            open: isDialogOpen,
+                            onOpenChange: setIsDialogOpen,
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogTrigger"], {
                                     asChild: true,
@@ -1532,19 +1624,19 @@ function StudentList({ students, stats, onSelectStudent }) {
                                                 className: "h-4 w-4 mr-2"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                lineNumber: 37,
+                                                lineNumber: 172,
                                                 columnNumber: 17
                                             }, this),
                                             "Add Student"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                        lineNumber: 36,
+                                        lineNumber: 171,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                    lineNumber: 35,
+                                    lineNumber: 170,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogContent"], {
@@ -1555,24 +1647,25 @@ function StudentList({ students, stats, onSelectStudent }) {
                                                     children: "Add New Student"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                    lineNumber: 43,
+                                                    lineNumber: 178,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                                     children: "Add a new student to your batch"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                    lineNumber: 44,
+                                                    lineNumber: 179,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                            lineNumber: 42,
+                                            lineNumber: 177,
                                             columnNumber: 15
                                         }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
                                             className: "space-y-4 py-4",
+                                            onSubmit: handleSubmit,
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     children: [
@@ -1580,20 +1673,30 @@ function StudentList({ students, stats, onSelectStudent }) {
                                                             children: "Student Name"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                            lineNumber: 48,
+                                                            lineNumber: 185,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                            value: form.name,
+                                                            onChange: (event)=>handleChange("name", event.target.value),
                                                             placeholder: "Enter student name"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                            lineNumber: 49,
+                                                            lineNumber: 186,
                                                             columnNumber: 19
+                                                        }, this),
+                                                        errors.name && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                            className: "text-xs text-red-600",
+                                                            children: errors.name
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                            lineNumber: 194,
+                                                            columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                    lineNumber: 47,
+                                                    lineNumber: 184,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1602,20 +1705,30 @@ function StudentList({ students, stats, onSelectStudent }) {
                                                             children: "Roll Number"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                            lineNumber: 52,
+                                                            lineNumber: 198,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                            value: form.rollNumber,
+                                                            onChange: (event)=>handleChange("rollNumber", event.target.value),
                                                             placeholder: "Enter roll number"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                            lineNumber: 53,
+                                                            lineNumber: 199,
                                                             columnNumber: 19
+                                                        }, this),
+                                                        errors.rollNumber && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                            className: "text-xs text-red-600",
+                                                            children: errors.rollNumber
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                            lineNumber: 207,
+                                                            columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                    lineNumber: 51,
+                                                    lineNumber: 197,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1627,21 +1740,31 @@ function StudentList({ students, stats, onSelectStudent }) {
                                                                     children: "Email"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                                    lineNumber: 57,
+                                                                    lineNumber: 212,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
                                                                     type: "email",
+                                                                    value: form.email,
+                                                                    onChange: (event)=>handleChange("email", event.target.value),
                                                                     placeholder: "student@college.edu"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                                    lineNumber: 58,
+                                                                    lineNumber: 213,
                                                                     columnNumber: 21
+                                                                }, this),
+                                                                errors.email && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                    className: "text-xs text-red-600",
+                                                                    children: errors.email
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                                    lineNumber: 222,
+                                                                    columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                            lineNumber: 56,
+                                                            lineNumber: 211,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1650,63 +1773,177 @@ function StudentList({ students, stats, onSelectStudent }) {
                                                                     children: "Phone"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                                    lineNumber: 61,
+                                                                    lineNumber: 226,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                                    value: form.phone,
+                                                                    onChange: (event)=>handleChange("phone", event.target.value),
                                                                     placeholder: "+91 XXXXX XXXXX"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                                    lineNumber: 62,
+                                                                    lineNumber: 227,
                                                                     columnNumber: 21
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                            lineNumber: 60,
+                                                            lineNumber: 225,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                    lineNumber: 55,
+                                                    lineNumber: 210,
                                                     columnNumber: 17
                                                 }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
-                                                    className: "w-full",
-                                                    children: "Add Student"
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "grid grid-cols-2 gap-4",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            children: [
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                                                    children: "Department"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                                    lineNumber: 238,
+                                                                    columnNumber: 21
+                                                                }, this),
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                                    value: form.department,
+                                                                    onChange: (event)=>handleChange("department", event.target.value),
+                                                                    placeholder: "Computer Science"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                                    lineNumber: 239,
+                                                                    columnNumber: 21
+                                                                }, this),
+                                                                errors.department && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                    className: "text-xs text-red-600",
+                                                                    children: errors.department
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                                    lineNumber: 247,
+                                                                    columnNumber: 23
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                            lineNumber: 237,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            children: [
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                                                    children: "Semester"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                                    lineNumber: 253,
+                                                                    columnNumber: 21
+                                                                }, this),
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                                    value: form.semester,
+                                                                    onChange: (event)=>handleChange("semester", event.target.value),
+                                                                    placeholder: "6"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                                    lineNumber: 254,
+                                                                    columnNumber: 21
+                                                                }, this),
+                                                                errors.semester && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                    className: "text-xs text-red-600",
+                                                                    children: errors.semester
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                                    lineNumber: 262,
+                                                                    columnNumber: 23
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                            lineNumber: 252,
+                                                            columnNumber: 19
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                    lineNumber: 236,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                                            children: "Batch Year"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                            lineNumber: 267,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                            value: form.batchYear,
+                                                            onChange: (event)=>handleChange("batchYear", event.target.value),
+                                                            placeholder: "2024"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                            lineNumber: 268,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        errors.batchYear && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                            className: "text-xs text-red-600",
+                                                            children: errors.batchYear
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                            lineNumber: 276,
+                                                            columnNumber: 21
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                    lineNumber: 266,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogFooter"], {
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
+                                                        type: "submit",
+                                                        className: "w-full",
+                                                        children: "Add Student"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
+                                                        lineNumber: 280,
+                                                        columnNumber: 19
+                                                    }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                                    lineNumber: 65,
+                                                    lineNumber: 279,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                            lineNumber: 46,
+                                            lineNumber: 183,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                    lineNumber: 41,
+                                    lineNumber: 176,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                            lineNumber: 34,
+                            lineNumber: 169,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                    lineNumber: 29,
+                    lineNumber: 162,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                lineNumber: 28,
+                lineNumber: 161,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1720,7 +1957,7 @@ function StudentList({ students, stats, onSelectStudent }) {
                                     className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                    lineNumber: 75,
+                                    lineNumber: 293,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -1730,18 +1967,18 @@ function StudentList({ students, stats, onSelectStudent }) {
                                     className: "pl-10"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                    lineNumber: 76,
+                                    lineNumber: 294,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                            lineNumber: 74,
+                            lineNumber: 292,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                        lineNumber: 73,
+                        lineNumber: 291,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1751,24 +1988,24 @@ function StudentList({ students, stats, onSelectStudent }) {
                                 onViewDetails: onSelectStudent
                             }, student.id, false, {
                                 fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                                lineNumber: 88,
+                                lineNumber: 306,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                        lineNumber: 86,
+                        lineNumber: 304,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-                lineNumber: 71,
+                lineNumber: 289,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/StaffAdvisorDashboard/StudentList.tsx",
-        lineNumber: 27,
+        lineNumber: 160,
         columnNumber: 5
     }, this);
 }
@@ -2614,93 +2851,109 @@ function StaffAdvisorDashboard({ stats, careerStats, students }) {
     const [selectedActivity, setSelectedActivity] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [selectedCommunity, setSelectedCommunity] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [activityPoints, setActivityPoints] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const totalStudents = studentList.length;
+    const placedStudents = studentList.filter((student)=>student.placementStatus === "Placed").length;
+    const inProcess = studentList.filter((student)=>student.placementStatus === "In Process").length;
+    const averageCGPA = totalStudents ? Number((studentList.reduce((sum, student)=>sum + student.cgpa, 0) / totalStudents).toFixed(1)) : 0;
+    const averageAttendance = totalStudents ? Math.round(studentList.reduce((sum, student)=>sum + student.attendance, 0) / totalStudents) : 0;
+    const batchYear = studentList.find((student)=>student.batchYear)?.batchYear ?? stats.batchYear;
+    const derivedStats = {
+        ...stats,
+        totalStudents,
+        placedStudents,
+        inProcess,
+        averageCGPA,
+        averageAttendance,
+        batchYear
+    };
     const handleViewStudent = (student)=>{
         setSelectedStudent(student);
         setIsStudentViewOpen(true);
     };
-    const handleAddActivity = async ()=>{
+    const handleAddActivity = ()=>{
         if (!selectedStudent) return;
         if (!selectedActivity || !selectedCommunity || !activityPoints) {
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].error("Please fill in all fields");
             return;
         }
-        try {
-            const response = await fetch(`/api/students/${selectedStudent.id}/activities`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name: selectedActivity,
-                    community: selectedCommunity,
-                    points: parseInt(activityPoints, 10)
-                })
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].error(data.error || "Activity update failed");
-                return;
-            }
-            setStudentList(data.students);
-            const updatedStudent = data.students.find((student)=>student.id === selectedStudent.id);
-            setSelectedStudent(updatedStudent ?? null);
-            setIsActivityDialogOpen(false);
-            setSelectedActivity("");
-            setSelectedCommunity("");
-            setActivityPoints("");
-            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].success("Activity added successfully");
-        } catch (error) {
-            console.error("Activity error:", error);
-            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].error("An error occurred while updating activity");
-        }
+        const newActivity = {
+            id: `act-${Date.now()}`,
+            name: selectedActivity,
+            community: selectedCommunity,
+            points: parseInt(activityPoints, 10),
+            date: new Date().toISOString().split("T")[0]
+        };
+        const updatedStudent = {
+            ...selectedStudent,
+            activities: [
+                ...selectedStudent.activities,
+                newActivity
+            ],
+            activityPoints: selectedStudent.activityPoints + newActivity.points
+        };
+        setStudentList((prev)=>prev.map((student)=>student.id === updatedStudent.id ? updatedStudent : student));
+        setSelectedStudent(updatedStudent);
+        setIsActivityDialogOpen(false);
+        setSelectedActivity("");
+        setSelectedCommunity("");
+        setActivityPoints("");
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].success("Activity added successfully");
+    };
+    const handleAddStudent = (student)=>{
+        setStudentList((prev)=>[
+                student,
+                ...prev
+            ]);
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].success("Student added successfully");
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "space-y-6",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$DashboardHeader$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DashboardHeader"], {
-                stats: stats
+                stats: derivedStats
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 82,
+                lineNumber: 109,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$StatsOverview$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["StatsOverview"], {
-                stats: stats
+                stats: derivedStats
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 83,
+                lineNumber: 110,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "grid grid-cols-1 lg:grid-cols-2 gap-6",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$FacultyStatusOverview$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["FacultyStatusOverview"], {
-                        stats: stats
+                        stats: derivedStats
                     }, void 0, false, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                        lineNumber: 86,
+                        lineNumber: 113,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$CareerExplorationStats$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CareerExplorationStats"], {
                         careerStats: careerStats
                     }, void 0, false, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                        lineNumber: 87,
+                        lineNumber: 114,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 85,
+                lineNumber: 112,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$StudentList$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["StudentList"], {
                 students: studentList,
-                stats: stats,
-                onSelectStudent: handleViewStudent
+                stats: derivedStats,
+                onSelectStudent: handleViewStudent,
+                onAddStudent: handleAddStudent
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 90,
+                lineNumber: 117,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$StudentDetailDialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["StudentDetailDialog"], {
@@ -2710,7 +2963,7 @@ function StaffAdvisorDashboard({ stats, careerStats, students }) {
                 onAddActivity: ()=>setIsActivityDialogOpen(true)
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 96,
+                lineNumber: 124,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$AddActivityDialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AddActivityDialog"], {
@@ -2726,13 +2979,13 @@ function StaffAdvisorDashboard({ stats, careerStats, students }) {
                 onAddActivity: handleAddActivity
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 103,
+                lineNumber: 131,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-        lineNumber: 81,
+        lineNumber: 108,
         columnNumber: 5
     }, this);
 }

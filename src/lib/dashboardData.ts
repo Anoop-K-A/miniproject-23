@@ -35,6 +35,7 @@ interface CourseFileRecord {
   facultyId: string;
   fileName: string;
   status?: string;
+  academicYear?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -149,6 +150,7 @@ export async function getFacultyDashboardData(
     name: user.name,
     department: user.department ?? "",
     role: user.facultyRole ?? "Faculty",
+    isStaffAdvisor: user.roles?.includes("staff-advisor") ?? false,
     email: user.email ?? user.username,
     phone: user.phone ?? "",
     courses: user.courses ?? [],
@@ -332,6 +334,116 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
   const approvedReports = eventReports.filter(
     (report) => report.status === "Approved",
   ).length;
+  const batchYears = Array.from(
+    new Set(scopedStudents.map((student) => student.batchYear).filter(Boolean)),
+  ) as string[];
+
+  const overallCourseFiles =
+    batchYears.length > 0
+      ? courseFiles.filter(
+          (file) => file.academicYear && batchYears.includes(file.academicYear),
+        )
+      : [];
+  const overallApproved = overallCourseFiles.filter(
+    (file) => file.status === "Approved",
+  ).length;
+  const overallInReview = overallCourseFiles.filter(
+    (file) => file.status === "Pending" || file.status === "Submitted",
+  ).length;
+  const overallRejected = overallCourseFiles.filter(
+    (file) => file.status === "Rejected",
+  ).length;
+  const overallCompletionRate =
+    overallCourseFiles.length > 0
+      ? Math.round((overallApproved / overallCourseFiles.length) * 100)
+      : 0;
+
+  const batchCourseOverview = {
+    overall: {
+      batchYear: "All",
+      totalFiles: overallCourseFiles.length,
+      approvedFiles: overallApproved,
+      inReviewFiles: overallInReview,
+      rejectedFiles: overallRejected,
+      completionRate: overallCompletionRate,
+    },
+    groups: batchYears.map((year) => {
+      const batchCourseFiles = courseFiles.filter(
+        (file) => file.academicYear === year,
+      );
+      const approvedBatchFiles = batchCourseFiles.filter(
+        (file) => file.status === "Approved",
+      ).length;
+      const inReviewBatchFiles = batchCourseFiles.filter(
+        (file) => file.status === "Pending" || file.status === "Submitted",
+      ).length;
+      const rejectedBatchFiles = batchCourseFiles.filter(
+        (file) => file.status === "Rejected",
+      ).length;
+      const completionRate =
+        batchCourseFiles.length > 0
+          ? Math.round((approvedBatchFiles / batchCourseFiles.length) * 100)
+          : 0;
+
+      const batchFacultyMap = new Map<
+        string,
+        {
+          id: string;
+          name: string;
+          department: string;
+          role: string;
+          filesTotal: number;
+          filesApproved: number;
+          filesInReview: number;
+          filesRejected: number;
+        }
+      >();
+
+      batchCourseFiles.forEach((file) => {
+        if (!file.facultyId) return;
+        const facultyUser = facultyUsers.find(
+          (user) => user.id === file.facultyId,
+        );
+        if (!facultyUser) return;
+        if (!batchFacultyMap.has(file.facultyId)) {
+          batchFacultyMap.set(file.facultyId, {
+            id: facultyUser.id,
+            name: facultyUser.name,
+            department: facultyUser.department ?? "",
+            role: facultyUser.facultyRole ?? "Faculty",
+            filesTotal: 0,
+            filesApproved: 0,
+            filesInReview: 0,
+            filesRejected: 0,
+          });
+        }
+        const entry = batchFacultyMap.get(file.facultyId);
+        if (!entry) return;
+        entry.filesTotal += 1;
+        if (file.status === "Approved") {
+          entry.filesApproved += 1;
+        } else if (file.status === "Rejected") {
+          entry.filesRejected += 1;
+        } else {
+          entry.filesInReview += 1;
+        }
+      });
+
+      return {
+        progress: {
+          batchYear: year,
+          totalFiles: batchCourseFiles.length,
+          approvedFiles: approvedBatchFiles,
+          inReviewFiles: inReviewBatchFiles,
+          rejectedFiles: rejectedBatchFiles,
+          completionRate,
+        },
+        faculty: Array.from(batchFacultyMap.values()).sort((a, b) =>
+          a.name.localeCompare(b.name),
+        ),
+      };
+    }),
+  };
 
   const stats: StaffStats = {
     totalStudents,
@@ -369,5 +481,6 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
     stats,
     careerStats,
     students: scopedStudents,
+    batchCourseOverview,
   };
 }
