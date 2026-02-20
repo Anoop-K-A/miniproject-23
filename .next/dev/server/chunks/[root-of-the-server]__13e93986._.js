@@ -169,7 +169,10 @@ async function recomputeEngagementForFaculty(facultyId) {
 }
 async function recomputeAllEngagements() {
     const users = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$jsonDb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["readJsonFile"])("users.json");
-    const results = await Promise.all(users.map((user)=>recomputeEngagementForFaculty(user.id)));
+    const results = [];
+    for (const user of users){
+        results.push(await recomputeEngagementForFaculty(user.id));
+    }
     return results;
 }
 }),

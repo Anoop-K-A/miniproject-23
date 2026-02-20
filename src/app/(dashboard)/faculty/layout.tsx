@@ -24,7 +24,7 @@ export default function FacultyLayout({
   const handleRoleChange = (role: typeof userRole) => {
     switchRole(role);
     document.cookie = `auth_role=${role}; path=/`;
-    router.push(`/${role}/dashboard`);
+    router.push(getDashboardPath(role));
   };
 
   return (

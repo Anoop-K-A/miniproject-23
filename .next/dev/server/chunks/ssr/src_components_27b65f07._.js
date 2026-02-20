@@ -3141,8 +3141,7 @@ function AdminDashboard() {
                 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].error(data.error || "Failed to add user");
                 return;
             }
-            const engagementMap = {};
-            setUsers(data.users.map((user)=>mapApiUserWithEngagement(user, engagementMap)));
+            await fetchUsers();
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].success(`User ${payload.name} added successfully`);
             pushNotification(`User ${payload.name} added`, "success");
         } catch (error) {
@@ -3164,10 +3163,8 @@ function AdminDashboard() {
                 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].error(data.error || "Update failed");
                 return null;
             }
-            const engagementMap = {};
-            const mappedUsers = data.users.map((user)=>mapApiUserWithEngagement(user, engagementMap));
-            setUsers(mappedUsers);
-            return mappedUsers.find((user)=>user.id === id) ?? null;
+            await fetchUsers();
+            return data.users.find((user)=>user.id === id) ?? null;
         } catch (error) {
             console.error("User update error:", error);
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].error("Failed to update user");
@@ -3201,8 +3198,7 @@ function AdminDashboard() {
                 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].error(data.error || "Delete failed");
                 return;
             }
-            const engagementMap = {};
-            setUsers(data.users.map((user)=>mapApiUserWithEngagement(user, engagementMap)));
+            await fetchUsers();
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"].success("User deleted successfully");
             pushNotification("User deleted", "warning");
         } catch (error) {
@@ -3253,14 +3249,14 @@ function AdminDashboard() {
                 onAddUser: handleAddUser
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 385,
+                lineNumber: 371,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AdminDashboard$2f$AdminStats$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AdminStats"], {
                 users: users
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 397,
+                lineNumber: 383,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AdminDashboard$2f$UsersTable$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["UsersTable"], {
@@ -3282,7 +3278,7 @@ function AdminDashboard() {
                 onReject: handleReject
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 399,
+                lineNumber: 385,
                 columnNumber: 7
             }, this),
             selectedUser && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AdminDashboard$2f$EditUserDialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["EditUserDialog"], {
@@ -3292,7 +3288,7 @@ function AdminDashboard() {
                 onUpdateUser: handleUpdateUser
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 419,
+                lineNumber: 405,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialog"], {
@@ -3306,7 +3302,7 @@ function AdminDashboard() {
                                     children: "Are you sure?"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                                    lineNumber: 433,
+                                    lineNumber: 419,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogDescription"], {
@@ -3317,13 +3313,13 @@ function AdminDashboard() {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                                    lineNumber: 434,
+                                    lineNumber: 420,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                            lineNumber: 432,
+                            lineNumber: 418,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogFooter"], {
@@ -3332,7 +3328,7 @@ function AdminDashboard() {
                                     children: "Cancel"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                                    lineNumber: 440,
+                                    lineNumber: 426,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDialogAction"], {
@@ -3347,30 +3343,30 @@ function AdminDashboard() {
                                     children: "Delete"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                                    lineNumber: 441,
+                                    lineNumber: 427,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                            lineNumber: 439,
+                            lineNumber: 425,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                    lineNumber: 431,
+                    lineNumber: 417,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-                lineNumber: 427,
+                lineNumber: 413,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AdminDashboard/AdminDashboard.tsx",
-        lineNumber: 384,
+        lineNumber: 370,
         columnNumber: 5
     }, this);
 }

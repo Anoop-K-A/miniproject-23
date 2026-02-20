@@ -261,12 +261,7 @@ export function AdminDashboard() {
         toast.error(data.error || "Failed to add user");
         return;
       }
-      const engagementMap: Record<string, any> = {};
-      setUsers(
-        (data.users as ApiUser[]).map((user) =>
-          mapApiUserWithEngagement(user, engagementMap),
-        ),
-      );
+      await fetchUsers();
       toast.success(`User ${payload.name} added successfully`);
       pushNotification(`User ${payload.name} added`, "success");
     } catch (error) {
@@ -287,12 +282,8 @@ export function AdminDashboard() {
         toast.error(data.error || "Update failed");
         return null;
       }
-      const engagementMap: Record<string, any> = {};
-      const mappedUsers = (data.users as ApiUser[]).map((user) =>
-        mapApiUserWithEngagement(user, engagementMap),
-      );
-      setUsers(mappedUsers);
-      return mappedUsers.find((user) => user.id === id) ?? null;
+      await fetchUsers();
+      return (data.users as ApiUser[]).find((user) => user.id === id) ?? null;
     } catch (error) {
       console.error("User update error:", error);
       toast.error("Failed to update user");
@@ -336,12 +327,7 @@ export function AdminDashboard() {
         toast.error(data.error || "Delete failed");
         return;
       }
-      const engagementMap: Record<string, any> = {};
-      setUsers(
-        (data.users as ApiUser[]).map((user) =>
-          mapApiUserWithEngagement(user, engagementMap),
-        ),
-      );
+      await fetchUsers();
       toast.success("User deleted successfully");
       pushNotification("User deleted", "warning");
     } catch (error) {

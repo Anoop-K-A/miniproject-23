@@ -69,6 +69,8 @@ var __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$2
 ;
 ;
 const dataRoot = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), "src", "data");
+// Simple lock mechanism to prevent concurrent writes
+const locks = new Map();
 function getDataFilePath(fileName) {
     return __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(dataRoot, fileName);
 }
@@ -79,7 +81,31 @@ async function readJsonFile(fileName) {
 }
 async function writeJsonFile(fileName, data) {
     const filePath = getDataFilePath(fileName);
-    await __TURBOPACK__imported__module__$5b$externals$5d2f$fs$2f$promises__$5b$external$5d$__$28$fs$2f$promises$2c$__cjs$29$__["default"].writeFile(filePath, JSON.stringify(data, null, 2));
+    // Wait for any existing write operation to complete
+    while(locks.has(fileName)){
+        await locks.get(fileName);
+    }
+    // Create a new lock for this write operation
+    const writeLock = (async ()=>{
+        try {
+            const jsonString = JSON.stringify(data, null, 2);
+            // Validate JSON before writing
+            try {
+                JSON.parse(jsonString);
+            } catch (error) {
+                console.error("Invalid JSON data, aborting write:", error);
+                throw new Error("Failed to write JSON: Invalid data structure");
+            }
+            // Write to temporary file first, then rename (atomic operation)
+            const tempFilePath = `${filePath}.tmp`;
+            await __TURBOPACK__imported__module__$5b$externals$5d2f$fs$2f$promises__$5b$external$5d$__$28$fs$2f$promises$2c$__cjs$29$__["default"].writeFile(tempFilePath, jsonString, "utf-8");
+            await __TURBOPACK__imported__module__$5b$externals$5d2f$fs$2f$promises__$5b$external$5d$__$28$fs$2f$promises$2c$__cjs$29$__["default"].rename(tempFilePath, filePath);
+        } finally{
+            locks.delete(fileName);
+        }
+    })();
+    locks.set(fileName, writeLock);
+    await writeLock;
 }
 }),
 "[project]/src/app/api/users/route.ts [app-route] (ecmascript)", ((__turbopack_context__) => {

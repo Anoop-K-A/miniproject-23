@@ -100,8 +100,9 @@ export async function recomputeEngagementForFaculty(facultyId: string) {
 
 export async function recomputeAllEngagements() {
   const users = await readJsonFile<{ id: string }[]>("users.json");
-  const results = await Promise.all(
-    users.map((user) => recomputeEngagementForFaculty(user.id)),
-  );
+  const results: EngagementRecord[] = [];
+  for (const user of users) {
+    results.push(await recomputeEngagementForFaculty(user.id));
+  }
   return results;
 }

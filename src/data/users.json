@@ -13,7 +13,7 @@
     "status": "active",
     "createdAt": "2026-02-13T00:00:00.000Z",
     "updatedAt": "2026-02-18T10:24:05.555Z",
-    "lastActiveAt": "2026-02-20T05:54:13.470Z"
+    "lastActiveAt": "2026-02-20T22:41:26.075Z"
   },
   {
     "id": "f1",
@@ -42,47 +42,6 @@
     "lastActiveAt": "2026-02-20T05:54:42.985Z"
   },
   {
-    "id": "f2",
-    "username": "faculty2@test.com",
-    "password": "password123",
-    "name": "Dr. Emily Carter",
-    "role": "faculty",
-    "roles": [
-      "faculty"
-    ],
-    "department": "Information Systems",
-    "email": "faculty2@test.com",
-    "phone": "+1 (555) 987-6543",
-    "facultyRole": "Assistant Professor",
-    "courses": [
-      "IS101 - Fundamentals of Information Systems",
-      "IS210 - Database Concepts",
-      "IS320 - Systems Analysis"
-    ],
-    "specialization": "Data Management and Analytics",
-    "experience": "7 years",
-    "status": "active",
-    "createdAt": "2024-01-02T00:00:00.000Z",
-    "updatedAt": "2024-01-02T00:00:00.000Z"
-  },
-  {
-    "id": "a1",
-    "username": "auditor@test.com",
-    "password": "password123",
-    "name": "Jane Smith",
-    "role": "auditor",
-    "roles": [
-      "faculty",
-      "auditor"
-    ],
-    "department": "Audit",
-    "email": "auditor@test.com",
-    "status": "active",
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z",
-    "lastActiveAt": "2026-02-18T10:00:47.080Z"
-  },
-  {
     "id": "1770985873707",
     "username": "anoopka6.7.2004@gmail.com",
     "password": "password123",
@@ -94,7 +53,7 @@
     "department": "computer science and engineering",
     "status": "active",
     "createdAt": "2026-02-13T12:31:13.707Z",
-    "updatedAt": "2026-02-18T08:50:40.701Z",
+    "updatedAt": "2026-02-20T22:48:41.137Z",
     "lastActiveAt": "2026-02-20T05:55:35.713Z"
   },
   {
@@ -106,13 +65,14 @@
     "roles": [
       "faculty",
       "auditor",
-      "staff-advisor"
+      "staff-advisor",
+      "admin"
     ],
     "department": "computer science and engineering",
     "status": "active",
     "createdAt": "2026-02-18T09:10:29.166Z",
-    "updatedAt": "2026-02-18T10:25:54.594Z",
-    "lastActiveAt": "2026-02-20T05:55:45.065Z",
+    "updatedAt": "2026-02-20T22:41:43.290Z",
+    "lastActiveAt": "2026-02-20T22:44:09.436Z",
     "email": "aaa@gmail.com"
   }
 ]
