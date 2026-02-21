@@ -24,6 +24,7 @@
   "/api/event-reports/[id]/route": "app/api/event-reports/[id]/route.js",
   "/api/event-reports/route": "app/api/event-reports/route.js",
   "/api/messages/route": "app/api/messages/route.js",
+  "/api/migrate-files/route": "app/api/migrate-files/route.js",
   "/api/remarks/[id]/route": "app/api/remarks/[id]/route.js",
   "/api/remarks/route": "app/api/remarks/route.js",
   "/api/students/[id]/activities/route": "app/api/students/[id]/activities/route.js",

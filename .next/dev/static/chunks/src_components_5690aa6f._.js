@@ -4109,12 +4109,29 @@ function StaffAdvisorDashboard({ stats, careerStats, students, batchCourseOvervi
         setSelectedStudent(student);
         setIsStudentViewOpen(true);
     };
-    const handleUpdateStudent = (updatedStudent)=>{
-        setStudentList((prev)=>prev.map((student)=>student.id === updatedStudent.id ? updatedStudent : student));
-        setSelectedStudent(updatedStudent);
-        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Student updated successfully");
+    const handleUpdateStudent = async (updatedStudent)=>{
+        try {
+            const response = await fetch(`/api/students/${updatedStudent.id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(updatedStudent)
+            });
+            if (response.ok) {
+                setStudentList((prev)=>prev.map((student)=>student.id === updatedStudent.id ? updatedStudent : student));
+                setSelectedStudent(updatedStudent);
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Student updated successfully");
+            } else {
+                const error = await response.json();
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error(error.error || "Failed to update student");
+            }
+        } catch (error) {
+            console.error("Error updating student:", error);
+            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error("Failed to update student");
+        }
     };
-    const handleAddActivity = ()=>{
+    const handleAddActivity = async ()=>{
         if (!selectedStudent) return;
         if (!selectedActivity || !selectedCommunity || !activityPoints) {
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error("Please fill in all fields");
@@ -4135,20 +4152,74 @@ function StaffAdvisorDashboard({ stats, careerStats, students, batchCourseOvervi
             ],
             activityPoints: selectedStudent.activityPoints + newActivity.points
         };
-        setStudentList((prev)=>prev.map((student)=>student.id === updatedStudent.id ? updatedStudent : student));
-        setSelectedStudent(updatedStudent);
-        setIsActivityDialogOpen(false);
-        setSelectedActivity("");
-        setSelectedCommunity("");
-        setActivityPoints("");
-        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Activity added successfully");
+        try {
+            const response = await fetch(`/api/students/${updatedStudent.id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(updatedStudent)
+            });
+            if (response.ok) {
+                setStudentList((prev)=>prev.map((student)=>student.id === updatedStudent.id ? updatedStudent : student));
+                setSelectedStudent(updatedStudent);
+                setIsActivityDialogOpen(false);
+                setSelectedActivity("");
+                setSelectedCommunity("");
+                setActivityPoints("");
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Activity added successfully");
+            } else {
+                const error = await response.json();
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error(error.error || "Failed to add activity");
+            }
+        } catch (error) {
+            console.error("Error adding activity:", error);
+            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error("Failed to add activity");
+        }
     };
-    const handleAddStudent = (student)=>{
-        setStudentList((prev)=>[
-                student,
-                ...prev
-            ]);
-        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Student added successfully");
+    const handleAddStudent = async (student)=>{
+        try {
+            const response = await fetch("/api/students", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    advisorId: "",
+                    name: student.name,
+                    rollNumber: student.rollNumber,
+                    email: student.email,
+                    phone: student.phone,
+                    department: student.department,
+                    semester: student.semester,
+                    batchYear: student.batchYear,
+                    cgpa: student.cgpa,
+                    attendance: student.attendance,
+                    careerInterest: student.careerInterest,
+                    skillsAcquired: student.skillsAcquired,
+                    placementStatus: student.placementStatus,
+                    companyName: student.companyName,
+                    activityPoints: student.activityPoints,
+                    activities: student.activities
+                })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                // Use the student returned from API which has proper ID and timestamps
+                const savedStudent = data.students && data.students[0] || student;
+                setStudentList((prev)=>[
+                        savedStudent,
+                        ...prev
+                    ]);
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Student added successfully");
+            } else {
+                const error = await response.json();
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error(error.error || "Failed to add student");
+            }
+        } catch (error) {
+            console.error("Error adding student:", error);
+            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error("Failed to add student");
+        }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "space-y-6",
@@ -4157,14 +4228,14 @@ function StaffAdvisorDashboard({ stats, careerStats, students, batchCourseOvervi
                 stats: derivedStats
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 163,
+                lineNumber: 238,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$StatsOverview$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StatsOverview"], {
                 stats: derivedStats
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 164,
+                lineNumber: 239,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4174,27 +4245,27 @@ function StaffAdvisorDashboard({ stats, careerStats, students, batchCourseOvervi
                         stats: derivedStats
                     }, void 0, false, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                        lineNumber: 167,
+                        lineNumber: 242,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$CareerExplorationStats$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CareerExplorationStats"], {
                         careerStats: careerStats
                     }, void 0, false, {
                         fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                        lineNumber: 168,
+                        lineNumber: 243,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 166,
+                lineNumber: 241,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$BatchCourseProgress$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["BatchCourseProgress"], {
                 groups: derivedBatchCourseOverview.groups
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 171,
+                lineNumber: 246,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$StudentList$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StudentList"], {
@@ -4204,7 +4275,7 @@ function StaffAdvisorDashboard({ stats, careerStats, students, batchCourseOvervi
                 onAddStudent: handleAddStudent
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 173,
+                lineNumber: 248,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$StudentDetailDialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StudentDetailDialog"], {
@@ -4215,7 +4286,7 @@ function StaffAdvisorDashboard({ stats, careerStats, students, batchCourseOvervi
                 onUpdateStudent: handleUpdateStudent
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 180,
+                lineNumber: 255,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$StaffAdvisorDashboard$2f$AddActivityDialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AddActivityDialog"], {
@@ -4231,13 +4302,13 @@ function StaffAdvisorDashboard({ stats, careerStats, students, batchCourseOvervi
                 onAddActivity: handleAddActivity
             }, void 0, false, {
                 fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-                lineNumber: 188,
+                lineNumber: 263,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/StaffAdvisorDashboard/index.tsx",
-        lineNumber: 162,
+        lineNumber: 237,
         columnNumber: 5
     }, this);
 }

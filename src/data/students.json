@@ -1,5 +1,25 @@
 [
   {
+    "id": "1771664058458",
+    "advisorId": "",
+    "name": "anoop",
+    "rollNumber": "73",
+    "email": "anpka6.7.2004@gmail.com",
+    "phone": "+1 (555) 123-4567",
+    "department": "computer science and engineering",
+    "semester": "Spring",
+    "batchYear": "2022",
+    "cgpa": 0,
+    "attendance": 0,
+    "careerInterest": "Not set",
+    "skillsAcquired": [],
+    "placementStatus": "Not Started",
+    "activityPoints": 0,
+    "activities": [],
+    "createdAt": "2026-02-21T08:54:18.457Z",
+    "updatedAt": "2026-02-21T08:54:18.457Z"
+  },
+  {
     "id": "1771616136272",
     "name": "anoop",
     "rollNumber": "72",

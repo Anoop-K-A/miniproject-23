@@ -1,3 +1,0 @@
-module.exports=[47928,a=>{"use strict";let b={faculty:"/faculty",auditor:"/auditor","staff-advisor":"/staff-advisor",admin:"/admin"};function c(a){return"admin"===a?b.admin:`${b[a]}/dashboard`}a.s(["getDashboardPath",()=>c])},66943,a=>{"use strict";var b=a.i(87924),c=a.i(72131),d=a.i(50944),e=a.i(56025),f=a.i(47928);function g({children:a}){let{userRole:g,isAuthenticated:h,isLoading:i}=(0,e.useAuth)(),j=(0,d.useRouter)();return(0,c.useEffect)(()=>{!i&&h&&"admin"!==g&&j.replace((0,f.getDashboardPath)(g))},[h,i,j,g]),(0,b.jsx)("div",{className:"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8",children:a})}a.s(["default",()=>g])}];
-
-//# sourceMappingURL=src_50631f6f._.js.map

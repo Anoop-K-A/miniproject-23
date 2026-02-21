@@ -193,196 +193,196 @@ function ChecklistSidebar({ checklist, checkedItems, onChecklistChange }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "lg:col-span-1",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
-            className: "sticky top-4",
+            className: "sticky top-4 h-fit flex flex-col rounded-lg border border-gray-200 shadow-md",
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardHeader"], {
+                    className: "flex-shrink-0 border-b",
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardTitle"], {
                         className: "text-base",
                         children: "Audit Checklist"
                     }, void 0, false, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                        lineNumber: 17,
+                        lineNumber: 21,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                    lineNumber: 16,
+                    lineNumber: 20,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
+                    className: "max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100",
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "space-y-4",
-                        children: [
-                            checklist.map((checkItem)=>{
-                                const status = checkedItems[checkItem.id] || "pending";
-                                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "space-y-2",
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
-                                            className: "text-sm leading-tight",
-                                            children: checkItem.label
-                                        }, void 0, false, {
-                                            fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                            lineNumber: 25,
-                                            columnNumber: 19
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "flex gap-2",
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
-                                                    size: "sm",
-                                                    variant: status === "yes" ? "default" : "outline",
-                                                    onClick: ()=>onChecklistChange(checkItem.id, "yes"),
-                                                    className: "flex-1 text-xs",
-                                                    children: "Yes"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 29,
-                                                    columnNumber: 21
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
-                                                    size: "sm",
-                                                    variant: status === "no" ? "destructive" : "outline",
-                                                    onClick: ()=>onChecklistChange(checkItem.id, "no"),
-                                                    className: "flex-1 text-xs",
-                                                    children: "No"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 37,
-                                                    columnNumber: 21
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
-                                                    size: "sm",
-                                                    variant: status === "pending" ? "default" : "outline",
-                                                    onClick: ()=>onChecklistChange(checkItem.id, "pending"),
-                                                    className: "flex-1 text-xs",
-                                                    children: "Pending"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 45,
-                                                    columnNumber: 21
-                                                }, this)
-                                            ]
-                                        }, void 0, true, {
-                                            fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                            lineNumber: 28,
-                                            columnNumber: 19
-                                        }, this)
-                                    ]
-                                }, checkItem.id, true, {
-                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                    lineNumber: 24,
-                                    columnNumber: 17
-                                }, this);
-                            }),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "pt-4 border-t",
-                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "space-y-2 text-xs",
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "flex justify-between",
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    children: "Yes:"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 62,
-                                                    columnNumber: 19
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    className: "font-medium",
-                                                    children: Object.values(checkedItems).filter((v)=>v === "yes").length
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 63,
-                                                    columnNumber: 19
-                                                }, this)
-                                            ]
-                                        }, void 0, true, {
-                                            fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                            lineNumber: 61,
-                                            columnNumber: 17
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "flex justify-between",
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    children: "No:"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 68,
-                                                    columnNumber: 19
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    className: "font-medium",
-                                                    children: Object.values(checkedItems).filter((v)=>v === "no").length
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 69,
-                                                    columnNumber: 19
-                                                }, this)
-                                            ]
-                                        }, void 0, true, {
-                                            fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                            lineNumber: 67,
-                                            columnNumber: 17
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "flex justify-between",
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    children: "Pending:"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 74,
-                                                    columnNumber: 19
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    className: "font-medium",
-                                                    children: checklist.length - Object.keys(checkedItems).length + Object.values(checkedItems).filter((v)=>v === "pending").length
-                                                }, void 0, false, {
-                                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                                    lineNumber: 75,
-                                                    columnNumber: 19
-                                                }, this)
-                                            ]
-                                        }, void 0, true, {
-                                            fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                            lineNumber: 73,
-                                            columnNumber: 17
-                                        }, this)
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                    lineNumber: 60,
-                                    columnNumber: 15
-                                }, this)
-                            }, void 0, false, {
+                        className: "space-y-4 pr-2",
+                        children: checklist.map((checkItem)=>{
+                            const status = checkedItems[checkItem.id] || "pending";
+                            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "space-y-2",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                        className: "text-sm leading-tight",
+                                        children: checkItem.label
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                        lineNumber: 29,
+                                        columnNumber: 19
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "flex gap-2",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
+                                                size: "sm",
+                                                variant: status === "yes" ? "default" : "outline",
+                                                onClick: ()=>onChecklistChange(checkItem.id, "yes"),
+                                                className: "flex-1 text-xs",
+                                                children: "Yes"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                                lineNumber: 33,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
+                                                size: "sm",
+                                                variant: status === "no" ? "destructive" : "outline",
+                                                onClick: ()=>onChecklistChange(checkItem.id, "no"),
+                                                className: "flex-1 text-xs",
+                                                children: "No"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                                lineNumber: 41,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
+                                                size: "sm",
+                                                variant: status === "pending" ? "default" : "outline",
+                                                onClick: ()=>onChecklistChange(checkItem.id, "pending"),
+                                                className: "flex-1 text-xs",
+                                                children: "Pending"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                                lineNumber: 49,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                        lineNumber: 32,
+                                        columnNumber: 19
+                                    }, this)
+                                ]
+                            }, checkItem.id, true, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                                lineNumber: 59,
+                                lineNumber: 28,
+                                columnNumber: 17
+                            }, this);
+                        })
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                        lineNumber: 24,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                    lineNumber: 23,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex-shrink-0 pt-4 border-t px-6 pb-4 bg-white",
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "space-y-2 text-xs",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex justify-between",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        children: "Yes:"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                        lineNumber: 67,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "font-medium",
+                                        children: Object.values(checkedItems).filter((v)=>v === "yes").length
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                        lineNumber: 68,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                lineNumber: 66,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex justify-between",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        children: "No:"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                        lineNumber: 73,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "font-medium",
+                                        children: Object.values(checkedItems).filter((v)=>v === "no").length
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                        lineNumber: 74,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                lineNumber: 72,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex justify-between",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        children: "Pending:"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                        lineNumber: 79,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "font-medium",
+                                        children: checklist.length - Object.keys(checkedItems).length + Object.values(checkedItems).filter((v)=>v === "pending").length
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                        lineNumber: 80,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
+                                lineNumber: 78,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                        lineNumber: 20,
+                        lineNumber: 65,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-                    lineNumber: 19,
+                    lineNumber: 64,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-            lineNumber: 15,
+            lineNumber: 19,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/ChecklistSidebar.tsx",
-        lineNumber: 14,
+        lineNumber: 18,
         columnNumber: 5
     }, this);
 }
@@ -1076,8 +1076,96 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$download$2e$ts
 ;
 const courseFileChecklist = [
     {
-        id: "format",
-        label: "Document format is correct and readable"
+        id: "co_po_mapping",
+        label: "CO–PO Mapping (CO–PO Mapping Level)"
+    },
+    {
+        id: "co_pso_mapping",
+        label: "CO–PO Mapping (CO–PSO Mapping Level)"
+    },
+    {
+        id: "justification",
+        label: "Justification of Mapping"
+    },
+    {
+        id: "course_coverage",
+        label: "Course File Coverage"
+    },
+    {
+        id: "test_qp",
+        label: "Test (QP)"
+    },
+    {
+        id: "test_co_level",
+        label: "Test (CO Level)"
+    },
+    {
+        id: "test_sample_answer",
+        label: "Test (Sample Answer Sheets)"
+    },
+    {
+        id: "test_qp_second",
+        label: "Test (QP) – Second"
+    },
+    {
+        id: "test_co_level_second",
+        label: "Test (CO Level) – Second"
+    },
+    {
+        id: "test_sample_answer_second",
+        label: "Test (Sample Answer Sheets) – Second"
+    },
+    {
+        id: "assignment_qp",
+        label: "Assignment (QP)"
+    },
+    {
+        id: "assignment_co_level",
+        label: "Assignment (CO Level)"
+    },
+    {
+        id: "assignment_sample",
+        label: "Assignment (Sample)"
+    },
+    {
+        id: "assignment_qp_second",
+        label: "Assignment (QP) – Second"
+    },
+    {
+        id: "assignment_co_level_second",
+        label: "Assignment (CO Level) – Second"
+    },
+    {
+        id: "assignment_sample_second",
+        label: "Assignment (Sample) – Second"
+    },
+    {
+        id: "sample_tutorial",
+        label: "Sample Tutorial"
+    },
+    {
+        id: "attendance",
+        label: "Attendance (%)"
+    },
+    {
+        id: "internal_marks",
+        label: "Internal Marks Display"
+    },
+    {
+        id: "course_exit_survey",
+        label: "Course Exit Survey"
+    },
+    {
+        id: "attainment_calculation",
+        label: "Attainment Calculation"
+    },
+    {
+        id: "remarks",
+        label: "Remarks"
+    },
+    {
+        id: "score",
+        label: "Score (Faculty/Auditor)"
     }
 ];
 const eventReportChecklist = [
@@ -1247,14 +1335,14 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 className: "h-4 w-4 mr-2"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 222,
+                                lineNumber: 247,
                                 columnNumber: 11
                             }, this),
                             "Back to Faculty List"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 221,
+                        lineNumber: 246,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -1265,20 +1353,20 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 className: "h-4 w-4 mr-2"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 226,
+                                lineNumber: 251,
                                 columnNumber: 11
                             }, this),
                             "Download Audit Sheet"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 225,
+                        lineNumber: 250,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 220,
+                lineNumber: 245,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -1294,7 +1382,7 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                         children: facultyName
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                        lineNumber: 236,
+                                        lineNumber: 261,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1302,13 +1390,13 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                         children: type === "file" ? "Course File Review" : "Event Report Review"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                        lineNumber: 237,
+                                        lineNumber: 262,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 235,
+                                lineNumber: 260,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1319,28 +1407,28 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                     children: reviewDecision === "approve" ? "Approved" : "Not Approved"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                    lineNumber: 242,
+                                    lineNumber: 267,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 241,
+                                lineNumber: 266,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 234,
+                        lineNumber: 259,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                    lineNumber: 233,
+                    lineNumber: 258,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 232,
+                lineNumber: 257,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1352,7 +1440,7 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                         onChecklistChange: handleChecklistChange
                     }, void 0, false, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 260,
+                        lineNumber: 285,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1364,7 +1452,7 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 onDownload: handleDownloadDocument
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 269,
+                                lineNumber: 294,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$AuditReviewInterface$2f$DocumentDetails$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DocumentDetails"], {
@@ -1372,7 +1460,7 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 item: item
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 276,
+                                lineNumber: 301,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$AuditReviewInterface$2f$AuditorRemarks$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AuditorRemarks"], {
@@ -1387,25 +1475,25 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 checkedItems: checkedItems
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 279,
+                                lineNumber: 304,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 267,
+                        lineNumber: 292,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 258,
+                lineNumber: 283,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-        lineNumber: 218,
+        lineNumber: 243,
         columnNumber: 5
     }, this);
 }

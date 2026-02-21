@@ -18,7 +18,32 @@ import {
 } from "@/lib/download";
 
 const courseFileChecklist: ChecklistItem[] = [
-  { id: "format", label: "Document format is correct and readable" },
+  { id: "co_po_mapping", label: "CO–PO Mapping (CO–PO Mapping Level)" },
+  { id: "co_pso_mapping", label: "CO–PO Mapping (CO–PSO Mapping Level)" },
+  { id: "justification", label: "Justification of Mapping" },
+  { id: "course_coverage", label: "Course File Coverage" },
+  { id: "test_qp", label: "Test (QP)" },
+  { id: "test_co_level", label: "Test (CO Level)" },
+  { id: "test_sample_answer", label: "Test (Sample Answer Sheets)" },
+  { id: "test_qp_second", label: "Test (QP) – Second" },
+  { id: "test_co_level_second", label: "Test (CO Level) – Second" },
+  {
+    id: "test_sample_answer_second",
+    label: "Test (Sample Answer Sheets) – Second",
+  },
+  { id: "assignment_qp", label: "Assignment (QP)" },
+  { id: "assignment_co_level", label: "Assignment (CO Level)" },
+  { id: "assignment_sample", label: "Assignment (Sample)" },
+  { id: "assignment_qp_second", label: "Assignment (QP) – Second" },
+  { id: "assignment_co_level_second", label: "Assignment (CO Level) – Second" },
+  { id: "assignment_sample_second", label: "Assignment (Sample) – Second" },
+  { id: "sample_tutorial", label: "Sample Tutorial" },
+  { id: "attendance", label: "Attendance (%)" },
+  { id: "internal_marks", label: "Internal Marks Display" },
+  { id: "course_exit_survey", label: "Course Exit Survey" },
+  { id: "attainment_calculation", label: "Attainment Calculation" },
+  { id: "remarks", label: "Remarks" },
+  { id: "score", label: "Score (Faculty/Auditor)" },
 ];
 
 const eventReportChecklist: ChecklistItem[] = [

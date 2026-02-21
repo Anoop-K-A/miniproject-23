@@ -12,10 +12,10 @@ interface FacultyCardProps {
 export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
   return (
     <Card
-      className="hover:shadow-lg transition-shadow cursor-pointer"
+      className="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col"
       onClick={() => onSelect(faculty)}
     >
-      <CardContent className="pt-6">
+      <CardContent className="pt-6 flex flex-col h-full">
         <div className="flex items-start gap-3 mb-4">
           <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
             {faculty.name
@@ -49,11 +49,11 @@ export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
           </div>
         </div>
 
-        <div className="mt-3 pt-3 border-t">
+        <div className="mt-3 pt-3 border-t flex-1 flex flex-col">
           <p className="text-xs text-gray-500 mb-2">
             Courses: {faculty.courses.length}
           </p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 mb-4">
             {faculty.courses.slice(0, 2).map((course, idx) => (
               <Badge
                 key={idx}
@@ -69,12 +69,15 @@ export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
               </Badge>
             )}
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-auto flex items-center justify-center gap-1"
+          >
+            View Portfolio
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-
-        <Button variant="outline" size="sm" className="w-full mt-4">
-          View Portfolio
-          <ChevronRight className="h-4 w-4 ml-2" />
-        </Button>
       </CardContent>
     </Card>
   );

@@ -9,15 +9,19 @@ interface ChecklistSidebarProps {
   onChecklistChange: (itemId: string, value: "yes" | "no" | "pending") => void;
 }
 
-export function ChecklistSidebar({ checklist, checkedItems, onChecklistChange }: ChecklistSidebarProps) {
+export function ChecklistSidebar({
+  checklist,
+  checkedItems,
+  onChecklistChange,
+}: ChecklistSidebarProps) {
   return (
     <div className="lg:col-span-1">
-      <Card className="sticky top-4">
-        <CardHeader>
+      <Card className="sticky top-4 h-fit flex flex-col rounded-lg border border-gray-200 shadow-md">
+        <CardHeader className="flex-shrink-0 border-b">
           <CardTitle className="text-base">Audit Checklist</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="space-y-4 pr-2">
             {checklist.map((checkItem) => {
               const status = checkedItems[checkItem.id] || "pending";
               return (
@@ -54,33 +58,34 @@ export function ChecklistSidebar({ checklist, checkedItems, onChecklistChange }:
                 </div>
               );
             })}
-
-            {/* Checklist Summary */}
-            <div className="pt-4 border-t">
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span>Yes:</span>
-                  <span className="font-medium">
-                    {Object.values(checkedItems).filter(v => v === "yes").length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>No:</span>
-                  <span className="font-medium">
-                    {Object.values(checkedItems).filter(v => v === "no").length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Pending:</span>
-                  <span className="font-medium">
-                    {checklist.length - Object.keys(checkedItems).length + 
-                     Object.values(checkedItems).filter(v => v === "pending").length}
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
         </CardContent>
+        {/* Checklist Summary - Fixed at Bottom */}
+        <div className="flex-shrink-0 pt-4 border-t px-6 pb-4 bg-white">
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span>Yes:</span>
+              <span className="font-medium">
+                {Object.values(checkedItems).filter((v) => v === "yes").length}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>No:</span>
+              <span className="font-medium">
+                {Object.values(checkedItems).filter((v) => v === "no").length}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Pending:</span>
+              <span className="font-medium">
+                {checklist.length -
+                  Object.keys(checkedItems).length +
+                  Object.values(checkedItems).filter((v) => v === "pending")
+                    .length}
+              </span>
+            </div>
+          </div>
+        </div>
       </Card>
     </div>
   );

@@ -112,17 +112,35 @@ export function StaffAdvisorDashboard({
     setIsStudentViewOpen(true);
   };
 
-  const handleUpdateStudent = (updatedStudent: Student) => {
-    setStudentList((prev) =>
-      prev.map((student) =>
-        student.id === updatedStudent.id ? updatedStudent : student,
-      ),
-    );
-    setSelectedStudent(updatedStudent);
-    toast.success("Student updated successfully");
+  const handleUpdateStudent = async (updatedStudent: Student) => {
+    try {
+      const response = await fetch(`/api/students/${updatedStudent.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedStudent),
+      });
+
+      if (response.ok) {
+        setStudentList((prev) =>
+          prev.map((student) =>
+            student.id === updatedStudent.id ? updatedStudent : student,
+          ),
+        );
+        setSelectedStudent(updatedStudent);
+        toast.success("Student updated successfully");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to update student");
+      }
+    } catch (error) {
+      console.error("Error updating student:", error);
+      toast.error("Failed to update student");
+    }
   };
 
-  const handleAddActivity = () => {
+  const handleAddActivity = async () => {
     if (!selectedStudent) return;
     if (!selectedActivity || !selectedCommunity || !activityPoints) {
       toast.error("Please fill in all fields");
@@ -140,22 +158,79 @@ export function StaffAdvisorDashboard({
       activities: [...selectedStudent.activities, newActivity],
       activityPoints: selectedStudent.activityPoints + newActivity.points,
     };
-    setStudentList((prev) =>
-      prev.map((student) =>
-        student.id === updatedStudent.id ? updatedStudent : student,
-      ),
-    );
-    setSelectedStudent(updatedStudent);
-    setIsActivityDialogOpen(false);
-    setSelectedActivity("");
-    setSelectedCommunity("");
-    setActivityPoints("");
-    toast.success("Activity added successfully");
+
+    try {
+      const response = await fetch(`/api/students/${updatedStudent.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedStudent),
+      });
+
+      if (response.ok) {
+        setStudentList((prev) =>
+          prev.map((student) =>
+            student.id === updatedStudent.id ? updatedStudent : student,
+          ),
+        );
+        setSelectedStudent(updatedStudent);
+        setIsActivityDialogOpen(false);
+        setSelectedActivity("");
+        setSelectedCommunity("");
+        setActivityPoints("");
+        toast.success("Activity added successfully");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to add activity");
+      }
+    } catch (error) {
+      console.error("Error adding activity:", error);
+      toast.error("Failed to add activity");
+    }
   };
 
-  const handleAddStudent = (student: Student) => {
-    setStudentList((prev) => [student, ...prev]);
-    toast.success("Student added successfully");
+  const handleAddStudent = async (student: Student) => {
+    try {
+      const response = await fetch("/api/students", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          advisorId: "",
+          name: student.name,
+          rollNumber: student.rollNumber,
+          email: student.email,
+          phone: student.phone,
+          department: student.department,
+          semester: student.semester,
+          batchYear: student.batchYear,
+          cgpa: student.cgpa,
+          attendance: student.attendance,
+          careerInterest: student.careerInterest,
+          skillsAcquired: student.skillsAcquired,
+          placementStatus: student.placementStatus,
+          companyName: student.companyName,
+          activityPoints: student.activityPoints,
+          activities: student.activities,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Use the student returned from API which has proper ID and timestamps
+        const savedStudent = (data.students && data.students[0]) || student;
+        setStudentList((prev) => [savedStudent, ...prev]);
+        toast.success("Student added successfully");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to add student");
+      }
+    } catch (error) {
+      console.error("Error adding student:", error);
+      toast.error("Failed to add student");
+    }
   };
 
   return (
