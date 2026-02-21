@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Search, Target } from "lucide-react";
+import { Search, Target, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "../../ui/badge";
 import {
   Card,
@@ -32,10 +32,8 @@ export function StudentListTab({ students }: StudentListTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const batchLabel = useMemo(
-    () => students.find((student) => student.batchYear)?.batchYear ?? "",
-    [students],
+  const [expandedBatches, setExpandedBatches] = useState<Set<string>>(
+    new Set(students.map((s) => s.batchYear).filter(Boolean)),
   );
 
   const filteredStudents = useMemo(
@@ -51,6 +49,35 @@ export function StudentListTab({ students }: StudentListTabProps) {
     [students, searchTerm],
   );
 
+  const groupedStudents = useMemo(() => {
+    const groups: Record<string, Student[]> = {};
+    filteredStudents.forEach((student) => {
+      const batch = student.batchYear || "Unknown";
+      if (!groups[batch]) {
+        groups[batch] = [];
+      }
+      groups[batch].push(student);
+    });
+    return Object.entries(groups)
+      .sort(([batchA], [batchB]) => batchB.localeCompare(batchA))
+      .map(([batch, students]) => ({
+        batch,
+        students: students.sort((a, b) =>
+          a.rollNumber.localeCompare(b.rollNumber),
+        ),
+      }));
+  }, [filteredStudents]);
+
+  const toggleBatch = (batch: string) => {
+    const newExpanded = new Set(expandedBatches);
+    if (newExpanded.has(batch)) {
+      newExpanded.delete(batch);
+    } else {
+      newExpanded.add(batch);
+    }
+    setExpandedBatches(newExpanded);
+  };
+
   const handleViewDetails = (student: Student) => {
     setSelectedStudent(student);
     setIsDialogOpen(true);
@@ -61,9 +88,7 @@ export function StudentListTab({ students }: StudentListTabProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>
-              Student List{batchLabel ? ` - Batch ${batchLabel}` : ""}
-            </CardTitle>
+            <CardTitle>Student List - Grouped by Batch</CardTitle>
             <CardDescription>
               Manage and track student progress and placements
             </CardDescription>
@@ -91,65 +116,99 @@ export function StudentListTab({ students }: StudentListTabProps) {
             No students assigned yet.
           </p>
         ) : (
-          <div className="space-y-3">
-            {filteredStudents.map((student) => (
-              <Card
-                key={student.id}
-                className="hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleViewDetails(student)}
-              >
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="h-12 w-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
-                        {student.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{student.name}</p>
-                          <Badge
-                            className={getPlacementColor(
-                              student.placementStatus,
-                            )}
-                          >
-                            {student.placementStatus}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          {student.rollNumber} • {student.semester} Semester
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                      <div className="text-center">
-                        <p className="text-xs text-gray-500">CGPA</p>
-                        <p className="font-medium">{student.cgpa}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-500">Attendance</p>
-                        <p className="font-medium">{student.attendance}%</p>
-                      </div>
-                      <div className="text-center min-w-[120px]">
-                        <p className="text-xs text-gray-500 mb-1">
-                          Career Interest
-                        </p>
-                        <Badge variant="outline" className="text-xs">
-                          <Target className="h-3 w-3 mr-1" />
-                          {student.careerInterest || "Not set"}
-                        </Badge>
-                      </div>
-
-                      <Button variant="outline" size="sm">
-                        View Details
-                      </Button>
-                    </div>
+          <div className="space-y-4">
+            {groupedStudents.map(({ batch, students: batchStudents }) => (
+              <div key={batch} className="border rounded-lg overflow-hidden">
+                {/* Batch Header */}
+                <button
+                  onClick={() => toggleBatch(batch)}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transition-colors flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold text-blue-900">
+                      Batch {batch}
+                    </span>
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-200 text-blue-800"
+                    >
+                      {batchStudents.length} student
+                      {batchStudents.length !== 1 ? "s" : ""}
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="text-blue-900">
+                    {expandedBatches.has(batch) ? (
+                      <ChevronUp className="h-5 w-5" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Batch Students */}
+                {expandedBatches.has(batch) && (
+                  <div className="space-y-2 p-4 bg-white">
+                    {batchStudents.map((student) => (
+                      <Card
+                        key={student.id}
+                        className="hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleViewDetails(student)}
+                      >
+                        <CardContent className="pt-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className="h-10 w-10 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0 text-sm font-medium">
+                                {student.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-sm">
+                                    {student.name}
+                                  </p>
+                                  <Badge
+                                    className={getPlacementColor(
+                                      student.placementStatus,
+                                    )}
+                                  >
+                                    {student.placementStatus}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                  {student.rollNumber} • {student.semester}{" "}
+                                  Semester
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                              <div className="text-center hidden sm:block">
+                                <p className="text-xs text-gray-500">CGPA</p>
+                                <p className="text-sm font-medium">
+                                  {student.cgpa}
+                                </p>
+                              </div>
+                              <div className="text-center hidden md:block">
+                                <p className="text-xs text-gray-500">
+                                  Attendance
+                                </p>
+                                <p className="text-sm font-medium">
+                                  {student.attendance}%
+                                </p>
+                              </div>
+                              <Button variant="outline" size="sm">
+                                View Details
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
