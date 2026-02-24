@@ -17,7 +17,7 @@ import {
   sanitizeFileName,
 } from "@/lib/download";
 
-const courseFileChecklist: ChecklistItem[] = [
+const theoryCourseFileChecklist: ChecklistItem[] = [
   { id: "co_po_mapping", label: "CO–PO Mapping (CO–PO Mapping Level)" },
   { id: "co_pso_mapping", label: "CO–PO Mapping (CO–PSO Mapping Level)" },
   { id: "justification", label: "Justification of Mapping" },
@@ -42,13 +42,61 @@ const courseFileChecklist: ChecklistItem[] = [
   { id: "internal_marks", label: "Internal Marks Display" },
   { id: "course_exit_survey", label: "Course Exit Survey" },
   { id: "attainment_calculation", label: "Attainment Calculation" },
-  { id: "remarks", label: "Remarks" },
   { id: "score", label: "Score (Faculty/Auditor)" },
 ];
 
-const eventReportChecklist: ChecklistItem[] = [
-  { id: "details", label: "Event details are complete and accurate" },
+const labCourseFileChecklist: ChecklistItem[] = [
+  { id: "co_po_mapping", label: "CO–PO Mapping" },
+  { id: "co_pso_mapping", label: "CO–PSO Mapping" },
+  { id: "justification", label: "Justification of Mapping" },
+  { id: "course_coverage", label: "Course File Coverage" },
+  { id: "course_execution", label: "Course Execution" },
+  { id: "continuous_evaluation", label: "Continuous Evaluation" },
+  { id: "internal_test_conducted", label: "Internal Test Conducted" },
+  { id: "internal_test_qp", label: "Internal Test Question Paper" },
+  { id: "internal_test_answers", label: "Internal Test Answer Sheets" },
+  { id: "internal_test_marks", label: "Internal Test Mark Display" },
+  { id: "internal_total_marks", label: "Internal Total Marks" },
+  { id: "attendance", label: "Attendance (%)" },
+  { id: "assignment_record", label: "Assignment / Record" },
+  { id: "record_continuous_eval", label: "Record Continuous Evaluation" },
+  { id: "course_exit_survey", label: "Course Exit Survey" },
+  { id: "sample_record", label: "Sample Record" },
+  { id: "mark_calculation", label: "Mark Calculation" },
 ];
+
+const eventReportChecklist: ChecklistItem[] = [
+  { id: "event_title", label: "Event Title" },
+  { id: "event_type", label: "Event Type" },
+  { id: "date_time", label: "Date & Time" },
+  { id: "venue", label: "Venue" },
+  { id: "organizing_department", label: "Organizing Department / Club" },
+  { id: "event_coordinator", label: "Event Coordinator Details" },
+  { id: "proposal_approval", label: "Event Proposal Approval" },
+  { id: "budget_approval", label: "Budget Approval" },
+  { id: "resource_planning", label: "Resource Planning" },
+  { id: "poster_brochure", label: "Event Poster / Brochure" },
+  { id: "publicity_done", label: "Publicity Done" },
+  { id: "participant_registration", label: "Participant Registration" },
+  { id: "attendance_record", label: "Attendance Record" },
+  { id: "participant_list", label: "Participant List" },
+  { id: "feedback_collection", label: "Feedback Collection" },
+  { id: "photos_media", label: "Photos / Media Evidence" },
+  { id: "event_report_doc", label: "Event Report Document" },
+  { id: "supporting_docs", label: "Supporting Documents" },
+  { id: "outcomes", label: "Outcome / Objectives Achieved" },
+  { id: "learning_impact", label: "Learning / Impact" },
+  { id: "budget_utilization", label: "Budget Utilization" },
+  { id: "sponsorship_details", label: "Sponsorship Details" },
+];
+
+const isTheoryCourseCode = (code: string) => {
+  const lastLetter = (code.match(/[a-zA-Z](?!.*[a-zA-Z])/g) ?? [""])[0];
+  return lastLetter.toLowerCase() === "t";
+};
+
+const getChecklistForCourse = (code: string) =>
+  isTheoryCourseCode(code) ? theoryCourseFileChecklist : labCourseFileChecklist;
 
 export function AuditReviewInterface({
   type,
@@ -67,8 +115,10 @@ export function AuditReviewInterface({
   >(null);
   const { user } = useAuth();
 
+  const courseCode =
+    type === "file" ? ((item as { courseCode?: string }).courseCode ?? "") : "";
   const checklist =
-    type === "file" ? courseFileChecklist : eventReportChecklist;
+    type === "file" ? getChecklistForCourse(courseCode) : eventReportChecklist;
 
   const handleChecklistChange = (
     itemId: string,

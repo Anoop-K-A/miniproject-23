@@ -156,7 +156,15 @@ async function getFacultyDashboardData(username) {
     const userFiles = userId ? courseFiles.filter((file)=>file.facultyId === userId) : [];
     const userReports = userId ? eventReports.filter((report)=>report.facultyId === userId) : [];
     const totalParticipants = userReports.reduce((sum, report)=>sum + (report.participants ?? 0), 0);
-    const pendingReports = userReports.filter((report)=>report.status !== "Approved").length;
+    const pendingFileReviews = userFiles.filter((file)=>[
+            "Pending",
+            "Submitted"
+        ].includes(file.status ?? "")).length;
+    const pendingReportReviews = userReports.filter((report)=>[
+            "Pending",
+            "Submitted"
+        ].includes(report.status ?? "")).length;
+    const pendingReports = pendingFileReviews + pendingReportReviews;
     const recentActivity = [
         ...userFiles.map((file)=>({
                 action: "Uploaded",

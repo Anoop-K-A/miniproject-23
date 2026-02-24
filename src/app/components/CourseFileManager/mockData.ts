@@ -6,7 +6,7 @@ export const mockCourseFiles: CourseFile[] = [
     fileName: "CS101_Syllabus_Fall2024.pdf",
     courseCode: "CS101",
     courseName: "Introduction to Computer Science",
-    fileType: "Syllabus",
+    fileType: "CO–PO Mapping (CO–PO Mapping Level)",
     uploadDate: "2024-08-15",
     semester: "Fall",
     academicYear: "2024-2025",
@@ -22,26 +22,47 @@ export const mockCourseFiles: CourseFile[] = [
         id: "pr1",
         reviewerName: "Dr. Robert Brown",
         reviewDate: "2024-08-17",
-        comment: "Very well-structured syllabus. The learning outcomes are clearly defined and measurable."
-      }
-    ]
-  }
-];
-
-export const fileCategories = [
-  "Syllabus",
-  "Lesson Plan",
-  "Assignment",
-  "Reading Material",
-  "Presentation",
-  "Other"
+        comment:
+          "Very well-structured syllabus. The learning outcomes are clearly defined and measurable.",
+      },
+    ],
+  },
 ];
 
 export const fileTypes = [
-  "Syllabus",
-  "Lesson Plan",
-  "Assignment",
-  "Reading Material",
-  "Presentation",
-  "Other"
+  "CO–PO Mapping (CO–PO Mapping Level)",
+  "CO–PO Mapping (CO–PSO Mapping Level)",
+  "Justification of Mapping",
+  "Course File Coverage",
+  "Course Execution",
+  "Continuous Evaluation",
+  "Internal Test Conducted",
+  "Internal Test Question Paper",
+  "Internal Test Answer Sheets",
+  "Internal Test Mark Display",
+  "Internal Total Marks",
+  "Test (QP)",
+  "Test (CO Level)",
+  "Test (Sample Answer Sheets)",
+  "Test (QP) – Second",
+  "Test (CO Level) – Second",
+  "Test (Sample Answer Sheets) – Second",
+  "Assignment (QP)",
+  "Assignment (CO Level)",
+  "Assignment (Sample)",
+  "Assignment (QP) – Second",
+  "Assignment (CO Level) – Second",
+  "Assignment (Sample) – Second",
+  "Sample Tutorial",
+  "Attendance (%)",
+  "Internal Marks Display",
+  "Assignment / Record",
+  "Record Continuous Evaluation",
+  "Course Exit Survey",
+  "Sample Record",
+  "Attainment Calculation",
+  "Mark Calculation",
+  "CO–PO Mapping",
+  "CO–PSO Mapping",
+  "Score (Faculty/Auditor)",
 ];

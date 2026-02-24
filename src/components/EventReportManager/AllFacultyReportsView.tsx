@@ -18,13 +18,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Calendar,
   Download,
   Search,
@@ -42,175 +35,9 @@ import { ResponseDialog } from "@/components/shared/dialogs/ResponseDialog";
 import {
   Accordion,
   AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { EventReport, PeerReview } from "./types";
-import { downloadJsonFile, sanitizeFileName } from "@/lib/download";
-
-interface AllFacultyReportsViewProps {
-  reports: EventReport[];
-  currentUser: string;
-  onReportsChange?: (reports: EventReport[]) => void;
-}
-
-export function AllFacultyReportsView({
-  reports,
-  currentUser,
-  onReportsChange,
-}: AllFacultyReportsViewProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterDepartment, setFilterDepartment] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterYear, setFilterYear] = useState("all");
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<EventReport | null>(
-    null,
-  );
-  const [isPeerReviewOpen, setIsPeerReviewOpen] = useState(false);
-  const [isResponseOpen, setIsResponseOpen] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<PeerReview | null>(null);
-
-  const handleView = (report: EventReport) => {
-    setSelectedReport(report);
-    setIsViewOpen(true);
-  };
-
-  const handlePeerReview = async (review: string) => {
-    if (!selectedReport) return;
-
-    const newReview: PeerReview = {
-      id: `pr${Date.now()}`,
-      reviewerName: currentUser,
-      reviewDate: new Date().toISOString().split("T")[0],
-      comment: review,
-    };
-
-    const updatedReport = {
-      ...selectedReport,
-      peerReviews: [...(selectedReport.peerReviews || []), newReview],
-    };
-
-    try {
-      const response = await fetch(`/api/event-reports/${selectedReport.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ peerReviews: updatedReport.peerReviews }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        toast.error(data.error || "Peer review failed");
-        return;
-      }
-      onReportsChange?.(data.reports);
-      const refreshed = data.reports.find(
-        (report: EventReport) => report.id === selectedReport.id,
-      );
-      setSelectedReport(refreshed ?? updatedReport);
-      setIsPeerReviewOpen(false);
-    } catch (error) {
-      console.error("Peer review error:", error);
-      toast.error("An error occurred while submitting review");
-    }
-  };
-
-  const handleRespondToReview = async (response: string) => {
-    if (!selectedReport || !selectedReview) return;
-
-    const updatedReport = {
-      ...selectedReport,
-      peerReviews: selectedReport.peerReviews?.map((pr) =>
-        pr.id === selectedReview.id
-          ? {
-              ...pr,
-              facultyResponse: response,
-              responseDate: new Date().toISOString().split("T")[0],
-            }
-          : pr,
-      ),
-    };
-
-    try {
-      const apiResponse = await fetch(
-        `/api/event-reports/${selectedReport.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ peerReviews: updatedReport.peerReviews }),
-        },
-      );
-      const data = await apiResponse.json();
-      if (!apiResponse.ok) {
-        toast.error(data.error || "Response failed");
-        return;
-      }
-      onReportsChange?.(data.reports);
-      const refreshed = data.reports.find(
-        (report: EventReport) => report.id === selectedReport.id,
-      );
-      setSelectedReport(refreshed ?? updatedReport);
-      setSelectedReview(null);
-      setIsResponseOpen(false);
-    } catch (error) {
-      console.error("Response error:", error);
-      toast.error("An error occurred while responding");
-    }
-  };
-
-  const handleDownload = (report: EventReport) => {
-    const safeName = sanitizeFileName(report.eventName, "event-report");
-    const fileName = `${safeName || "event-report"}.json`;
-    downloadJsonFile(report, fileName);
-    toast.success(`Downloading ${report.eventName} report`);
-  };
-
-  const getStatusColor = (status: string | undefined) => {
-    switch (status) {
-      case "Approved":
-        return "bg-green-100 text-green-800";
-      case "Rejected":
-        return "bg-red-100 text-red-800";
-      case "Submitted":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const filteredReports = reports.filter((report) => {
-    const matchesSearch =
-      report.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.facultyCoordinator
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (report.eventType &&
-        report.eventType.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesDepartment =
-      filterDepartment === "all" || report.department === filterDepartment;
-    const matchesStatus =
-      filterStatus === "all" || report.status === filterStatus;
-    const matchesYear =
-      filterYear === "all" ||
-      new Date(report.eventDate).getFullYear().toString() === filterYear;
-
-    return matchesSearch && matchesDepartment && matchesStatus && matchesYear;
-  });
-
-  const uniqueDepartments = Array.from(
-    new Set(reports.map((r) => r.department).filter(Boolean) as string[]),
-  );
-  const uniqueYears = Array.from(
-    new Set(reports.map((r) => new Date(r.eventDate).getFullYear().toString())),
-  ).sort((a, b) => parseInt(b) - parseInt(a));
-
   return (
     <Card>
       <CardContent className="pt-6 space-y-4">
-        {/* Search and Filter Bar */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -264,7 +91,6 @@ export function AllFacultyReportsView({
           </Select>
         </div>
 
-        {/* Reports Table */}
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
@@ -281,10 +107,7 @@ export function AllFacultyReportsView({
             <TableBody>
               {filteredReports.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={7}
-                    className="text-center text-gray-500 py-8"
-                  >
+                  <TableCell colSpan={7} className="text-center text-gray-500 py-8">
                     No event reports found matching your criteria.
                   </TableCell>
                 </TableRow>
@@ -297,9 +120,7 @@ export function AllFacultyReportsView({
                         <div>
                           <div>{report.eventName}</div>
                           {report.location && (
-                            <div className="text-sm text-gray-500">
-                              {report.location}
-                            </div>
+                            <div className="text-sm text-gray-500">{report.location}</div>
                           )}
                         </div>
                       </div>
@@ -308,9 +129,7 @@ export function AllFacultyReportsView({
                       <div>
                         <div>{report.facultyCoordinator}</div>
                         {report.department && (
-                          <div className="text-sm text-gray-500">
-                            {report.department}
-                          </div>
+                          <div className="text-sm text-gray-500">{report.department}</div>
                         )}
                       </div>
                     </TableCell>
@@ -328,25 +147,15 @@ export function AllFacultyReportsView({
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm">
-                          {report.peerReviews?.length || 0}
-                        </span>
+                        <span className="text-sm">{report.peerReviews?.length || 0}</span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleView(report)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleView(report)}>
                           <Eye className="h-4 w-4 text-blue-600" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDownload(report)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleDownload(report)}>
                           <Download className="h-4 w-4" />
                         </Button>
                       </div>
@@ -358,91 +167,26 @@ export function AllFacultyReportsView({
           </Table>
         </div>
 
-        {/* View Report Details Dialog */}
-        <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Event Report Details & Peer Review</DialogTitle>
-              <DialogDescription>
-                {selectedReport && (
-                  <span className="flex items-center gap-2 mt-2">
-                    <Calendar className="h-4 w-4" />
-                    {selectedReport.eventName}
-                  </span>
-                )}
-              </DialogDescription>
-            </DialogHeader>
-            {selectedReport && (
-              <div className="space-y-4">
-                {/* Report Info */}
-                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-sm text-gray-500">Coordinator</p>
-                    <p>{selectedReport.facultyCoordinator}</p>
-                  </div>
-                  {selectedReport.department && (
-                    <div>
-                      <p className="text-sm text-gray-500">Department</p>
-                      <p>{selectedReport.department}</p>
-                    </div>
-                  )}
-                  {selectedReport.eventType && (
-                    <div>
-                      <p className="text-sm text-gray-500">Event Type</p>
-                      <p>{selectedReport.eventType}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm text-gray-500">Event Date</p>
-                    <p>{selectedReport.eventDate}</p>
-                  </div>
-                  {selectedReport.location && (
-                    <div>
-                      <p className="text-sm text-gray-500">Location</p>
-                      <p>{selectedReport.location}</p>
-                    </div>
-                  )}
-                  {selectedReport.participants && (
-                    <div>
-                      <p className="text-sm text-gray-500">Participants</p>
-                      <p>{selectedReport.participants}</p>
-                    </div>
-                  )}
-                  {selectedReport.duration && (
-                    <div>
-                      <p className="text-sm text-gray-500">Duration</p>
-                      <p>{selectedReport.duration}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm text-gray-500">Status</p>
-                    <Badge className={getStatusColor(selectedReport.status)}>
-                      {selectedReport.status}
-                    </Badge>
-                  </div>
-                </div>
+        <PeerReviewDialog
+          open={isPeerReviewOpen}
+          onOpenChange={setIsPeerReviewOpen}
+          onSubmit={handlePeerReview}
+          itemType="report"
+          itemName={selectedReport?.eventName || ""}
+        />
 
-                {/* Event Details */}
-                <div className="space-y-3">
-                  {selectedReport.description && (
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">Description</p>
-                      <p className="text-sm">{selectedReport.description}</p>
-                    </div>
-                  )}
-                  {selectedReport.objectives && (
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">Objectives</p>
-                      <p className="text-sm">{selectedReport.objectives}</p>
-                    </div>
-                  )}
-                  {selectedReport.outcomes && (
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">Outcomes</p>
-                      <p className="text-sm">{selectedReport.outcomes}</p>
-                    </div>
-                  )}
-                </div>
+        <ResponseDialog
+          open={isResponseOpen}
+          onOpenChange={(open) => {
+            setIsResponseOpen(open);
+            if (!open) setSelectedReview(null);
+          }}
+          onSubmit={handleRespondToReview}
+          itemType="report"
+        />
+      </CardContent>
+    </Card>
+  );
 
                 {/* Admin Review */}
                 {selectedReport.adminRemarks && (

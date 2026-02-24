@@ -60,20 +60,69 @@ import {
   sanitizeFileName,
 } from "@/lib/download";
 
+const theoryFileTypes = [
+  "CO–PO Mapping (CO–PO Mapping Level)",
+  "CO–PO Mapping (CO–PSO Mapping Level)",
+  "Justification of Mapping",
+  "Course File Coverage",
+  "Test (QP)",
+  "Test (CO Level)",
+  "Test (Sample Answer Sheets)",
+  "Test (QP) – Second",
+  "Test (CO Level) – Second",
+  "Test (Sample Answer Sheets) – Second",
+  "Assignment (QP)",
+  "Assignment (CO Level)",
+  "Assignment (Sample)",
+  "Assignment (QP) – Second",
+  "Assignment (CO Level) – Second",
+  "Assignment (Sample) – Second",
+  "Sample Tutorial",
+  "Attendance (%)",
+  "Internal Marks Display",
+  "Course Exit Survey",
+  "Attainment Calculation",
+  "Score (Faculty/Auditor)",
+];
+
+const labFileTypes = [
+  "CO–PO Mapping",
+  "CO–PSO Mapping",
+  "Justification of Mapping",
+  "Course File Coverage",
+  "Course Execution",
+  "Continuous Evaluation",
+  "Internal Test Conducted",
+  "Internal Test Question Paper",
+  "Internal Test Answer Sheets",
+  "Internal Test Mark Display",
+  "Internal Total Marks",
+  "Attendance (%)",
+  "Assignment / Record",
+  "Record Continuous Evaluation",
+  "Course Exit Survey",
+  "Sample Record",
+  "Mark Calculation",
+];
+
+const isTheoryCourseCode = (code: string) => {
+  const lastLetter = (code.match(/[a-zA-Z](?!.*[a-zA-Z])/g) ?? [""])[0];
+  return lastLetter.toLowerCase() === "t";
+};
+
+const getFileTypeOptionsForCourse = (code: string) =>
+  isTheoryCourseCode(code) ? theoryFileTypes : labFileTypes;
+
 interface CourseFileManagerProps {
   initialFiles?: CourseFile[];
-  fileCategories?: string[];
   fileTypes?: string[];
 }
 
 export function CourseFileManager({
   initialFiles = [],
-  fileCategories = [],
   fileTypes = [],
 }: CourseFileManagerProps) {
   const [files, setFiles] = useState<CourseFile[]>(initialFiles);
-  const [categoryOptions, setCategoryOptions] =
-    useState<string[]>(fileCategories);
   const [typeOptions, setTypeOptions] = useState<string[]>(fileTypes);
   const { user, userRole } = useAuth();
 
@@ -83,7 +132,6 @@ export function CourseFileManager({
   const [filterYear, setFilterYear] = useState("all");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedFileType, setSelectedFileType] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [semester, setSemester] = useState("");
@@ -114,6 +162,17 @@ export function CourseFileManager({
     }[]
   >([]);
 
+  const uploadTypeOptions = useMemo(
+    () => getFileTypeOptionsForCourse(courseCode),
+    [courseCode],
+  );
+
+  useEffect(() => {
+    if (selectedFileType && !uploadTypeOptions.includes(selectedFileType)) {
+      setSelectedFileType("");
+    }
+  }, [selectedFileType, uploadTypeOptions]);
+
   useEffect(() => {
     const fetchFiles = async () => {
       try {
@@ -124,7 +183,6 @@ export function CourseFileManager({
           return;
         }
         setFiles(data.files ?? []);
-        setCategoryOptions(data.fileCategories ?? []);
         setTypeOptions(data.fileTypes ?? []);
       } catch (error) {
         console.error("Load files error:", error);
@@ -507,25 +565,6 @@ export function CourseFileManager({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="category">File Category *</Label>
-                  <Select
-                    value={selectedCategory}
-                    onValueChange={(value) => setSelectedCategory(value)}
-                    required
-                  >
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select file category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categoryOptions.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <Label htmlFor="courseCode">Course Code</Label>
                   <Input
                     id="courseCode"
@@ -555,7 +594,7 @@ export function CourseFileManager({
                       <SelectValue placeholder="Select file type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {typeOptions.map((type) => (
+                      {uploadTypeOptions.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type}
                         </SelectItem>
@@ -574,9 +613,8 @@ export function CourseFileManager({
                         <SelectValue placeholder="Select semester" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Fall">Fall</SelectItem>
-                        <SelectItem value="Spring">Spring</SelectItem>
-                        <SelectItem value="Summer">Summer</SelectItem>
+                        <SelectItem value="Even">Even</SelectItem>
+                        <SelectItem value="Odd">Odd</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

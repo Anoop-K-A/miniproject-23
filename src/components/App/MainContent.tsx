@@ -20,6 +20,7 @@ import type {
   DashboardStats as StaffStats,
   Student,
 } from "@/components/StaffAdvisorDashboard/types";
+import { useAuth } from "@/context/AuthContext";
 
 interface MainContentProps {
   activeTab: string;
@@ -32,6 +33,7 @@ export function MainContent({
   onTabChange,
   userRole,
 }: MainContentProps) {
+  const { user } = useAuth();
   const [facultyData, setFacultyData] = useState<{
     stats: DashboardStats;
     facultyMembers: FacultyMember[];
@@ -50,7 +52,10 @@ export function MainContent({
   useEffect(() => {
     const fetchData = async () => {
       if (userRole === "faculty") {
-        const response = await fetch("/api/dashboard/faculty");
+        const url = user?.username
+          ? `/api/dashboard/faculty?username=${encodeURIComponent(user.username)}`
+          : "/api/dashboard/faculty";
+        const response = await fetch(url);
         const data = await response.json();
         setFacultyData(data);
       }
@@ -69,7 +74,7 @@ export function MainContent({
     fetchData().catch((error) => {
       console.error("Dashboard load error:", error);
     });
-  }, [userRole]);
+  }, [user?.username, userRole]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

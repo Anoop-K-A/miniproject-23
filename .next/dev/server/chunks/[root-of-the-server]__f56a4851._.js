@@ -142,7 +142,15 @@ async function getFacultyDashboardData(username) {
     const userFiles = userId ? courseFiles.filter((file)=>file.facultyId === userId) : [];
     const userReports = userId ? eventReports.filter((report)=>report.facultyId === userId) : [];
     const totalParticipants = userReports.reduce((sum, report)=>sum + (report.participants ?? 0), 0);
-    const pendingReports = userReports.filter((report)=>report.status !== "Approved").length;
+    const pendingFileReviews = userFiles.filter((file)=>[
+            "Pending",
+            "Submitted"
+        ].includes(file.status ?? "")).length;
+    const pendingReportReviews = userReports.filter((report)=>[
+            "Pending",
+            "Submitted"
+        ].includes(report.status ?? "")).length;
+    const pendingReports = pendingFileReviews + pendingReportReviews;
     const recentActivity = [
         ...userFiles.map((file)=>({
                 action: "Uploaded",
@@ -363,7 +371,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$dashboardData$
 ;
 ;
 async function GET(request) {
-    const username = request.cookies.get("auth_user")?.value ?? null;
+    const queryUsername = request.nextUrl.searchParams.get("username");
+    const cookieUsername = request.cookies.get("auth_user")?.value ?? null;
+    const username = queryUsername ?? cookieUsername;
     const data = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$dashboardData$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getFacultyDashboardData"])(username);
     return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json(data);
 }

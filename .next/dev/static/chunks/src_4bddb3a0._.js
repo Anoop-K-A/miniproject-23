@@ -1138,7 +1138,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-const courseFileChecklist = [
+const theoryCourseFileChecklist = [
     {
         id: "co_po_mapping",
         label: "CO–PO Mapping (CO–PO Mapping Level)"
@@ -1224,27 +1224,185 @@ const courseFileChecklist = [
         label: "Attainment Calculation"
     },
     {
-        id: "remarks",
-        label: "Remarks"
-    },
-    {
         id: "score",
         label: "Score (Faculty/Auditor)"
     }
 ];
-const eventReportChecklist = [
+const labCourseFileChecklist = [
     {
-        id: "details",
-        label: "Event details are complete and accurate"
+        id: "co_po_mapping",
+        label: "CO–PO Mapping"
+    },
+    {
+        id: "co_pso_mapping",
+        label: "CO–PSO Mapping"
+    },
+    {
+        id: "justification",
+        label: "Justification of Mapping"
+    },
+    {
+        id: "course_coverage",
+        label: "Course File Coverage"
+    },
+    {
+        id: "course_execution",
+        label: "Course Execution"
+    },
+    {
+        id: "continuous_evaluation",
+        label: "Continuous Evaluation"
+    },
+    {
+        id: "internal_test_conducted",
+        label: "Internal Test Conducted"
+    },
+    {
+        id: "internal_test_qp",
+        label: "Internal Test Question Paper"
+    },
+    {
+        id: "internal_test_answers",
+        label: "Internal Test Answer Sheets"
+    },
+    {
+        id: "internal_test_marks",
+        label: "Internal Test Mark Display"
+    },
+    {
+        id: "internal_total_marks",
+        label: "Internal Total Marks"
+    },
+    {
+        id: "attendance",
+        label: "Attendance (%)"
+    },
+    {
+        id: "assignment_record",
+        label: "Assignment / Record"
+    },
+    {
+        id: "record_continuous_eval",
+        label: "Record Continuous Evaluation"
+    },
+    {
+        id: "course_exit_survey",
+        label: "Course Exit Survey"
+    },
+    {
+        id: "sample_record",
+        label: "Sample Record"
+    },
+    {
+        id: "mark_calculation",
+        label: "Mark Calculation"
     }
 ];
+const eventReportChecklist = [
+    {
+        id: "event_title",
+        label: "Event Title"
+    },
+    {
+        id: "event_type",
+        label: "Event Type"
+    },
+    {
+        id: "date_time",
+        label: "Date & Time"
+    },
+    {
+        id: "venue",
+        label: "Venue"
+    },
+    {
+        id: "organizing_department",
+        label: "Organizing Department / Club"
+    },
+    {
+        id: "event_coordinator",
+        label: "Event Coordinator Details"
+    },
+    {
+        id: "proposal_approval",
+        label: "Event Proposal Approval"
+    },
+    {
+        id: "budget_approval",
+        label: "Budget Approval"
+    },
+    {
+        id: "resource_planning",
+        label: "Resource Planning"
+    },
+    {
+        id: "poster_brochure",
+        label: "Event Poster / Brochure"
+    },
+    {
+        id: "publicity_done",
+        label: "Publicity Done"
+    },
+    {
+        id: "participant_registration",
+        label: "Participant Registration"
+    },
+    {
+        id: "attendance_record",
+        label: "Attendance Record"
+    },
+    {
+        id: "participant_list",
+        label: "Participant List"
+    },
+    {
+        id: "feedback_collection",
+        label: "Feedback Collection"
+    },
+    {
+        id: "photos_media",
+        label: "Photos / Media Evidence"
+    },
+    {
+        id: "event_report_doc",
+        label: "Event Report Document"
+    },
+    {
+        id: "supporting_docs",
+        label: "Supporting Documents"
+    },
+    {
+        id: "outcomes",
+        label: "Outcome / Objectives Achieved"
+    },
+    {
+        id: "learning_impact",
+        label: "Learning / Impact"
+    },
+    {
+        id: "budget_utilization",
+        label: "Budget Utilization"
+    },
+    {
+        id: "sponsorship_details",
+        label: "Sponsorship Details"
+    }
+];
+const isTheoryCourseCode = (code)=>{
+    const lastLetter = (code.match(/[a-zA-Z](?!.*[a-zA-Z])/g) ?? [
+        ""
+    ])[0];
+    return lastLetter.toLowerCase() === "t";
+};
+const getChecklistForCourse = (code)=>isTheoryCourseCode(code) ? theoryCourseFileChecklist : labCourseFileChecklist;
 function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onReviewCompleted }) {
     _s();
     const [checkedItems, setCheckedItems] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({});
     const [auditorRemarks, setAuditorRemarks] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
     const [reviewDecision, setReviewDecision] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
-    const checklist = type === "file" ? courseFileChecklist : eventReportChecklist;
+    const courseCode = type === "file" ? item.courseCode ?? "" : "";
+    const checklist = type === "file" ? getChecklistForCourse(courseCode) : eventReportChecklist;
     const handleChecklistChange = (itemId, value)=>{
         setCheckedItems({
             ...checkedItems,
@@ -1401,14 +1559,14 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 className: "h-4 w-4 mr-2"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 247,
+                                lineNumber: 297,
                                 columnNumber: 11
                             }, this),
                             "Back to Faculty List"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 246,
+                        lineNumber: 296,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1419,20 +1577,20 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 className: "h-4 w-4 mr-2"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 251,
+                                lineNumber: 301,
                                 columnNumber: 11
                             }, this),
                             "Download Audit Sheet"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 250,
+                        lineNumber: 300,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 245,
+                lineNumber: 295,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -1448,7 +1606,7 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                         children: facultyName
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                        lineNumber: 261,
+                                        lineNumber: 311,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1456,13 +1614,13 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                         children: type === "file" ? "Course File Review" : "Event Report Review"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                        lineNumber: 262,
+                                        lineNumber: 312,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 260,
+                                lineNumber: 310,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1473,28 +1631,28 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                     children: reviewDecision === "approve" ? "Approved" : "Not Approved"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                    lineNumber: 267,
+                                    lineNumber: 317,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 266,
+                                lineNumber: 316,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 259,
+                        lineNumber: 309,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                    lineNumber: 258,
+                    lineNumber: 308,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 257,
+                lineNumber: 307,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1506,7 +1664,7 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                         onChecklistChange: handleChecklistChange
                     }, void 0, false, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 285,
+                        lineNumber: 335,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1518,7 +1676,7 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 onDownload: handleDownloadDocument
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 294,
+                                lineNumber: 344,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$AuditReviewInterface$2f$DocumentDetails$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DocumentDetails"], {
@@ -1526,7 +1684,7 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 item: item
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 301,
+                                lineNumber: 351,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$AuditorDashboard$2f$AuditReviewInterface$2f$AuditorRemarks$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AuditorRemarks"], {
@@ -1541,25 +1699,25 @@ function AuditReviewInterface({ type, item, facultyName, facultyId, onBack, onRe
                                 checkedItems: checkedItems
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                                lineNumber: 304,
+                                lineNumber: 354,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                        lineNumber: 292,
+                        lineNumber: 342,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-                lineNumber: 283,
+                lineNumber: 333,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AuditorDashboard/AuditReviewInterface/index.tsx",
-        lineNumber: 243,
+        lineNumber: 293,
         columnNumber: 5
     }, this);
 }

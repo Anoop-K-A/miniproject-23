@@ -49,7 +49,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AllFacultyReportsView } from "./AllFacultyReportsView";
 import { EventReportBlogViewer } from "./EventReportBlogViewer";
 import { EventReport } from "./types";
 import { useAuth } from "@/context/AuthContext";
@@ -407,9 +406,8 @@ export function EventReportManager({
       </CardHeader>
       <CardContent className="space-y-4">
         <Tabs defaultValue="my-reports" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="my-reports">My Reports</TabsTrigger>
-            <TabsTrigger value="all-reports">All Faculty Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="my-reports" className="space-y-4 mt-4">
@@ -839,14 +837,6 @@ export function EventReportManager({
                 </TableBody>
               </Table>
             </div>
-          </TabsContent>
-
-          <TabsContent value="all-reports" className="space-y-4 mt-4">
-            <AllFacultyReportsView
-              reports={visibleReports}
-              currentUser={displayName}
-              onReportsChange={setReports}
-            />
           </TabsContent>
         </Tabs>
       </CardContent>

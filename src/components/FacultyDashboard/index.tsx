@@ -82,10 +82,15 @@ export function FacultyDashboard({
       return bTime - aTime;
     });
 
+  const dashboardKey = `${user?.id ?? ""}:${user?.username ?? ""}`;
+
   useEffect(() => {
     const refreshDashboard = async () => {
       try {
-        const response = await fetch("/api/dashboard/faculty");
+        const url = user?.username
+          ? `/api/dashboard/faculty?username=${encodeURIComponent(user.username)}`
+          : "/api/dashboard/faculty";
+        const response = await fetch(url);
         const data = await response.json();
         if (response.ok) {
           if (data?.stats) {
@@ -125,7 +130,7 @@ export function FacultyDashboard({
         window.removeEventListener("dashboard:data-updated", handler);
       };
     }
-  }, [user?.id]);
+  }, [dashboardKey]);
 
   if (selectedFaculty) {
     return (

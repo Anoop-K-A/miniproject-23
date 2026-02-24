@@ -1447,10 +1447,59 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes = [] }) {
+const theoryFileTypes = [
+    "CO–PO Mapping (CO–PO Mapping Level)",
+    "CO–PO Mapping (CO–PSO Mapping Level)",
+    "Justification of Mapping",
+    "Course File Coverage",
+    "Test (QP)",
+    "Test (CO Level)",
+    "Test (Sample Answer Sheets)",
+    "Test (QP) – Second",
+    "Test (CO Level) – Second",
+    "Test (Sample Answer Sheets) – Second",
+    "Assignment (QP)",
+    "Assignment (CO Level)",
+    "Assignment (Sample)",
+    "Assignment (QP) – Second",
+    "Assignment (CO Level) – Second",
+    "Assignment (Sample) – Second",
+    "Sample Tutorial",
+    "Attendance (%)",
+    "Internal Marks Display",
+    "Course Exit Survey",
+    "Attainment Calculation",
+    "Score (Faculty/Auditor)"
+];
+const labFileTypes = [
+    "CO–PO Mapping",
+    "CO–PSO Mapping",
+    "Justification of Mapping",
+    "Course File Coverage",
+    "Course Execution",
+    "Continuous Evaluation",
+    "Internal Test Conducted",
+    "Internal Test Question Paper",
+    "Internal Test Answer Sheets",
+    "Internal Test Mark Display",
+    "Internal Total Marks",
+    "Attendance (%)",
+    "Assignment / Record",
+    "Record Continuous Evaluation",
+    "Course Exit Survey",
+    "Sample Record",
+    "Mark Calculation"
+];
+const isTheoryCourseCode = (code)=>{
+    const lastLetter = (code.match(/[a-zA-Z](?!.*[a-zA-Z])/g) ?? [
+        ""
+    ])[0];
+    return lastLetter.toLowerCase() === "t";
+};
+const getFileTypeOptionsForCourse = (code)=>isTheoryCourseCode(code) ? theoryFileTypes : labFileTypes;
+function CourseFileManager({ initialFiles = [], fileTypes = [] }) {
     _s();
     const [files, setFiles] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(initialFiles);
-    const [categoryOptions, setCategoryOptions] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(fileCategories);
     const [typeOptions, setTypeOptions] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(fileTypes);
     const { user, userRole } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
     const [searchTerm, setSearchTerm] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
@@ -1459,7 +1508,6 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
     const [filterYear, setFilterYear] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("all");
     const [uploadDialogOpen, setUploadDialogOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [selectedFileType, setSelectedFileType] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
-    const [selectedCategory, setSelectedCategory] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
     const [courseCode, setCourseCode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
     const [courseName, setCourseName] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
     const [semester, setSemester] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
@@ -1471,6 +1519,21 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
     const [isResponseOpen, setIsResponseOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isMessageReplyOpen, setIsMessageReplyOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [messages, setMessages] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const uploadTypeOptions = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
+        "CourseFileManager.useMemo[uploadTypeOptions]": ()=>getFileTypeOptionsForCourse(courseCode)
+    }["CourseFileManager.useMemo[uploadTypeOptions]"], [
+        courseCode
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "CourseFileManager.useEffect": ()=>{
+            if (selectedFileType && !uploadTypeOptions.includes(selectedFileType)) {
+                setSelectedFileType("");
+            }
+        }
+    }["CourseFileManager.useEffect"], [
+        selectedFileType,
+        uploadTypeOptions
+    ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "CourseFileManager.useEffect": ()=>{
             const fetchFiles = {
@@ -1483,7 +1546,6 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                             return;
                         }
                         setFiles(data.files ?? []);
-                        setCategoryOptions(data.fileCategories ?? []);
                         setTypeOptions(data.fileTypes ?? []);
                     } catch (error) {
                         console.error("Load files error:", error);
@@ -1754,20 +1816,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                         children: "Course File Management"
                     }, void 0, false, {
                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                        lineNumber: 404,
+                        lineNumber: 462,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
                         children: "Upload and manage course materials, syllabi, lesson plans, and assignments"
                     }, void 0, false, {
                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                        lineNumber: 405,
+                        lineNumber: 463,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                lineNumber: 403,
+                lineNumber: 461,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1783,7 +1845,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                         className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 414,
+                                        lineNumber: 472,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1793,13 +1855,13 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                         className: "pl-10"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 415,
+                                        lineNumber: 473,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                lineNumber: 413,
+                                lineNumber: 471,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -1813,20 +1875,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                 className: "h-4 w-4 mr-2"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 424,
+                                                lineNumber: 482,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectValue"], {
                                                 placeholder: "Filter by Type"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 425,
+                                                lineNumber: 483,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 423,
+                                        lineNumber: 481,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -1836,7 +1898,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                 children: "All Types"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 428,
+                                                lineNumber: 486,
                                                 columnNumber: 15
                                             }, this),
                                             typeOptions.map((type)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -1844,19 +1906,19 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                     children: type
                                                 }, type, false, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 430,
+                                                    lineNumber: 488,
                                                     columnNumber: 17
                                                 }, this))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 427,
+                                        lineNumber: 485,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                lineNumber: 422,
+                                lineNumber: 480,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -1870,20 +1932,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                 className: "h-4 w-4 mr-2"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 438,
+                                                lineNumber: 496,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectValue"], {
                                                 placeholder: "Filter by Status"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 439,
+                                                lineNumber: 497,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 437,
+                                        lineNumber: 495,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -1893,7 +1955,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                 children: "All Statuses"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 442,
+                                                lineNumber: 500,
                                                 columnNumber: 15
                                             }, this),
                                             statuses.map((status)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -1901,19 +1963,19 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                     children: status || "Unknown"
                                                 }, status || "unknown", false, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 444,
+                                                    lineNumber: 502,
                                                     columnNumber: 17
                                                 }, this))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 441,
+                                        lineNumber: 499,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                lineNumber: 436,
+                                lineNumber: 494,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -1927,20 +1989,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                 className: "h-4 w-4 mr-2"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 455,
+                                                lineNumber: 513,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectValue"], {
                                                 placeholder: "Filter by Year"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 456,
+                                                lineNumber: 514,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 454,
+                                        lineNumber: 512,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -1950,7 +2012,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                 children: "All Years"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 459,
+                                                lineNumber: 517,
                                                 columnNumber: 15
                                             }, this),
                                             years.map((year)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -1958,19 +2020,19 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                     children: year
                                                 }, year, false, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 461,
+                                                    lineNumber: 519,
                                                     columnNumber: 17
                                                 }, this))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 458,
+                                        lineNumber: 516,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                lineNumber: 453,
+                                lineNumber: 511,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -1986,19 +2048,19 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                     className: "h-4 w-4 mr-2"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 470,
+                                                    lineNumber: 528,
                                                     columnNumber: 17
                                                 }, this),
                                                 "Upload File"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 469,
+                                            lineNumber: 527,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 468,
+                                        lineNumber: 526,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogContent"], {
@@ -2010,20 +2072,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                         children: "Upload Course File"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 476,
+                                                        lineNumber: 534,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                                         children: "Add a new course file to your repository"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 477,
+                                                        lineNumber: 535,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 475,
+                                                lineNumber: 533,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -2037,7 +2099,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 children: "File"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 483,
+                                                                lineNumber: 541,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2061,68 +2123,13 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 }
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 484,
+                                                                lineNumber: 542,
                                                                 columnNumber: 19
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 482,
-                                                        columnNumber: 17
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                        children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Label"], {
-                                                                htmlFor: "category",
-                                                                children: "File Category *"
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 510,
-                                                                columnNumber: 19
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
-                                                                value: selectedCategory,
-                                                                onValueChange: (value)=>setSelectedCategory(value),
-                                                                required: true,
-                                                                children: [
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectTrigger"], {
-                                                                        id: "category",
-                                                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectValue"], {
-                                                                            placeholder: "Select file category"
-                                                                        }, void 0, false, {
-                                                                            fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                            lineNumber: 517,
-                                                                            columnNumber: 23
-                                                                        }, this)
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 516,
-                                                                        columnNumber: 21
-                                                                    }, this),
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
-                                                                        children: categoryOptions.map((category)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                                value: category,
-                                                                                children: category
-                                                                            }, category, false, {
-                                                                                fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                lineNumber: 521,
-                                                                                columnNumber: 25
-                                                                            }, this))
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 519,
-                                                                        columnNumber: 21
-                                                                    }, this)
-                                                                ]
-                                                            }, void 0, true, {
-                                                                fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 511,
-                                                                columnNumber: 19
-                                                            }, this)
-                                                        ]
-                                                    }, void 0, true, {
-                                                        fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 509,
+                                                        lineNumber: 540,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2132,7 +2139,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 children: "Course Code"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 529,
+                                                                lineNumber: 568,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2143,13 +2150,13 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 required: true
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 530,
+                                                                lineNumber: 569,
                                                                 columnNumber: 19
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 528,
+                                                        lineNumber: 567,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2159,7 +2166,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 children: "Course Name"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 539,
+                                                                lineNumber: 578,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2170,13 +2177,13 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 required: true
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 540,
+                                                                lineNumber: 579,
                                                                 columnNumber: 19
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 538,
+                                                        lineNumber: 577,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2186,7 +2193,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 children: "File Type"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 549,
+                                                                lineNumber: 588,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -2199,38 +2206,38 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                             placeholder: "Select file type"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                            lineNumber: 555,
+                                                                            lineNumber: 594,
                                                                             columnNumber: 23
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 554,
+                                                                        lineNumber: 593,
                                                                         columnNumber: 21
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
-                                                                        children: typeOptions.map((type)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
+                                                                        children: uploadTypeOptions.map((type)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
                                                                                 value: type,
                                                                                 children: type
                                                                             }, type, false, {
                                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                lineNumber: 559,
+                                                                                lineNumber: 598,
                                                                                 columnNumber: 25
                                                                             }, this))
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 557,
+                                                                        lineNumber: 596,
                                                                         columnNumber: 21
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 550,
+                                                                lineNumber: 589,
                                                                 columnNumber: 19
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 548,
+                                                        lineNumber: 587,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2243,7 +2250,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                         children: "Semester"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 568,
+                                                                        lineNumber: 607,
                                                                         columnNumber: 21
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -2256,56 +2263,48 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                                     placeholder: "Select semester"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                    lineNumber: 574,
+                                                                                    lineNumber: 613,
                                                                                     columnNumber: 25
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                lineNumber: 573,
+                                                                                lineNumber: 612,
                                                                                 columnNumber: 23
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
                                                                                 children: [
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                                        value: "Fall",
-                                                                                        children: "Fall"
+                                                                                        value: "Even",
+                                                                                        children: "Even"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                        lineNumber: 577,
+                                                                                        lineNumber: 616,
                                                                                         columnNumber: 25
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                                        value: "Spring",
-                                                                                        children: "Spring"
+                                                                                        value: "Odd",
+                                                                                        children: "Odd"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                        lineNumber: 578,
-                                                                                        columnNumber: 25
-                                                                                    }, this),
-                                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                                        value: "Summer",
-                                                                                        children: "Summer"
-                                                                                    }, void 0, false, {
-                                                                                        fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                        lineNumber: 579,
+                                                                                        lineNumber: 617,
                                                                                         columnNumber: 25
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                lineNumber: 576,
+                                                                                lineNumber: 615,
                                                                                 columnNumber: 23
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 569,
+                                                                        lineNumber: 608,
                                                                         columnNumber: 21
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 567,
+                                                                lineNumber: 606,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2315,7 +2314,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                         children: "Academic Year"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 584,
+                                                                        lineNumber: 622,
                                                                         columnNumber: 21
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2326,19 +2325,19 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                         required: true
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 585,
+                                                                        lineNumber: 623,
                                                                         columnNumber: 21
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 583,
+                                                                lineNumber: 621,
                                                                 columnNumber: 19
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 566,
+                                                        lineNumber: 605,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -2347,31 +2346,31 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                         children: "Upload File"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 594,
+                                                        lineNumber: 632,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 481,
+                                                lineNumber: 539,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                        lineNumber: 474,
+                                        lineNumber: 532,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                lineNumber: 467,
+                                lineNumber: 525,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                        lineNumber: 412,
+                        lineNumber: 470,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$CourseFileManager$2f$TreeView$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TreeView"], {
@@ -2382,7 +2381,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                         canDelete: true
                     }, void 0, false, {
                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                        lineNumber: 603,
+                        lineNumber: 641,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2397,7 +2396,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                             children: resolvedFiles.length
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 615,
+                                            lineNumber: 653,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2405,18 +2404,18 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                             children: "Total Files"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 616,
+                                            lineNumber: 654,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                    lineNumber: 614,
+                                    lineNumber: 652,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                lineNumber: 613,
+                                lineNumber: 651,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -2428,7 +2427,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                             children: fileTypes.length
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 621,
+                                            lineNumber: 659,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2436,18 +2435,18 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                             children: "File Types"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 622,
+                                            lineNumber: 660,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                    lineNumber: 620,
+                                    lineNumber: 658,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                lineNumber: 619,
+                                lineNumber: 657,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -2459,7 +2458,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                             children: years.length
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 627,
+                                            lineNumber: 665,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2467,24 +2466,24 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                             children: "Years"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 628,
+                                            lineNumber: 666,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                    lineNumber: 626,
+                                    lineNumber: 664,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                lineNumber: 625,
+                                lineNumber: 663,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                        lineNumber: 612,
+                        lineNumber: 650,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -2499,7 +2498,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                             children: "File Details"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 637,
+                                            lineNumber: 675,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogDescription"], {
@@ -2510,25 +2509,25 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                         className: "h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 641,
+                                                        lineNumber: 679,
                                                         columnNumber: 21
                                                     }, this),
                                                     selectedFile.fileName
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 640,
+                                                lineNumber: 678,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 638,
+                                            lineNumber: 676,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                    lineNumber: 636,
+                                    lineNumber: 674,
                                     columnNumber: 13
                                 }, this),
                                 selectedFile && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2544,20 +2543,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             children: "Course Code"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 651,
+                                                            lineNumber: 689,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                             children: selectedFile.courseCode
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 652,
+                                                            lineNumber: 690,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 650,
+                                                    lineNumber: 688,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2567,20 +2566,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             children: "Course Name"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 655,
+                                                            lineNumber: 693,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                             children: selectedFile.courseName
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 656,
+                                                            lineNumber: 694,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 654,
+                                                    lineNumber: 692,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2590,20 +2589,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             children: "File Type"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 659,
+                                                            lineNumber: 697,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                             children: selectedFile.fileType
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 660,
+                                                            lineNumber: 698,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 658,
+                                                    lineNumber: 696,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2613,7 +2612,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             children: "Semester"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 663,
+                                                            lineNumber: 701,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2624,13 +2623,13 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 664,
+                                                            lineNumber: 702,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 662,
+                                                    lineNumber: 700,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2640,20 +2639,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             children: "Upload Date"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 669,
+                                                            lineNumber: 707,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                             children: selectedFile.uploadDate
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 670,
+                                                            lineNumber: 708,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 668,
+                                                    lineNumber: 706,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2663,26 +2662,26 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             children: "File Size"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 673,
+                                                            lineNumber: 711,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                             children: selectedFile.size
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 674,
+                                                            lineNumber: 712,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 672,
+                                                    lineNumber: 710,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 649,
+                                            lineNumber: 687,
                                             columnNumber: 17
                                         }, this),
                                         selectedFile.status && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2698,14 +2697,14 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                     className: "h-5 w-5 text-gray-600"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                    lineNumber: 683,
+                                                                    lineNumber: 721,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 "Admin Review"
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 682,
+                                                            lineNumber: 720,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2713,13 +2712,13 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             children: selectedFile.status
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 686,
+                                                            lineNumber: 724,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 681,
+                                                    lineNumber: 719,
                                                     columnNumber: 21
                                                 }, this),
                                                 selectedFile.adminRemarks ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2734,7 +2733,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                         children: selectedFile.adminRemarks
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 711,
+                                                                        lineNumber: 749,
                                                                         columnNumber: 29
                                                                     }, this),
                                                                     selectedFile.reviewedBy && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2747,7 +2746,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                lineNumber: 716,
+                                                                                lineNumber: 754,
                                                                                 columnNumber: 33
                                                                             }, this),
                                                                             selectedFile.reviewedDate && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2757,24 +2756,24 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                lineNumber: 718,
+                                                                                lineNumber: 756,
                                                                                 columnNumber: 35
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 715,
+                                                                        lineNumber: 753,
                                                                         columnNumber: 31
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 710,
+                                                                lineNumber: 748,
                                                                 columnNumber: 27
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 701,
+                                                            lineNumber: 739,
                                                             columnNumber: 25
                                                         }, this),
                                                         selectedFile.facultyResponse ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Alert"], {
@@ -2786,7 +2785,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                         children: "Your Response:"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 729,
+                                                                        lineNumber: 767,
                                                                         columnNumber: 31
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2794,7 +2793,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                         children: selectedFile.facultyResponse
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 732,
+                                                                        lineNumber: 770,
                                                                         columnNumber: 31
                                                                     }, this),
                                                                     selectedFile.responseDate && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2806,23 +2805,23 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                            lineNumber: 737,
+                                                                            lineNumber: 775,
                                                                             columnNumber: 35
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 736,
+                                                                        lineNumber: 774,
                                                                         columnNumber: 33
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 728,
+                                                                lineNumber: 766,
                                                                 columnNumber: 29
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 727,
+                                                            lineNumber: 765,
                                                             columnNumber: 27
                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                                             variant: "outline",
@@ -2834,20 +2833,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                     className: "h-4 w-4 mr-2"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                    lineNumber: 751,
+                                                                    lineNumber: 789,
                                                                     columnNumber: 29
                                                                 }, this),
                                                                 "Respond to Admin Review"
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 745,
+                                                            lineNumber: 783,
                                                             columnNumber: 27
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 700,
+                                                    lineNumber: 738,
                                                     columnNumber: 23
                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Alert"], {
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AlertDescription"], {
@@ -2855,18 +2854,18 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                         children: "This file is pending admin review. You will be notified once the review is complete."
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 758,
+                                                        lineNumber: 796,
                                                         columnNumber: 25
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 757,
+                                                    lineNumber: 795,
                                                     columnNumber: 23
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 680,
+                                            lineNumber: 718,
                                             columnNumber: 19
                                         }, this),
                                         (()=>{
@@ -2885,14 +2884,14 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                         className: "h-5 w-5 text-gray-600"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 778,
+                                                                        lineNumber: 816,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     "Auditor Messages"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 777,
+                                                                lineNumber: 815,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2900,13 +2899,13 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 children: threadMessages.length
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 781,
+                                                                lineNumber: 819,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 776,
+                                                        lineNumber: 814,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2921,20 +2920,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                                 children: msg.senderName || msg.senderRole || "Message"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                lineNumber: 790,
+                                                                                lineNumber: 828,
                                                                                 columnNumber: 31
                                                                             }, this),
                                                                             msg.createdAt && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                 children: new Date(msg.createdAt).toLocaleString()
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                                lineNumber: 794,
+                                                                                lineNumber: 832,
                                                                                 columnNumber: 33
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 789,
+                                                                        lineNumber: 827,
                                                                         columnNumber: 29
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2942,18 +2941,18 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                         children: msg.message
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                        lineNumber: 799,
+                                                                        lineNumber: 837,
                                                                         columnNumber: 29
                                                                     }, this)
                                                                 ]
                                                             }, msg.id, true, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 785,
+                                                                lineNumber: 823,
                                                                 columnNumber: 27
                                                             }, this))
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 783,
+                                                        lineNumber: 821,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -2965,20 +2964,20 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                                 className: "h-4 w-4 mr-2"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                                lineNumber: 810,
+                                                                lineNumber: 848,
                                                                 columnNumber: 25
                                                             }, this),
                                                             "Reply to Auditor"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                        lineNumber: 805,
+                                                        lineNumber: 843,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                lineNumber: 775,
+                                                lineNumber: 813,
                                                 columnNumber: 21
                                             }, this);
                                         })(),
@@ -2993,14 +2992,14 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                             className: "h-4 w-4 mr-2"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                            lineNumber: 822,
+                                                            lineNumber: 860,
                                                             columnNumber: 21
                                                         }, this),
                                                         "Download File"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 818,
+                                                    lineNumber: 856,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -3009,30 +3008,30 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                                                     children: "Close"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                                    lineNumber: 825,
+                                                    lineNumber: 863,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                            lineNumber: 817,
+                                            lineNumber: 855,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                                    lineNumber: 648,
+                                    lineNumber: 686,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                            lineNumber: 635,
+                            lineNumber: 673,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                        lineNumber: 634,
+                        lineNumber: 672,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$shared$2f$dialogs$2f$ResponseDialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResponseDialog"], {
@@ -3042,7 +3041,7 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                         itemType: "file"
                     }, void 0, false, {
                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                        lineNumber: 838,
+                        lineNumber: 876,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$shared$2f$dialogs$2f$ResponseDialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResponseDialog"], {
@@ -3052,23 +3051,23 @@ function CourseFileManager({ initialFiles = [], fileCategories = [], fileTypes =
                         itemType: "file"
                     }, void 0, false, {
                         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                        lineNumber: 844,
+                        lineNumber: 882,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/CourseFileManager/index.tsx",
-                lineNumber: 410,
+                lineNumber: 468,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/CourseFileManager/index.tsx",
-        lineNumber: 402,
+        lineNumber: 460,
         columnNumber: 5
     }, this);
 }
-_s(CourseFileManager, "BEG0SoJFcyc+Ax+OIQ7L7CBFrU0=", false, function() {
+_s(CourseFileManager, "ZTKnAwhYQ9smzAh97spPm3xB4tw=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"]
     ];

@@ -115,9 +115,15 @@ export async function getFacultyDashboardData(
     0,
   );
 
-  const pendingReports = userReports.filter(
-    (report) => report.status !== "Approved",
+  const pendingFileReviews = userFiles.filter((file) =>
+    ["Pending", "Submitted"].includes(file.status ?? ""),
   ).length;
+
+  const pendingReportReviews = userReports.filter((report) =>
+    ["Pending", "Submitted"].includes(report.status ?? ""),
+  ).length;
+
+  const pendingReports = pendingFileReviews + pendingReportReviews;
 
   const recentActivity: ActivityItem[] = [
     ...userFiles.map((file) => ({

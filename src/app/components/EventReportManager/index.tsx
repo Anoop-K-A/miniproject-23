@@ -48,7 +48,6 @@ import {
 import { Badge } from "../ui/badge";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { AllFacultyReportsView } from "./AllFacultyReportsView";
 import { EventReportBlogViewer } from "./EventReportBlogViewer";
 import { mockEventReports, communities } from "./mockData";
 import { EventReport } from "./types";
@@ -295,9 +294,8 @@ function LegacyEventReportManager() {
       </CardHeader>
       <CardContent className="space-y-4">
         <Tabs defaultValue="my-reports" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="my-reports">My Reports</TabsTrigger>
-            <TabsTrigger value="all-reports">All Faculty Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="my-reports" className="space-y-4 mt-4">
@@ -728,18 +726,6 @@ function LegacyEventReportManager() {
                 </TableBody>
               </Table>
             </div>
-          </TabsContent>
-
-          <TabsContent value="all-reports" className="space-y-4 mt-4">
-            <AllFacultyReportsView
-              reports={reports}
-              onReportUpdate={(updatedReport) => {
-                const updated = reports.map((r) =>
-                  r.id === updatedReport.id ? updatedReport : r,
-                );
-                setReports(updated);
-              }}
-            />
           </TabsContent>
         </Tabs>
       </CardContent>

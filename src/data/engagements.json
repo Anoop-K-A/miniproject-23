@@ -12,12 +12,12 @@
   {
     "id": "f1",
     "facultyId": "f1",
-    "uploadsCount": 1,
+    "uploadsCount": 2,
     "activityParticipationCount": 2,
     "responsibilitiesCount": 0,
     "courseCompletionCount": 0,
-    "score": 40,
-    "updatedAt": "2026-02-20T22:33:43.459Z"
+    "score": 50,
+    "updatedAt": "2026-02-24T17:42:43.172Z"
   },
   {
     "id": "admin-1",
@@ -32,11 +32,11 @@
   {
     "id": "1771405829166",
     "facultyId": "1771405829166",
-    "uploadsCount": 4,
+    "uploadsCount": 7,
     "activityParticipationCount": 0,
     "responsibilitiesCount": 0,
     "courseCompletionCount": 0,
-    "score": 40,
-    "updatedAt": "2026-02-20T22:33:43.524Z"
+    "score": 70,
+    "updatedAt": "2026-02-24T17:48:19.784Z"
   }
 ]
