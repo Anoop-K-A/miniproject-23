@@ -1,10 +1,9 @@
 import { Card, CardContent } from "../../ui/card";
-import { Alert, AlertDescription } from "../../ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { FileText, Calendar } from "lucide-react";
 import { CourseFile, EventReport } from "./types";
-import { CourseFileCard } from "./CourseFileCard";
 import { EventReportCard } from "./EventReportCard";
+import { CourseCodeCards } from "./CourseCodeCards";
 
 interface PortfolioTabsProps {
   courseFiles: CourseFile[];
@@ -34,53 +33,44 @@ export function PortfolioTabs({
         </TabsTrigger>
       </TabsList>
 
-      {/* Course Files Tab */}
+      {/* Course Files Tab - Grouped by Course Code */}
       <TabsContent value="course-files" className="space-y-4 mt-6">
-        {courseFiles.length === 0 ? (
-          <Alert>
-            <AlertDescription className="text-sm text-gray-500">
-              No course files available yet.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {courseFiles.map((file) => (
-                <CourseFileCard
-                  key={file.id}
-                  file={file}
-                  onView={onViewFile}
-                  getStatusColor={getStatusColor}
-                />
-              ))}
-            </div>
+        <CourseCodeCards
+          courseFiles={courseFiles}
+          onViewFile={onViewFile}
+          getStatusColor={getStatusColor}
+        />
 
-            {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{courseFiles.length}</div>
-                  <p className="text-sm text-gray-500">Total Files</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">
-                    {courseFiles.filter((f) => f.status === "Approved").length}
-                  </div>
-                  <p className="text-sm text-gray-500">Approved Files</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">
-                    {courseFiles.filter((f) => f.status === "Submitted").length}
-                  </div>
-                  <p className="text-sm text-gray-500">Under Review</p>
-                </CardContent>
-              </Card>
-            </div>
-          </>
+        {/* Summary Stats */}
+        {courseFiles.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">{courseFiles.length}</div>
+                <p className="text-sm text-gray-500">Total Files</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">
+                  {courseFiles.filter((f) => f.status === "Approved").length}
+                </div>
+                <p className="text-sm text-gray-500">Approved Files</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">
+                  {
+                    courseFiles.filter(
+                      (f) => f.status === "Pending" || f.status === "Submitted",
+                    ).length
+                  }
+                </div>
+                <p className="text-sm text-gray-500">Under Review</p>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </TabsContent>
 
@@ -109,7 +99,9 @@ export function PortfolioTabs({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <Card>
                 <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{eventReports.length}</div>
+                  <div className="text-2xl font-bold">
+                    {eventReports.length}
+                  </div>
                   <p className="text-sm text-gray-500">Total Reports</p>
                 </CardContent>
               </Card>

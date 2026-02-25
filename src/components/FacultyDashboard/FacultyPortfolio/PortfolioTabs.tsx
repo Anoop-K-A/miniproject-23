@@ -2,13 +2,16 @@ import { Card, CardContent } from "../../ui/card";
 import { Alert, AlertDescription } from "../../ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { FileText, Calendar } from "lucide-react";
-import { CourseFile, EventReport } from "./types";
-import { CourseFileCard } from "./CourseFileCard";
+import { CourseFile, EventReport, Student } from "./types";
 import { EventReportCard } from "./EventReportCard";
+import { CourseCodeCards } from "./CourseCodeCards";
+import { StudentListTab } from "./StudentListTab";
 
 interface PortfolioTabsProps {
   courseFiles: CourseFile[];
   eventReports: EventReport[];
+  students?: Student[];
+  showStudents?: boolean;
   onViewFile: (file: CourseFile) => void;
   onViewReport: (report: EventReport) => void;
   getStatusColor: (status: string) => string;
@@ -17,13 +20,19 @@ interface PortfolioTabsProps {
 export function PortfolioTabs({
   courseFiles,
   eventReports,
+  students = [],
+  showStudents = false,
   onViewFile,
   onViewReport,
   getStatusColor,
 }: PortfolioTabsProps) {
+  const tabCount = showStudents ? 3 : 2;
+  const tabsClassName =
+    tabCount === 3 ? "grid w-full grid-cols-3" : "grid w-full grid-cols-2";
+
   return (
     <Tabs defaultValue="course-files" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className={tabsClassName}>
         <TabsTrigger value="course-files" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
           Course Files ({courseFiles.length})
@@ -32,55 +41,51 @@ export function PortfolioTabs({
           <Calendar className="h-4 w-4" />
           Event Reports ({eventReports.length})
         </TabsTrigger>
+        {showStudents && (
+          <TabsTrigger value="students" className="flex items-center gap-2">
+            Students ({students.length})
+          </TabsTrigger>
+        )}
       </TabsList>
 
-      {/* Course Files Tab */}
+      {/* Course Files Tab - Grouped by Course Code */}
       <TabsContent value="course-files" className="space-y-4 mt-6">
-        {courseFiles.length === 0 ? (
-          <Alert>
-            <AlertDescription className="text-sm text-gray-500">
-              No course files available yet.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {courseFiles.map((file) => (
-                <CourseFileCard
-                  key={file.id}
-                  file={file}
-                  onView={onViewFile}
-                  getStatusColor={getStatusColor}
-                />
-              ))}
-            </div>
+        <CourseCodeCards
+          courseFiles={courseFiles}
+          onViewFile={onViewFile}
+          getStatusColor={getStatusColor}
+        />
 
-            {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{courseFiles.length}</div>
-                  <p className="text-sm text-gray-500">Total Files</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">
-                    {courseFiles.filter((f) => f.status === "Approved").length}
-                  </div>
-                  <p className="text-sm text-gray-500">Approved Files</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">
-                    {courseFiles.filter((f) => f.status === "Submitted").length}
-                  </div>
-                  <p className="text-sm text-gray-500">Under Review</p>
-                </CardContent>
-              </Card>
-            </div>
-          </>
+        {/* Summary Stats */}
+        {courseFiles.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">{courseFiles.length}</div>
+                <p className="text-sm text-gray-500">Total Files</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">
+                  {courseFiles.filter((f) => f.status === "Approved").length}
+                </div>
+                <p className="text-sm text-gray-500">Approved Files</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">
+                  {
+                    courseFiles.filter(
+                      (f) => f.status === "Pending" || f.status === "Submitted",
+                    ).length
+                  }
+                </div>
+                <p className="text-sm text-gray-500">Under Review</p>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </TabsContent>
 
@@ -109,7 +114,9 @@ export function PortfolioTabs({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <Card>
                 <CardContent className="pt-6">
-                  <div className="text-2xl font-bold">{eventReports.length}</div>
+                  <div className="text-2xl font-bold">
+                    {eventReports.length}
+                  </div>
                   <p className="text-sm text-gray-500">Total Reports</p>
                 </CardContent>
               </Card>
@@ -133,6 +140,12 @@ export function PortfolioTabs({
           </>
         )}
       </TabsContent>
+
+      {showStudents && (
+        <TabsContent value="students" className="space-y-4 mt-6">
+          <StudentListTab students={students} />
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

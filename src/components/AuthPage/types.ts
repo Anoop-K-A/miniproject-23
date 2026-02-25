@@ -1,3 +1,5 @@
+import type { UserRole } from "@/lib/roles";
+
 export interface SignInFormData {
   email: string;
   password: string;
@@ -8,12 +10,19 @@ export interface SignUpFormData {
   password: string;
   confirmPassword: string;
   fullName: string;
-  role: string;
   department: string;
 }
 
+export interface AuthUser {
+  id: string;
+  username: string;
+  name: string;
+  role: UserRole;
+  roles?: UserRole[];
+  department?: string;
+}
+
 export interface AuthPageProps {
-  onLogin: (role: UserRole) => void;
+  onLogin: (user: AuthUser) => void;
   register: (role: UserRole) => void;
 }
-export type UserRole = "Faculty" | "Auditor" | "StaffAdvisor";

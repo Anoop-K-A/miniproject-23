@@ -27,7 +27,9 @@ export interface AuditReviewInterfaceProps {
   type: "file" | "report";
   item: CourseFile | EventReport;
   facultyName: string;
+  facultyId?: string;
   onBack: () => void;
+  onReviewCompleted?: (item: CourseFile | EventReport) => void;
 }
 
 export interface ChecklistItem {

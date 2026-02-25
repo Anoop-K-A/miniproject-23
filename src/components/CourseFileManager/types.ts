@@ -9,7 +9,9 @@ export interface PeerReview {
 
 export interface CourseFile {
   id: string;
+  facultyId?: string;
   fileName: string;
+  documentUrl?: string;
   courseCode: string;
   courseName: string;
   fileType: string;
@@ -26,4 +28,6 @@ export interface CourseFile {
   facultyName: string;
   department: string;
   peerReviews?: PeerReview[];
+  createdAt?: string;
+  updatedAt?: string;
 }

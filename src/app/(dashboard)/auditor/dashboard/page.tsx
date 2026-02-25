@@ -1,12 +1,18 @@
-"use client";
-
-import React from "react";
 import { AuditorDashboard } from "@/components/AuditorDashboard";
+import { getAuditorDashboardData } from "@/lib/dashboardData";
 
-export default function AuditorDashboardPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AuditorDashboardPage() {
+  const { stats, facultyMembers, recentReviews } =
+    await getAuditorDashboardData();
   return (
     <main className="space-y-6">
-      <AuditorDashboard />
+      <AuditorDashboard
+        stats={stats}
+        facultyMembers={facultyMembers}
+        recentReviews={recentReviews}
+      />
     </main>
   );
 }

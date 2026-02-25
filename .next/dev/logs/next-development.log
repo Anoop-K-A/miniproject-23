@@ -1,0 +1,120 @@
+[00:00:26.614] Server  LOG     ✓ Ready in 19.8s
+[00:00:29.633] Server  LOG     ○ Compiling / ...
+[00:00:30.630] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:30.640] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:10.855] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:23.919] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:43.893] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:45.173] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:08:44.712] Server  LOG     ✓ Compiled in 821ms
+[00:29:09.786] Server  LOG     ✓ Compiled in 1301ms
+[00:29:33.058] Server  LOG     ✓ Compiled in 474ms
+[00:39:46.294] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:39:46.294] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:42:00.983] Server  LOG     Saving file for course code: cst 301
+[00:42:00.984] Server  LOG     Original course code: "cst 301"
+[00:42:00.985] Server  LOG     Sanitized course code: "cst_301"
+[00:42:00.986] Server  LOG     Creating folder: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301
+[00:42:00.989] Server  LOG     Creating course folder: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301
+[00:42:01.004] Server  LOG     Saving file to: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301\1771949905257_Untitled-1.pdf
+[00:42:01.017] Server  LOG     File saved successfully, size: 3767198 bytes
+[00:42:01.018] Server  LOG     Public URL: /uploads/course-files/cst_301/1771949905257_Untitled-1.pdf
+[00:42:01.020] Server  LOG     File saved successfully: /uploads/course-files/cst_301/1771949905257_Untitled-1.pdf
+[00:42:01.021] Server  LOG     Writing to courseFiles.json...
+[00:42:01.031] Server  LOG     courseFiles.json updated successfully
+[00:42:01.032] Server  LOG     Recomputing engagement for faculty: 1771405829166
+[00:42:01.075] Server  LOG     Engagement recomputed successfully
+[00:43:32.608] Server  LOG     Saving file for course code: csl
+[00:43:32.608] Server  LOG     Original course code: "csl"
+[00:43:32.608] Server  LOG     Sanitized course code: "csl"
+[00:43:32.609] Server  LOG     Creating folder: C:\Users\anoop\miniproject-23\public\uploads\course-files\csl
+[00:43:32.609] Server  LOG     Creating course folder: C:\Users\anoop\miniproject-23\public\uploads\course-files\csl
+[00:43:32.615] Server  LOG     Saving file to: C:\Users\anoop\miniproject-23\public\uploads\course-files\csl\1771949996866_Untitled-1.pdf
+[00:43:32.631] Server  LOG     File saved successfully, size: 3767198 bytes
+[00:43:32.632] Server  LOG     Public URL: /uploads/course-files/csl/1771949996866_Untitled-1.pdf
+[00:43:32.632] Server  LOG     File saved successfully: /uploads/course-files/csl/1771949996866_Untitled-1.pdf
+[00:43:32.632] Server  LOG     Writing to courseFiles.json...
+[00:43:32.638] Server  LOG     courseFiles.json updated successfully
+[00:43:32.639] Server  LOG     Recomputing engagement for faculty: 1771405829166
+[00:43:32.660] Server  LOG     Engagement recomputed successfully
+[01:52:27.101] Server  LOG     ✓ Compiled in 460ms
+[02:02:51.562] Server  LOG     ✓ Compiled in 325ms
+[02:03:02.349] Server  LOG     ✓ Compiled in 248ms
+[02:03:27.411] Server  LOG     ✓ Compiled in 355ms
+[02:06:18.861] Server  LOG     Saving file for course code: cst 301
+[02:06:18.862] Server  LOG     Original course code: "cst 301"
+[02:06:18.862] Server  LOG     Sanitized course code: "cst_301"
+[02:06:18.862] Server  LOG     Creating folder: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301
+[02:06:18.863] Server  LOG     Course folder already exists: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301
+[02:06:18.870] Server  LOG     Saving file to: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301\1771954963125_Untitled-1.pdf
+[02:06:18.891] Server  LOG     File saved successfully, size: 3767198 bytes
+[02:06:18.892] Server  LOG     Public URL: /uploads/course-files/cst_301/1771954963125_Untitled-1.pdf
+[02:06:18.892] Server  LOG     File saved successfully: /uploads/course-files/cst_301/1771954963125_Untitled-1.pdf
+[02:06:18.893] Server  LOG     Writing to courseFiles.json...
+[02:06:18.897] Server  LOG     courseFiles.json updated successfully
+[02:06:18.897] Server  LOG     Recomputing engagement for faculty: f1
+[02:06:18.921] Server  LOG     Engagement recomputed successfully
+[02:10:44.790] Server  LOG     ✓ Compiled in 254ms
+[02:10:58.916] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:11:55.469] Server  LOG     Saving file for course code: cst 301
+[02:11:55.469] Server  LOG     Original course code: "cst 301"
+[02:11:55.469] Server  LOG     Sanitized course code: "cst_301"
+[02:11:55.470] Server  LOG     Creating folder: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301
+[02:11:55.470] Server  LOG     Course folder already exists: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301
+[02:11:55.475] Server  LOG     Saving file to: C:\Users\anoop\miniproject-23\public\uploads\course-files\cst_301\1771955299729_Untitled-1.pdf
+[02:11:55.484] Server  LOG     File saved successfully, size: 3767198 bytes
+[02:11:55.485] Server  LOG     Public URL: /uploads/course-files/cst_301/1771955299729_Untitled-1.pdf
+[02:11:55.485] Server  LOG     File saved successfully: /uploads/course-files/cst_301/1771955299729_Untitled-1.pdf
+[02:11:55.485] Server  LOG     Writing to courseFiles.json...
+[02:11:55.493] Server  LOG     courseFiles.json updated successfully
+[02:11:55.494] Server  LOG     Recomputing engagement for faculty: 1771405829166
+[02:11:55.532] Server  LOG     Engagement recomputed successfully
+[02:12:13.948] Server  ERROR   Course file delete error: Error: EPERM: operation not permitted, rename 'C:\Users\anoop\miniproject-23\src\data\courseFiles.json.tmp' -> 'C:\Users\anoop\miniproject-23\src\data\courseFiles.json'
+[02:12:13.952] Server  ERROR   Course file delete error: Error: EPERM: operation not permitted, rename 'C:\Users\anoop\miniproject-23\src\data\courseFiles.json.tmp' -> 'C:\Users\anoop\miniproject-23\src\data\courseFiles.json'
+[02:15:22.111] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:18:18.285] Server  LOG     ✓ Compiled in 326ms
+[02:19:02.601] Server  LOG     ✓ Compiled in 234ms
+[02:19:03.868] Server  LOG     ✓ Compiled in 250ms
+[02:19:05.980] Server  LOG     ✓ Compiled in 215ms
+[02:19:25.238] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:44.105] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:30:23.326] Server  LOG     ✓ Compiled in 2.3s
+[02:40:01.717] Server  LOG     ✓ Compiled in 514ms
+[02:56:11.468] Server  LOG     ✓ Compiled in 895ms
+[02:57:41.766] Browser ERROR   The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [1771405829166] [1771405829166, aaa@gmail.com]
+[03:00:06.455] Server  LOG     ✓ Compiled in 403ms
+[03:00:07.637] Browser ERROR   The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [1771405829166, aaa@gmail.com] [1771405829166:aaa@gmail.com]
+[03:01:39.330] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:01:49.068] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:08:21.398] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:10:13.884] Server  LOG     ✓ Compiled in 528ms
+[03:11:47.317] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:11:47.317] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:17:35.110] Server  LOG     ✓ Compiled in 332ms
+[03:17:39.075] Server  LOG     ✓ Compiled in 273ms
+[03:18:16.099] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:18:45.414] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:18:45.414] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:21:42.440] Server  LOG     ✓ Compiled in 570ms
+[03:21:46.570] Server  LOG     ✓ Compiled in 291ms
+[03:21:50.471] Server  LOG     ✓ Compiled in 242ms
+[03:22:16.910] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:22:28.330] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:22:28.330] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:22:55.770] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:22:55.770] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:25:51.291] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:25:51.291] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:35:28.065] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:35:28.065] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:46:57.462] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:47:11.709] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:47:11.709] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:47:42.126] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[03:47:42.126] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.

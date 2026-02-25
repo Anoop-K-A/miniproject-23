@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/anoop/miniproject-23/src/app/%28auth%29/layout.tsx"],"sourcesContent":["import React from \"react\";\r\n\r\nexport default function AuthLayout({\r\n  children,\r\n}: {\r\n  children: React.ReactNode;\r\n}) {\r\n  return (\r\n    <div className=\"min-h-screen flex items-center justify-center bg-gray-50\">\r\n      {children}\r\n    </div>\r\n  );\r\n}\r\n"],"names":[],"mappings":";;;;;;AAEe,SAAS,WAAW,EACjC,QAAQ,EAGT;IACC,qBACE,8OAAC;QAAI,WAAU;kBACZ;;;;;;AAGP"}}]
+}

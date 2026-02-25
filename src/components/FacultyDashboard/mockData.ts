@@ -6,8 +6,12 @@ export const mockStats: DashboardStats = {
   pendingReports: 2,
   totalParticipants: 245,
   recentActivity: [
-    { action: "Uploaded", item: "CS101_Syllabus_Fall2024.pdf", time: "2 hours ago" }
-  ]
+    {
+      action: "Uploaded",
+      item: "CS101_Syllabus_Fall2024.pdf",
+      time: "2 hours ago",
+    },
+  ],
 };
 
 export const mockFacultyMembers: FacultyMember[] = [
@@ -16,10 +20,15 @@ export const mockFacultyMembers: FacultyMember[] = [
     name: "Dr. Sarah Johnson",
     department: "Computer Science",
     role: "Associate Professor",
+    isStaffAdvisor: true,
     email: "sarah.johnson@college.edu",
     phone: "+1 (555) 123-4567",
-    courses: ["CS101 - Intro to Programming", "CS201 - Data Structures", "CS301 - Algorithms"],
+    courses: [
+      "CS101 - Intro to Programming",
+      "CS201 - Data Structures",
+      "CS301 - Algorithms",
+    ],
     specialization: "Artificial Intelligence & Machine Learning",
-    experience: "12 years"
-  }
+    experience: "12 years",
+  },
 ];

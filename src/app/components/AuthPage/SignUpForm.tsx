@@ -1,8 +1,20 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Mail, Lock, User, Building, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -13,13 +25,15 @@ interface SignUpFormProps {
   onSwitchToSignIn: () => void;
 }
 
-export function SignUpForm({ onSignUpSuccess, onSwitchToSignIn }: SignUpFormProps) {
+export function SignUpForm({
+  onSignUpSuccess,
+  onSwitchToSignIn,
+}: SignUpFormProps) {
   const [formData, setFormData] = useState<SignUpFormData>({
     email: "",
     password: "",
     confirmPassword: "",
     fullName: "",
-    role: "",
     department: "",
   });
 
@@ -31,7 +45,6 @@ export function SignUpForm({ onSignUpSuccess, onSwitchToSignIn }: SignUpFormProp
       !formData.password ||
       !formData.confirmPassword ||
       !formData.fullName ||
-      !formData.role ||
       !formData.department
     ) {
       toast.error("Please fill in all fields");
@@ -101,20 +114,6 @@ export function SignUpForm({ onSignUpSuccess, onSwitchToSignIn }: SignUpFormProp
                 className="pl-10"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Faculty">Faculty</SelectItem>
-                <SelectItem value="Auditor">Auditor</SelectItem>
-                <SelectItem value="StaffAdvisor">Staff Advisor</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="space-y-2">

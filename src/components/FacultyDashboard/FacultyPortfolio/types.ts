@@ -3,6 +3,7 @@ export interface FacultyMember {
   name: string;
   department: string;
   role: string;
+  isStaffAdvisor?: boolean;
   email: string;
   phone: string;
   courses: string[];
@@ -10,18 +11,59 @@ export interface FacultyMember {
   experience: string;
 }
 
+export interface Student {
+  id: string;
+  advisorId?: string;
+  name: string;
+  rollNumber: string;
+  email: string;
+  phone: string;
+  department: string;
+  semester: string;
+  batchYear?: string;
+  cgpa: number;
+  attendance: number;
+  careerInterest: string;
+  skillsAcquired: string[];
+  placementStatus: "Placed" | "In Process" | "Not Started";
+  companyName?: string;
+  activityPoints: number;
+  activities: Array<{
+    id: string;
+    name: string;
+    community: string;
+    points: number;
+    date: string;
+  }>;
+}
+
 export interface CourseFile {
   id: string;
+  facultyId?: string;
   fileName: string;
+  documentUrl?: string;
+  courseCode: string;
+  courseName: string;
   fileType: string;
   uploadDate: string;
-  courseName: string;
   semester: string;
-  status: "Draft" | "Submitted" | "Approved" | "Rejected";
+  academicYear: string;
+  size: string;
+  status?: "Pending" | "Approved" | "Rejected" | "Draft" | "Submitted";
+  adminRemarks?: string;
+  reviewedBy?: string;
+  reviewedDate?: string;
+  facultyResponse?: string;
+  responseDate?: string;
+  facultyName: string;
+  department: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface EventReport {
   id: string;
+  facultyId?: string;
   eventName: string;
   eventType: string;
   eventDate: string;

@@ -8,6 +8,11 @@ import { FileInfoSidebar } from "./FileInfoSidebar";
 import { AdminReviewSection } from "./AdminReviewSection";
 import { PeerReviewsSection } from "./PeerReviewsSection";
 import { CourseFile, PeerReview, DocumentViewerInterfaceProps } from "./types";
+import {
+  downloadFromDataUrl,
+  downloadTextFile,
+  sanitizeFileName,
+} from "@/lib/download";
 
 export function DocumentViewerInterface({
   file,
@@ -37,8 +42,8 @@ export function DocumentViewerInterface({
         reviews.map((review) =>
           review.id === selectedReview.id
             ? { ...review, facultyResponse: response }
-            : review
-        )
+            : review,
+        ),
       );
       setSelectedReview(null);
       setIsResponseOpen(false);
@@ -46,8 +51,26 @@ export function DocumentViewerInterface({
   };
 
   const handleDownloadDocument = (file: CourseFile) => {
-    console.log("Downloading:", file.fileName);
-    // Download logic here
+    const safeName = sanitizeFileName(file.fileName, "course-file");
+    if (file.documentUrl) {
+      downloadFromDataUrl(file.documentUrl, safeName);
+      return;
+    }
+
+    const baseName = safeName.replace(/\.[^/.]+$/, "");
+    const summaryName = `${baseName || "course-file"}-summary.txt`;
+    const summary = [
+      `File Name: ${file.fileName}`,
+      `Course: ${file.courseCode} - ${file.courseName}`,
+      `Type: ${file.fileType}`,
+      `Semester: ${file.semester}`,
+      `Academic Year: ${file.academicYear}`,
+      `Uploaded: ${file.uploadDate}`,
+      `Faculty: ${file.facultyName}`,
+      `Department: ${file.department}`,
+      `Status: ${file.status ?? "Unknown"}`,
+    ].join("\n");
+    downloadTextFile(summary, summaryName);
   };
 
   return (

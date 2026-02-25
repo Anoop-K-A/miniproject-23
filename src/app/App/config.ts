@@ -1,6 +1,5 @@
 import { GraduationCap, Shield, Users } from "lucide-react";
-
-export type UserRole = "faculty" | "auditor" | "staff-advisor";
+import type { UserRole } from "@/lib/roles";
 
 export interface RoleInfo {
   name: string;

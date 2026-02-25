@@ -1,8 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { FileText, Calendar } from "lucide-react";
 import { CourseFile, EventReport } from "./types";
-import { CourseFileCard } from "./CourseFileCard";
 import { EventReportCard } from "./EventReportCard";
+import { CourseCodeCards } from "./CourseCodeCards";
 
 interface PortfolioTabsProps {
   courseFiles: CourseFile[];
@@ -32,18 +32,13 @@ export function PortfolioTabs({
         </TabsTrigger>
       </TabsList>
 
-      {/* Course Files Tab */}
+      {/* Course Files Tab - Grouped by Course Code */}
       <TabsContent value="course-files" className="space-y-4 mt-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {courseFiles.map((file) => (
-            <CourseFileCard
-              key={file.id}
-              file={file}
-              onReview={onReviewFile}
-              getStatusColor={getStatusColor}
-            />
-          ))}
-        </div>
+        <CourseCodeCards
+          courseFiles={courseFiles}
+          onReviewFile={onReviewFile}
+          getStatusColor={getStatusColor}
+        />
       </TabsContent>
 
       {/* Event Reports Tab */}

@@ -1,44 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getDashboardPath, getRoleFromPath, isValidRole } from "@/lib/roles";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Get auth from cookies (we'll set these from the client)
+  // Get auth from cookies (set on login)
   const isAuthenticated =
     request.cookies.get("auth_authenticated")?.value === "true";
   const userRole = request.cookies.get("auth_role")?.value;
 
-  // Allow login and auth pages without authentication
-  if (pathname.startsWith("/(auth)") || pathname === "/login") {
-    if (isAuthenticated) {
-      // Redirect authenticated users away from login
+  const isLoginRoute = pathname === "/login" || pathname === "/register";
+  const isRootRoute = pathname === "/";
+
+  if (isLoginRoute) {
+    if (isAuthenticated && isValidRole(userRole)) {
       return NextResponse.redirect(
-        new URL(`/${userRole}/dashboard`, request.url),
+        new URL(getDashboardPath(userRole), request.url),
       );
     }
     return NextResponse.next();
   }
 
-  // Protect dashboard routes
-  if (pathname.startsWith("/(dashboard)")) {
+  if (isRootRoute) {
+    if (isAuthenticated && isValidRole(userRole)) {
+      return NextResponse.redirect(
+        new URL(getDashboardPath(userRole), request.url),
+      );
+    }
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  const routeRole = getRoleFromPath(pathname);
+  if (routeRole) {
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // Check role-based access
-    if (pathname.startsWith("/faculty") && userRole !== "faculty") {
-      return NextResponse.redirect(
-        new URL(`/${userRole}/dashboard`, request.url),
-      );
+    if (!isValidRole(userRole)) {
+      return NextResponse.redirect(new URL("/login", request.url));
     }
-    if (pathname.startsWith("/auditor") && userRole !== "auditor") {
+
+    if (userRole !== routeRole) {
       return NextResponse.redirect(
-        new URL(`/${userRole}/dashboard`, request.url),
-      );
-    }
-    if (pathname.startsWith("/staff-advisor") && userRole !== "staff-advisor") {
-      return NextResponse.redirect(
-        new URL(`/${userRole}/dashboard`, request.url),
+        new URL(getDashboardPath(userRole), request.url),
       );
     }
   }

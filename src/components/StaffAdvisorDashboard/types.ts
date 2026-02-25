@@ -1,11 +1,13 @@
 export interface Student {
   id: string;
+  advisorId?: string;
   name: string;
   rollNumber: string;
   email: string;
   phone: string;
   department: string;
   semester: string;
+  batchYear?: string;
   cgpa: number;
   attendance: number;
   careerInterest: string;
@@ -52,6 +54,36 @@ export interface CareerStats {
   completedProjects: number;
   skillWorkshops: number;
   campusInterviews: number;
+}
+
+export interface BatchCourseProgress {
+  batchYear: string;
+  totalFiles: number;
+  approvedFiles: number;
+  inReviewFiles: number;
+  rejectedFiles: number;
+  completionRate: number;
+}
+
+export interface BatchFacultySummary {
+  id: string;
+  name: string;
+  department: string;
+  role: string;
+  filesTotal: number;
+  filesApproved: number;
+  filesInReview: number;
+  filesRejected: number;
+}
+
+export interface BatchCourseGroup {
+  progress: BatchCourseProgress;
+  faculty: BatchFacultySummary[];
+}
+
+export interface BatchCourseOverview {
+  overall: BatchCourseProgress;
+  groups: BatchCourseGroup[];
 }
 
 export interface Activity {

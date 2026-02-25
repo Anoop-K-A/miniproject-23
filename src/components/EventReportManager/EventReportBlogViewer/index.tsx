@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card, CardContent } from "../../ui/card";
 import { ResponseDialog } from "../../shared/dialogs/ResponseDialog";
 import { EventReportHeader } from "./EventReportHeader";
 import { HeroImage } from "./HeroImage";
@@ -44,7 +43,7 @@ export function EventReportBlogViewer({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <EventReportHeader
         report={report}
         onBack={onBack}
@@ -53,31 +52,23 @@ export function EventReportBlogViewer({
       />
 
       {/* Blog Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <HeroImage report={report} />
-
-          {/* Article Content */}
-          <Card className="shadow-lg p-0">
-            <CardContent className="p-8 md:p-12 space-y-8">
-            <ArticleHeader report={report} />
-            <ArticleContent report={report} />
-            <GallerySection
-              report={report}
-              onSelectImage={setSelectedGalleryImage}
-            />
-            <CoordinatorSection report={report} />
-            <AdminReviewSection
-              report={report}
-              getStatusColor={getStatusColor}
-              onRespondClick={() => setIsResponseOpen(true)}
-              showRespond={currentUser === report.facultyCoordinator}
-            />
-            <DownloadSection report={report} onDownload={onDownload} />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <article className="mx-auto max-w-5xl px-4 py-8 space-y-8">
+        <HeroImage report={report} />
+        <ArticleHeader report={report} />
+        <ArticleContent report={report} />
+        <GallerySection
+          report={report}
+          onSelectImage={setSelectedGalleryImage}
+        />
+        <CoordinatorSection report={report} />
+        <AdminReviewSection
+          report={report}
+          getStatusColor={getStatusColor}
+          onRespondClick={() => setIsResponseOpen(true)}
+          showRespond={true}
+        />
+        <DownloadSection report={report} onDownload={onDownload} />
+      </article>
 
       {/* Gallery Lightbox */}
       <GalleryLightbox

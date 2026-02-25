@@ -1,6 +1,5 @@
-import { GraduationCap, Shield, Users } from "lucide-react";
-
-export type UserRole = "faculty" | "auditor" | "staff-advisor";
+import { GraduationCap, Shield, ShieldCheck, Users } from "lucide-react";
+import type { UserRole } from "@/lib/roles";
 
 export interface RoleInfo {
   name: string;
@@ -23,6 +22,11 @@ export const ROLE_CONFIG: Record<UserRole, RoleInfo> = {
     name: "Staff Advisor",
     icon: Users,
     color: "bg-green-600",
+  },
+  admin: {
+    name: "Administrator",
+    icon: ShieldCheck,
+    color: "bg-slate-800",
   },
 };
 
