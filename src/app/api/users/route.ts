@@ -1,24 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
-
-interface UserRecord {
-  id: string;
-  username: string;
-  password: string;
-  name: string;
-  role: "faculty" | "auditor" | "staff-advisor" | "admin" | string;
-  roles?: ("faculty" | "auditor" | "staff-advisor" | "admin")[];
-  department?: string;
-  email?: string;
-  phone?: string;
-  status?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import type { UserRole } from "@/lib/roles";
+import { createUser, getAllUsers } from "@/lib/userStore";
 
 export async function GET() {
   try {
-    const users = await readJsonFile<UserRecord[]>("users.json");
+    const users = await getAllUsers();
     return NextResponse.json({ users });
   } catch (error) {
     console.error("Users load error:", error);
@@ -32,31 +18,41 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.json();
-    const users = await readJsonFile<UserRecord[]>("users.json");
-    const timestamp = new Date().toISOString();
+    const requestedRole = payload.role;
+    const normalizedRole: UserRole =
+      requestedRole === "auditor" || requestedRole === "Auditor"
+        ? "auditor"
+        : requestedRole === "staff-advisor" ||
+            requestedRole === "StaffAdvisor" ||
+            requestedRole === "Staff Advisor"
+          ? "staff-advisor"
+          : requestedRole === "admin" || requestedRole === "Admin"
+            ? "admin"
+            : "faculty";
 
-    const rolesArray = payload.roles || [payload.role || "faculty"];
-
-    const newUser: UserRecord = {
-      id: Date.now().toString(),
-      username: payload.username,
-      password: payload.password ?? "",
-      name: payload.name ?? payload.username,
-      role: payload.role ?? "faculty",
-      roles: rolesArray,
-      department: payload.department,
+    await createUser({
+      id: payload.id,
+      username: payload.username ?? payload.email,
       email: payload.email ?? payload.username,
+      password: payload.password ?? "",
+      name: payload.name ?? payload.username ?? payload.email,
+      role: normalizedRole,
+      roles: payload.roles || [normalizedRole],
+      department: payload.department,
       phone: payload.phone,
       status: payload.status ?? "active",
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    };
+    });
 
-    const updatedUsers = [newUser, ...users];
-    await writeJsonFile("users.json", updatedUsers);
-
-    return NextResponse.json({ users: updatedUsers });
+    const users = await getAllUsers();
+    return NextResponse.json({ users });
   } catch (error) {
+    if (error instanceof Error && error.message === "DUPLICATE_USER") {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 },
+      );
+    }
+
     console.error("User create error:", error);
     return NextResponse.json(
       { error: "Failed to create user" },

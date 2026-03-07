@@ -1,0 +1,239 @@
+  return (
+    <Card>
+      <CardContent className="pt-6 space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by event name, faculty, or type..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={filterDepartment} onValueChange={setFilterDepartment}>
+            <SelectTrigger className="w-full md:w-48">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Department" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Departments</SelectItem>
+              {uniqueDepartments.map((dept) => (
+                <SelectItem key={dept} value={dept}>
+                  {dept}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-full md:w-48">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="Approved">Approved</SelectItem>
+              <SelectItem value="Submitted">Submitted</SelectItem>
+              <SelectItem value="Rejected">Rejected</SelectItem>
+              <SelectItem value="Draft">Draft</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterYear} onValueChange={setFilterYear}>
+            <SelectTrigger className="w-full md:w-48">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Years</SelectItem>
+              {uniqueYears.map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Event Name</TableHead>
+                <TableHead>Coordinator</TableHead>
+                <TableHead>Event Date</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Peer Reviews</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredReports.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-gray-500 py-8">
+                    No event reports found matching your criteria.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredReports.map((report) => (
+                  <TableRow key={report.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-purple-600" />
+                        <div>
+                          <div>{report.eventName}</div>
+                          {report.location && (
+                            <div className="text-sm text-gray-500">{report.location}</div>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div>{report.facultyCoordinator}</div>
+                        {report.department && (
+                          <div className="text-sm text-gray-500">{report.department}</div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{report.eventDate}</TableCell>
+                    <TableCell>
+                      {report.eventType && (
+                        <Badge variant="secondary">{report.eventType}</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(report.status)}>
+                        {report.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <MessageSquare className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm">{report.peerReviews?.length || 0}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleView(report)}>
+                          <Eye className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDownload(report)}>
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        <PeerReviewDialog
+          open={isPeerReviewOpen}
+          onOpenChange={setIsPeerReviewOpen}
+          onSubmit={handlePeerReview}
+          itemType="report"
+          itemName={selectedReport?.eventName || ""}
+        />
+
+        <ResponseDialog
+          open={isResponseOpen}
+          onOpenChange={(open) => {
+            setIsResponseOpen(open);
+            if (!open) setSelectedReview(null);
+          }}
+          onSubmit={handleRespondToReview}
+          itemType="report"
+        />
+      </CardContent>
+    </Card>
+  );
+                                </AlertDescription>
+                              </Alert>
+
+                              {/* Faculty Response to Peer Review */}
+                              {review.facultyResponse ? (
+                                <Alert className="border-blue-200 bg-blue-50">
+                                  <AlertDescription>
+                                    <p className="text-xs text-blue-800 mb-2">Response from {selectedReport.facultyCoordinator}:</p>
+                                    <p className="text-sm">{review.facultyResponse}</p>
+                                    <p className="text-xs text-gray-500 mt-2">{review.responseDate}</p>
+                                  </AlertDescription>
+                                </Alert>
+                              ) : (
+                                <div className="space-y-2">
+                                  {review.reviewerName === CURRENT_USER ? (
+                                    <Alert>
+                                      <AlertDescription className="text-xs text-gray-500 italic">
+                                        Awaiting response from {selectedReport.facultyCoordinator}...
+                                      </AlertDescription>
+                                    </Alert>
+                                  ) : selectedReport.facultyCoordinator === CURRENT_USER ? (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedReview(review);
+                                        setIsResponseOpen(true);
+                                      }}
+                                      className="w-full"
+                                    >
+                                      <Reply className="h-4 w-4 mr-2" />
+                                      Respond to Review
+                                    </Button>
+                                  ) : null}
+                                </div>
+                              )}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  ) : (
+                    <Alert>
+                      <AlertDescription className="text-sm text-gray-500">
+                        No peer reviews yet. Be the first to provide feedback!
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsViewOpen(false)}
+                    className="flex-1"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Peer Review Dialog */}
+        <PeerReviewDialog
+          open={isPeerReviewOpen}
+          onOpenChange={setIsPeerReviewOpen}
+          onSubmit={handlePeerReview}
+          itemType="report"
+          itemName={selectedReport?.eventName || ""}
+        />
+
+        {/* Response to Peer Review Dialog */}
+        <ResponseDialog
+          open={isResponseOpen}
+          onOpenChange={(open) => {
+            setIsResponseOpen(open);
+            if (!open) setSelectedReview(null);
+          }}
+          onSubmit={handleRespondToReview}
+          itemType="report"
+        />
+      </CardContent>
+    </Card>
+  );
+}

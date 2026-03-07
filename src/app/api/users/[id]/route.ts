@@ -1,21 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { deleteUserById, getAllUsers, updateUserById } from "@/lib/userStore";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
-
-interface UserRecord {
-  id: string;
-  username: string;
-  password: string;
-  name: string;
-  role: "faculty" | "auditor" | "staff-advisor" | "admin" | string;
-  roles?: ("faculty" | "auditor" | "staff-advisor" | "admin")[];
-  department?: string;
-  email?: string;
-  phone?: string;
-  status?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
 
 interface CourseFileRecord {
   id: string;
@@ -55,21 +41,10 @@ export async function PATCH(
   try {
     const { id } = await params;
     const payload = await request.json();
-    const users = await readJsonFile<UserRecord[]>("users.json");
-    const updatedAt = new Date().toISOString();
+    await updateUserById(id, payload);
+    const users = await getAllUsers();
 
-    const updatedUsers = users.map((user) =>
-      user.id === id
-        ? {
-            ...user,
-            ...payload,
-            updatedAt,
-          }
-        : user,
-    );
-
-    await writeJsonFile("users.json", updatedUsers);
-    return NextResponse.json({ users: updatedUsers });
+    return NextResponse.json({ users });
   } catch (error) {
     console.error("User update error:", error);
     return NextResponse.json(
@@ -85,7 +60,6 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const users = await readJsonFile<UserRecord[]>("users.json");
     const courseFiles =
       await readJsonFile<CourseFileRecord[]>("courseFiles.json");
     const eventReports =
@@ -96,8 +70,6 @@ export async function DELETE(
     const engagements = await readJsonFile<EngagementRecord[]>(
       "engagements.json",
     ).catch(() => []);
-
-    const updatedUsers = users.filter((user) => user.id !== id);
 
     const removedFileIds = courseFiles
       .filter((file) => file.facultyId === id)
@@ -141,7 +113,7 @@ export async function DELETE(
       (engagement) => engagement.facultyId !== id,
     );
 
-    await writeJsonFile("users.json", updatedUsers);
+    await deleteUserById(id);
     await writeJsonFile("courseFiles.json", updatedFiles);
     await writeJsonFile("eventReports.json", updatedReports);
     await writeJsonFile("audits.json", updatedAudits);
@@ -149,7 +121,8 @@ export async function DELETE(
     await writeJsonFile("students.json", updatedStudents);
     await writeJsonFile("engagements.json", updatedEngagements);
 
-    return NextResponse.json({ users: updatedUsers });
+    const users = await getAllUsers();
+    return NextResponse.json({ users });
   } catch (error) {
     console.error("User delete error:", error);
     return NextResponse.json(

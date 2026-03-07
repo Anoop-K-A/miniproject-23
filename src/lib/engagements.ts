@@ -4,6 +4,7 @@ import type {
   EngagementRecord,
   ResponsibilityRecord,
 } from "@/lib/data/schema";
+import { getAllUsers } from "@/lib/userStore";
 
 interface CourseFileRecord {
   id: string;
@@ -99,7 +100,7 @@ export async function recomputeEngagementForFaculty(facultyId: string) {
 }
 
 export async function recomputeAllEngagements() {
-  const users = await readJsonFile<{ id: string }[]>("users.json");
+  const users = await getAllUsers();
   const results: EngagementRecord[] = [];
   for (const user of users) {
     results.push(await recomputeEngagementForFaculty(user.id));

@@ -14,6 +14,7 @@ import type {
   Student,
 } from "@/components/StaffAdvisorDashboard/types";
 import { readJsonFile } from "@/lib/jsonDb";
+import { getAllUsers } from "@/lib/userStore";
 
 interface UserRecord {
   id: string;
@@ -87,7 +88,7 @@ function toTimeAgo(isoDate?: string) {
 export async function getFacultyDashboardData(
   username?: string | null,
 ): Promise<FacultyDashboardData> {
-  const users = await readJsonFile<UserRecord[]>("users.json");
+  const users = await getAllUsers();
   const facultyUsers = users.filter(
     (user) =>
       (user.roles?.includes("faculty") || user.role === "faculty") &&
@@ -171,7 +172,7 @@ export async function getFacultyDashboardData(
 }
 
 export async function getAuditorDashboardData() {
-  const users = await readJsonFile<UserRecord[]>("users.json");
+  const users = await getAllUsers();
   const courseFiles =
     await readJsonFile<CourseFileRecord[]>("courseFiles.json");
   const eventReports =
@@ -287,7 +288,7 @@ export async function getAuditorDashboardData() {
 }
 
 export async function getStaffAdvisorDashboardData(username?: string | null) {
-  const users = await readJsonFile<UserRecord[]>("users.json");
+  const users = await getAllUsers();
   const students = await readJsonFile<Student[]>("students.json");
   const courseFiles =
     await readJsonFile<CourseFileRecord[]>("courseFiles.json");

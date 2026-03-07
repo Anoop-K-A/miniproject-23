@@ -3,6 +3,7 @@ import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { CourseFile } from "@/components/CourseFileManager/types";
 import { recomputeEngagementForFaculty } from "@/lib/engagements";
 import { saveDataUrlAsFile } from "@/lib/fileUpload";
+import { getAllUsers } from "@/lib/userStore";
 
 // Force Node.js runtime for file system operations
 export const runtime = "nodejs";
@@ -27,10 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     const files = await readJsonFile<CourseFile[]>("courseFiles.json");
-    const users =
-      await readJsonFile<{ id: string; name: string; department?: string }[]>(
-        "users.json",
-      );
+    const users = await getAllUsers();
     const facultyUser = users.find((user) => user.id === payload.facultyId);
     const timestamp = new Date().toISOString();
 
@@ -114,10 +112,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const files = await readJsonFile<CourseFile[]>("courseFiles.json");
-    const users =
-      await readJsonFile<{ id: string; name: string; department?: string }[]>(
-        "users.json",
-      );
+    const users = await getAllUsers();
     const fileCategories = await readJsonFile<string[]>(
       "files/course-file-categories.json",
     );

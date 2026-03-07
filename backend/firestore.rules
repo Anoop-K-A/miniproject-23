@@ -1,0 +1,98 @@
+# Firestore Security Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             ('admin' in request.auth.token.roles || request.auth.token.role == 'admin');
+    }
+    
+    function isFaculty() {
+      return isAuthenticated() && 
+             ('faculty' in request.auth.token.roles || request.auth.token.role == 'faculty');
+    }
+    
+    function isAuditor() {
+      return isAuthenticated() && 
+             ('auditor' in request.auth.token.roles || request.auth.token.role == 'auditor');
+    }
+    
+    function isStaffAdvisor() {
+      return isAuthenticated() && 
+             ('staff-advisor' in request.auth.token.roles || request.auth.token.role == 'staff-advisor');
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Anyone can read (for displaying user info)
+      allow read: if isAuthenticated();
+      
+      // Users can update their own profile, admin can update anyone
+      allow update: if isOwner(userId) || isAdmin();
+      
+      // Only backend should create users (via Admin SDK)
+      allow create: if false;
+      
+      // Only admin can delete
+      allow delete: if isAdmin();
+    }
+    
+    // Course files collection
+    match /courseFiles/{fileId} {
+      // All authenticated users can read
+      allow read: if isAuthenticated();
+      
+      // Faculty and admin can create
+      allow create: if isFaculty() || isAdmin();
+      
+      // Owner, auditor, or admin can update (for status, remarks, etc.)
+      allow update: if isOwner(resource.data.facultyId) || isAuditor() || isAdmin();
+      
+      // Owner or admin can delete
+      allow delete: if isOwner(resource.data.facultyId) || isAdmin();
+    }
+    
+    // Event reports collection
+    match /eventReports/{reportId} {
+      // All authenticated users can read
+      allow read: if isAuthenticated();
+      
+      // Faculty and admin can create
+      allow create: if isFaculty() || isAdmin();
+      
+      // Owner, staff advisor, or admin can update
+      allow update: if isOwner(resource.data.facultyId) || isStaffAdvisor() || isAdmin();
+      
+      // Owner or admin can delete
+      allow delete: if isOwner(resource.data.facultyId) || isAdmin();
+    }
+    
+    // Responsibilities collection
+    match /responsibilities/{responsibilityId} {
+      // All authenticated users can read
+      allow read: if isAuthenticated();
+      
+      // Staff advisor and admin can create/update
+      allow create, update: if isStaffAdvisor() || isAdmin();
+      
+      // Only admin and staff advisor can delete
+      allow delete: if isStaffAdvisor() || isAdmin();
+    }
+    
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

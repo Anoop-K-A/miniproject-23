@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { UserRole } from "@/lib/roles";
+import { createUser } from "@/lib/userStore";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,18 +22,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const users = await readJsonFile<any[]>("users.json");
-
-    // Check for duplicate email
-    if (users.some((user: any) => user.username === email)) {
-      return NextResponse.json(
-        { error: "Email already exists" },
-        { status: 400 },
-      );
-    }
-
-    // Generate unique id
-    const id = Date.now().toString();
     const normalizedRole: UserRole =
       role === "Auditor"
         ? "auditor"
@@ -41,27 +29,26 @@ export async function POST(request: NextRequest) {
           ? "staff-advisor"
           : "faculty";
 
-    const timestamp = new Date().toISOString();
-
-    const newUser = {
-      id,
+    await createUser({
       username: email,
+      email,
       password,
       name: fullName,
       role: normalizedRole,
       roles: [normalizedRole],
       department,
       status: normalizedRole === "faculty" ? "pending" : "active",
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    };
-
-    // Save user
-    users.push(newUser);
-    await writeJsonFile("users.json", users);
+    });
 
     return NextResponse.json({ message: "User created successfully" });
   } catch (error) {
+    if (error instanceof Error && error.message === "DUPLICATE_USER") {
+      return NextResponse.json(
+        { error: "Email already exists" },
+        { status: 400 },
+      );
+    }
+
     console.error("Register error:", error);
     return NextResponse.json(
       { error: "Internal server error" },

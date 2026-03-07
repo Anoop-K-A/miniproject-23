@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCredentials } from "@/lib/auth";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
-
-interface UserRecord {
-  id: string;
-  lastActiveAt?: string;
-  [key: string]: any;
-}
+import { updateUserLastActive } from "@/lib/userStore";
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,13 +38,7 @@ export async function POST(request: NextRequest) {
 
     // Update lastActiveAt timestamp
     try {
-      const users = await readJsonFile<UserRecord[]>("users.json");
-      const updatedUsers = users.map((user) =>
-        user.id === result.user.id
-          ? { ...user, lastActiveAt: new Date().toISOString() }
-          : user,
-      );
-      await writeJsonFile("users.json", updatedUsers);
+      await updateUserLastActive(result.user.id);
     } catch (error) {
       console.error("Failed to update lastActiveAt:", error);
       // Continue with response even if this fails

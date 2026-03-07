@@ -1,0 +1,204 @@
+import { prisma } from "./prisma";
+import type { CourseFile, Audit, Remark } from "@prisma/client";
+
+/**
+ * MongoDB Course File Operations
+ * Maintains compatibility with existing JSON data structure
+ */
+
+export const courseFileDb = {
+  // Create a new course file
+  create: async (
+    data: Omit<CourseFile, "id" | "createdAt" | "updatedAt">,
+  ): Promise<CourseFile> => {
+    return prisma.courseFile.create({
+      data: {
+        ...data,
+      },
+    });
+  },
+
+  // Get all course files
+  getAll: async (): Promise<CourseFile[]> => {
+    return prisma.courseFile.findMany({
+      include: {
+        audits: true,
+        remarks: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  },
+
+  // Get course file by ID
+  getById: async (id: string): Promise<CourseFile | null> => {
+    return prisma.courseFile.findUnique({
+      where: { id },
+      include: {
+        audits: true,
+        remarks: true,
+      },
+    });
+  },
+
+  // Get course files by faculty ID
+  getByFacultyId: async (facultyId: string): Promise<CourseFile[]> => {
+    return prisma.courseFile.findMany({
+      where: { facultyId },
+      include: {
+        audits: true,
+        remarks: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  },
+
+  // Update course file
+  update: async (
+    id: string,
+    data: Partial<CourseFile>,
+  ): Promise<CourseFile> => {
+    return prisma.courseFile.update({
+      where: { id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
+  },
+
+  // Delete course file (cascades to audits and remarks)
+  delete: async (id: string): Promise<void> => {
+    await prisma.courseFile.delete({
+      where: { id },
+    });
+  },
+
+  // Get course files by status
+  getByStatus: async (status: string): Promise<CourseFile[]> => {
+    return prisma.courseFile.findMany({
+      where: { status },
+      include: {
+        audits: true,
+        remarks: true,
+      },
+    });
+  },
+
+  // Get course files by course code
+  getByCourseCode: async (courseCode: string): Promise<CourseFile[]> => {
+    return prisma.courseFile.findMany({
+      where: { courseCode },
+      include: {
+        audits: true,
+        remarks: true,
+      },
+    });
+  },
+};
+
+/**
+ * MongoDB Audit Operations
+ */
+
+export const auditDb = {
+  // Create audit entry
+  create: async (data: Omit<Audit, "id" | "performedAt">): Promise<Audit> => {
+    return prisma.audit.create({
+      data: {
+        ...data,
+      },
+    });
+  },
+
+  // Get audits by entity
+  getByEntity: async (
+    entityType: string,
+    entityId: string,
+  ): Promise<Audit[]> => {
+    return prisma.audit.findMany({
+      where: { entityType, entityId },
+      orderBy: {
+        performedAt: "desc",
+      },
+    });
+  },
+
+  // Get all audits for a course file
+  getByCourseFile: async (courseFileId: string): Promise<Audit[]> => {
+    return prisma.audit.findMany({
+      where: { courseFileId },
+      orderBy: {
+        performedAt: "desc",
+      },
+    });
+  },
+
+  // Delete audits for a course file
+  deleteByCourseFile: async (courseFileId: string): Promise<void> => {
+    await prisma.audit.deleteMany({
+      where: { courseFileId },
+    });
+  },
+};
+
+/**
+ * MongoDB Remark Operations
+ */
+
+export const remarkDb = {
+  // Create remark
+  create: async (
+    data: Omit<Remark, "id" | "createdAt" | "updatedAt">,
+  ): Promise<Remark> => {
+    return prisma.remark.create({
+      data: {
+        ...data,
+      },
+    });
+  },
+
+  // Get remarks by entity
+  getByEntity: async (
+    entityType: string,
+    entityId: string,
+  ): Promise<Remark[]> => {
+    return prisma.remark.findMany({
+      where: { entityType, entityId },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  },
+
+  // Get remarks for a course file
+  getByCourseFile: async (courseFileId: string): Promise<Remark[]> => {
+    return prisma.remark.findMany({
+      where: { courseFileId },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  },
+
+  // Update remark
+  update: async (id: string, data: Partial<Remark>): Promise<Remark> => {
+    return prisma.remark.update({
+      where: { id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
+  },
+
+  // Delete remarks for a course file
+  deleteByCourseFile: async (courseFileId: string): Promise<void> => {
+    await prisma.remark.deleteMany({
+      where: { courseFileId },
+    });
+  },
+};
