@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
       await request.json();
 
     // Validate inputs
-    if (!email || !password || !fullName || !role || !department) {
+    if (!email || !password || !fullName || !department) {
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 },
@@ -22,12 +22,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const requestedRole =
+      typeof role === "string" && role.trim().length > 0
+        ? role.trim().toLowerCase()
+        : "faculty";
+
     const normalizedRole: UserRole =
-      role === "Auditor"
+      requestedRole === "auditor"
         ? "auditor"
-        : role === "StaffAdvisor" || role === "Staff Advisor"
+        : requestedRole === "staffadvisor" ||
+            requestedRole === "staff advisor" ||
+            requestedRole === "staff-advisor"
           ? "staff-advisor"
-          : "faculty";
+          : requestedRole === "admin"
+            ? "admin"
+            : "faculty";
 
     await createUser({
       username: email,

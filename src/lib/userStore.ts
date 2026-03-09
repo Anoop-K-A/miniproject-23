@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import type { UserRole } from "@/lib/roles";
-import { getMongoDb } from "@/lib/mongodb";
+import { getMongoDb } from "@/lib/mongoDb";
 import { userSeedData } from "@/lib/userSeed";
 
 export interface UserRecord {

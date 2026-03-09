@@ -178,7 +178,11 @@ export function AddUserDialog({
             <Label>Roles *</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-between"
+                >
                   <span className="text-left">
                     {selectedRoleLabels.length === 0
                       ? "Select roles..."

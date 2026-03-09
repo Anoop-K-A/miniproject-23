@@ -14,8 +14,20 @@ function getMongoUri() {
 
 export async function getMongoClient() {
   if (!globalForMongo.mongoClientPromise) {
-    const client = new MongoClient(getMongoUri());
-    globalForMongo.mongoClientPromise = client.connect();
+    const uri = getMongoUri();
+    // mongodb+srv handles TLS automatically
+    const client = new MongoClient(uri, {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 30000,
+      maxPoolSize: 10,
+      minPoolSize: 1,
+    });
+    globalForMongo.mongoClientPromise = client.connect().catch((error) => {
+      console.error("MongoDB connection error:", error);
+      // Clear the failed promise so retry is possible
+      globalForMongo.mongoClientPromise = undefined;
+      throw error;
+    });
   }
 
   return globalForMongo.mongoClientPromise;
