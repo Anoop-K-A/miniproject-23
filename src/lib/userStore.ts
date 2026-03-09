@@ -6,12 +6,13 @@ import { userSeedData } from "@/lib/userSeed";
 export interface UserRecord {
   id: string;
   username: string;
-  password: string;
+  password?: string;
   name: string;
   role: UserRole;
   roles?: UserRole[];
   department?: string;
   email?: string;
+  firebaseUid?: string;
   phone?: string;
   status?: string;
   createdAt?: string;
@@ -29,11 +30,12 @@ interface CreateUserInput {
   id?: string;
   username?: string;
   email?: string;
-  password: string;
+  password?: string;
   name: string;
   role: UserRole;
   roles?: UserRole[];
   department?: string;
+  firebaseUid?: string;
   phone?: string;
   status?: string;
   [key: string]: any;
@@ -151,6 +153,10 @@ export async function createUser(input: CreateUserInput) {
     createdAt: input.createdAt || timestamp,
     updatedAt: input.updatedAt || timestamp,
   };
+
+  if (!input.password) {
+    delete user.password;
+  }
 
   await collection.insertOne(user);
 

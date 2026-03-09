@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { UserRole } from "@/lib/roles";
-import { createUser } from "@/lib/userStore";
+import { adminAuth } from "@/lib/firebaseAdmin";
+import { createUser, findUserByUsername } from "@/lib/userStore";
 
 export async function POST(request: NextRequest) {
+  let createdFirebaseUid: string | null = null;
+
   try {
     const { email, password, fullName, role, department } =
       await request.json();
@@ -38,19 +41,54 @@ export async function POST(request: NextRequest) {
             ? "admin"
             : "faculty";
 
-    await createUser({
-      username: email,
-      email,
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const existingProfile = await findUserByUsername(normalizedEmail);
+    if (existingProfile) {
+      return NextResponse.json(
+        { error: "Email already exists" },
+        { status: 400 },
+      );
+    }
+
+    const firebaseUser = await adminAuth.createUser({
+      email: normalizedEmail,
       password,
+      displayName: fullName,
+    });
+    createdFirebaseUid = firebaseUser.uid;
+
+    await createUser({
+      username: normalizedEmail,
+      email: normalizedEmail,
       name: fullName,
       role: normalizedRole,
       roles: [normalizedRole],
       department,
       status: normalizedRole === "faculty" ? "pending" : "active",
+      firebaseUid: firebaseUser.uid,
     });
 
-    return NextResponse.json({ message: "User created successfully" });
+    return NextResponse.json({
+      message: "User created successfully",
+      firebaseUid: firebaseUser.uid,
+    });
   } catch (error) {
+    if (createdFirebaseUid) {
+      try {
+        await adminAuth.deleteUser(createdFirebaseUid);
+      } catch (rollbackError) {
+        console.error("Failed to roll back Firebase user:", rollbackError);
+      }
+    }
+
+    const firebaseError = error as { code?: string; message?: string };
+    if (firebaseError?.code === "auth/email-already-exists") {
+      return NextResponse.json(
+        { error: "Email already exists" },
+        { status: 400 },
+      );
+    }
+
     if (error instanceof Error && error.message === "DUPLICATE_USER") {
       return NextResponse.json(
         { error: "Email already exists" },

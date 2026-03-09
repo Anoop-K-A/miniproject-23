@@ -61,7 +61,11 @@ async function startServer() {
   try {
     await connectDB();
     app.listen(PORT, () => {
-      console.log(`✅ Backend server running on port ${PORT}`);
+      console.log(`🚀 Backend server running on port ${PORT}`);
+      console.log(`📍 API available at http://localhost:${PORT}`);
+      console.log(
+        `💚 Firebase project: ${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}`,
+      );
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error);
@@ -70,22 +74,5 @@ async function startServer() {
 }
 
 startServer();
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("Error:", err);
-  res.status(err.status || 500).json({
-    error: err.message || "Internal server error",
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Backend server running on port ${PORT}`);
-  console.log(`📍 API available at http://localhost:${PORT}`);
-  console.log(
-    `💚 Firebase project: ${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}`,
-  );
-});
 
 module.exports = app;

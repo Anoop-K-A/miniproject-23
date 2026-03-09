@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyCredentials } from "@/lib/auth";
-import { updateUserLastActive } from "@/lib/userStore";
+import { findUserByUsername, updateUserLastActive } from "@/lib/userStore";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,15 +13,73 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await verifyCredentials(email, password);
-    if (!result) {
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "Firebase API key not configured" },
+        { status: 500 },
+      );
+    }
+
+    const firebaseResponse = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          password,
+          returnSecureToken: true,
+        }),
+      },
+    );
+
+    if (!firebaseResponse.ok) {
+      const firebaseError = (await firebaseResponse.json()) as {
+        error?: { message?: string };
+      };
+      const errorCode = firebaseError.error?.message;
+
+      if (
+        errorCode === "EMAIL_NOT_FOUND" ||
+        errorCode === "INVALID_PASSWORD" ||
+        errorCode === "INVALID_LOGIN_CREDENTIALS"
+      ) {
+        return NextResponse.json(
+          { error: "Invalid credentials" },
+          { status: 401 },
+        );
+      }
+
+      if (errorCode === "USER_DISABLED") {
+        return NextResponse.json(
+          { error: "Account is disabled" },
+          { status: 403 },
+        );
+      }
+
+      console.error("Firebase sign-in error:", firebaseError);
+      return NextResponse.json(
+        { error: "Authentication failed" },
         { status: 401 },
       );
     }
 
-    const normalizedStatus = result.status?.toLowerCase();
+    const user = await findUserByUsername(normalizedEmail);
+    if (!user) {
+      return NextResponse.json(
+        {
+          error:
+            "Account is authenticated but profile is missing. Contact admin to complete setup.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const normalizedStatus = user.status?.toLowerCase();
     const isApproved =
       !normalizedStatus ||
       normalizedStatus === "active" ||
@@ -38,19 +95,19 @@ export async function POST(request: NextRequest) {
 
     // Update lastActiveAt timestamp
     try {
-      await updateUserLastActive(result.user.id);
+      await updateUserLastActive(user.id);
     } catch (error) {
       console.error("Failed to update lastActiveAt:", error);
       // Continue with response even if this fails
     }
 
     return NextResponse.json({
-      id: result.user.id,
-      username: result.user.username,
-      name: result.user.name,
-      role: result.user.role,
-      roles: result.user.roles || [result.user.role],
-      department: result.user.department,
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      role: user.role,
+      roles: user.roles || [user.role],
+      department: user.department,
     });
   } catch (error) {
     console.error("Login error:", error);
