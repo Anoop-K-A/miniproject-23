@@ -26,6 +26,12 @@ function serializeId(id: unknown): string {
   return String(id);
 }
 
+function normalizeIdentity(value?: string | null) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
+}
+
 interface UserRecord {
   id: string;
   username: string;
@@ -309,15 +315,24 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
     "careerActivities.json",
   );
 
-  const staffAdvisor = username
-    ? users.find((user) => user.username === username)
+  const normalizedUsername = normalizeIdentity(username);
+  const staffAdvisor = normalizedUsername
+    ? users.find((user) => {
+        const userRoles = user.roles?.length ? user.roles : [user.role];
+        const isStaffAdvisor =
+          userRoles.includes("staff-advisor") || user.role === "staff-advisor";
+        return (
+          isStaffAdvisor &&
+          normalizeIdentity(user.username) === normalizedUsername
+        );
+      })
     : undefined;
-  const staffAdvisorId = staffAdvisor
-    ? serializeId(staffAdvisor.id)
-    : undefined;
-  const scopedStudents = staffAdvisor
-    ? students.filter((student) => student.advisorId === staffAdvisorId)
-    : students;
+  const staffAdvisorId = staffAdvisor ? serializeId(staffAdvisor.id) : "";
+  const scopedStudents = staffAdvisorId
+    ? students.filter(
+        (student) => serializeId(student.advisorId) === staffAdvisorId,
+      )
+    : [];
 
   const totalStudents = scopedStudents.length;
   const batchYear =

@@ -198,7 +198,6 @@ export function StaffAdvisorDashboard({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          advisorId: "",
           name: student.name,
           rollNumber: student.rollNumber,
           email: student.email,

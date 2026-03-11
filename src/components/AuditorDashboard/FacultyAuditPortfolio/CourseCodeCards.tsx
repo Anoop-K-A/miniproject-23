@@ -21,19 +21,47 @@ interface CourseCodeCardsProps {
   getStatusColor: (status: string) => string;
 }
 
-// Helper function to group files by course code
-const groupByCourseCode = (files: CourseFile[]) => {
-  const grouped: Record<string, CourseFile[]> = {};
+interface CourseYearGroup {
+  key: string;
+  courseCode: string;
+  academicYear: string;
+  courseName: string;
+  files: CourseFile[];
+}
+
+// Group files by course code + academic year so batches are shown separately.
+const groupByCourseCodeAndYear = (files: CourseFile[]): CourseYearGroup[] => {
+  const grouped: Record<string, CourseYearGroup> = {};
 
   files.forEach((file) => {
     const courseCode = file.courseCode || "Unknown";
-    if (!grouped[courseCode]) {
-      grouped[courseCode] = [];
+    const academicYear = file.academicYear || "Unknown Year";
+    const key = `${courseCode}|${academicYear}`;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        key,
+        courseCode,
+        academicYear,
+        courseName: file.courseName || courseCode,
+        files: [],
+      };
     }
-    grouped[courseCode].push(file);
+    grouped[key].files.push(file);
   });
 
-  return grouped;
+  return Object.values(grouped).sort((a, b) => {
+    if (a.courseCode === b.courseCode) {
+      return b.academicYear.localeCompare(a.academicYear, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
+    }
+    return a.courseCode.localeCompare(b.courseCode, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
 };
 
 // Helper function to get status icon
@@ -56,23 +84,22 @@ export function CourseCodeCards({
   onReviewFile,
   getStatusColor,
 }: CourseCodeCardsProps) {
-  const [expandedCodes, setExpandedCodes] = useState<Set<string>>(new Set());
-  const groupedFiles = groupByCourseCode(courseFiles);
-  const courseCodes = Object.keys(groupedFiles).sort();
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const groupedFiles = groupByCourseCodeAndYear(courseFiles);
 
-  const toggleExpand = (courseCode: string) => {
-    setExpandedCodes((prev) => {
+  const toggleExpand = (groupKey: string) => {
+    setExpandedGroups((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(courseCode)) {
-        newSet.delete(courseCode);
+      if (newSet.has(groupKey)) {
+        newSet.delete(groupKey);
       } else {
-        newSet.add(courseCode);
+        newSet.add(groupKey);
       }
       return newSet;
     });
   };
 
-  if (courseCodes.length === 0) {
+  if (groupedFiles.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
         <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -83,8 +110,8 @@ export function CourseCodeCards({
 
   return (
     <div className="space-y-6">
-      {courseCodes.map((courseCode) => {
-        const files = groupedFiles[courseCode];
+      {groupedFiles.map((group) => {
+        const files = group.files;
         const approvedCount = files.filter(
           (f) => f.status === "Approved",
         ).length;
@@ -98,18 +125,17 @@ export function CourseCodeCards({
           (f) => f.status === "Submitted" || f.status === "Pending",
         ).length;
 
-        // Get course name from first file
-        const courseName = files[0]?.courseName || courseCode;
-        const isExpanded = expandedCodes.has(courseCode);
+        const courseName = group.courseName || group.courseCode;
+        const isExpanded = expandedGroups.has(group.key);
 
         return (
           <Card
-            key={courseCode}
+            key={group.key}
             className="border-l-4 border-l-purple-500 hover:shadow-lg transition-shadow"
           >
             <CardHeader
               className="pb-3 cursor-pointer hover:bg-gray-50 transition-colors"
-              onClick={() => toggleExpand(courseCode)}
+              onClick={() => toggleExpand(group.key)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1">
@@ -120,7 +146,7 @@ export function CourseCodeCards({
                   )}
                   <div className="flex-1">
                     <CardTitle className="text-xl font-bold text-gray-900">
-                      {courseCode}
+                      {group.courseCode} • {group.academicYear}
                     </CardTitle>
                     <p className="text-sm text-gray-600 mt-1">{courseName}</p>
                   </div>
