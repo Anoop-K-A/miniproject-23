@@ -94,8 +94,8 @@ npm run seed-admin
 
 This will create an admin account with:
 
-- Email: `anoopka.6.7.2004@gmail.com`
-- Password: `123`
+- Email: `admin@college.com`
+- Password: `Admin@123`
 
 ### 6. Migrate Existing Data (Optional)
 

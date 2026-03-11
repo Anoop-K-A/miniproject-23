@@ -9,6 +9,7 @@ import { AdminReviewSection } from "./AdminReviewSection";
 import { GallerySection, DownloadSection } from "./Sections";
 import { GalleryLightbox } from "./GalleryLightbox";
 import { EventReport, EventReportBlogViewerProps } from "./types";
+import { EntityMessagesPanel } from "@/components/shared/messages/EntityMessagesPanel";
 
 export function EventReportBlogViewer({
   report,
@@ -66,6 +67,13 @@ export function EventReportBlogViewer({
           getStatusColor={getStatusColor}
           onRespondClick={() => setIsResponseOpen(true)}
           showRespond={true}
+        />
+        {/* Auditor–Faculty Chat */}
+        <EntityMessagesPanel
+          facultyId={report.facultyId}
+          entityType="event-report"
+          entityId={report.id}
+          itemType="report"
         />
         <DownloadSection report={report} onDownload={onDownload} />
       </article>

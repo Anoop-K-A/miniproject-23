@@ -144,6 +144,6 @@ Expected output:
 
 ```
 ✅ Admin Account Setup Complete!
-Email: anoopka.6.7.2004@gmail.com
-Password: 123456
+Email: admin@college.com
+Password: Admin@123
 ```

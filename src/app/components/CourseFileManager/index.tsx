@@ -176,6 +176,12 @@ export function CourseFileManager() {
   };
 
   const handleDownload = (file: CourseFile) => {
+    const link = document.createElement("a");
+    link.href = `/api/course-files/${encodeURIComponent(file.id)}/download`;
+    link.download = file.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     toast.success(`Downloading ${file.fileName}`);
   };
 
@@ -509,10 +515,10 @@ export function CourseFileManager() {
                   <DialogTitle>File Details</DialogTitle>
                   <DialogDescription>
                     {selectedFile && (
-                      <div className="flex items-center gap-2 mt-2">
+                      <span className="inline-flex items-center gap-2 mt-2">
                         <FileText className="h-4 w-4" />
                         {selectedFile.fileName}
-                      </div>
+                      </span>
                     )}
                   </DialogDescription>
                 </DialogHeader>

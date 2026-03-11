@@ -24,6 +24,8 @@ export async function GET(request: NextRequest) {
     const facultyId = request.nextUrl.searchParams.get("facultyId");
     const auditorId = request.nextUrl.searchParams.get("auditorId");
     const threadId = request.nextUrl.searchParams.get("threadId");
+    const entityType = request.nextUrl.searchParams.get("entityType");
+    const entityId = request.nextUrl.searchParams.get("entityId");
     const messages = await readJsonFile<AuditorMessage[]>(
       "auditorMessages.json",
     );
@@ -33,6 +35,12 @@ export async function GET(request: NextRequest) {
     }
     if (auditorId) {
       filtered = filtered.filter((msg) => msg.auditorId === auditorId);
+    }
+    if (entityType) {
+      filtered = filtered.filter((msg) => msg.entityType === entityType);
+    }
+    if (entityId) {
+      filtered = filtered.filter((msg) => msg.entityId === entityId);
     }
     if (threadId) {
       filtered = filtered.filter((msg) => resolveThreadId(msg) === threadId);

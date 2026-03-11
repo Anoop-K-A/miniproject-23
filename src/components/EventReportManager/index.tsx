@@ -59,6 +59,15 @@ interface EventReportManagerProps {
   communities?: string[];
 }
 
+interface AuditorMessage {
+  id: string;
+  entityType: "course-file" | "event-report" | string;
+  entityId: string;
+  threadId?: string;
+  senderRole?: "auditor" | "faculty" | string;
+  createdAt?: string;
+}
+
 export function EventReportManager({
   initialReports = [],
   communities = [],
@@ -78,6 +87,8 @@ export function EventReportManager({
     null,
   );
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [pendingAuditorMessagesByReport, setPendingAuditorMessagesByReport] =
+    useState<Record<string, number>>({});
 
   // Form state for new report
   const [newReport, setNewReport] = useState({
@@ -115,6 +126,83 @@ export function EventReportManager({
 
     fetchReports();
   }, []);
+
+  useEffect(() => {
+    const loadMessageNotifications = async () => {
+      if (userRole !== "faculty" || !user?.id) {
+        setPendingAuditorMessagesByReport({});
+        return;
+      }
+
+      try {
+        const searchParams = new URLSearchParams({
+          facultyId: user.id,
+          entityType: "event-report",
+        });
+
+        const response = await fetch(
+          `/api/messages?${searchParams.toString()}`,
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+          setPendingAuditorMessagesByReport({});
+          return;
+        }
+
+        const groupedThreads = (data.messages ?? []).reduce<
+          Record<string, AuditorMessage[]>
+        >(
+          (
+            accumulator: Record<string, AuditorMessage[]>,
+            message: AuditorMessage,
+          ) => {
+            const threadId =
+              message.threadId ?? `${message.entityType}:${message.entityId}`;
+            if (!accumulator[threadId]) {
+              accumulator[threadId] = [];
+            }
+            accumulator[threadId].push(message);
+            return accumulator;
+          },
+          {},
+        );
+
+        const pendingByEntity = Object.values(groupedThreads).reduce<
+          Record<string, number>
+        >((accumulator, threadMessages) => {
+          const latestMessage = [...threadMessages].sort((a, b) => {
+            const aTime = new Date(a.createdAt ?? 0).getTime();
+            const bTime = new Date(b.createdAt ?? 0).getTime();
+            return aTime - bTime;
+          })[threadMessages.length - 1];
+
+          if (latestMessage?.senderRole === "auditor") {
+            accumulator[latestMessage.entityId] =
+              (accumulator[latestMessage.entityId] ?? 0) + 1;
+          }
+          return accumulator;
+        }, {});
+
+        setPendingAuditorMessagesByReport(pendingByEntity);
+      } catch (error) {
+        console.error("Load event report message notifications error:", error);
+        setPendingAuditorMessagesByReport({});
+      }
+    };
+
+    void loadMessageNotifications();
+
+    if (typeof window !== "undefined") {
+      const handler = () => {
+        void loadMessageNotifications();
+      };
+      window.addEventListener("dashboard:data-updated", handler);
+      return () => {
+        window.removeEventListener("dashboard:data-updated", handler);
+      };
+    }
+  }, [user?.id, userRole]);
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -777,8 +865,22 @@ export function EventReportManager({
                               />
                             )}
                             <div>
-                              <div className="font-medium">
-                                {report.eventName}
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium">
+                                  {report.eventName}
+                                </div>
+                                {(pendingAuditorMessagesByReport[report.id] ??
+                                  0) > 0 && (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-red-600" />
+                                    New message
+                                    {(pendingAuditorMessagesByReport[
+                                      report.id
+                                    ] ?? 0) > 1
+                                      ? ` (${pendingAuditorMessagesByReport[report.id]})`
+                                      : ""}
+                                  </span>
+                                )}
                               </div>
                               {report.location && (
                                 <div className="text-sm text-gray-500">

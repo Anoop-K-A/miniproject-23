@@ -183,7 +183,7 @@ cd backend
 # Install dependencies
 npm install
 
-# Create admin account (email: anoopka.6.7.2004@gmail.com, password: 123)
+# Create admin account (email: admin@college.com, password: Admin@123)
 npm run seed-admin
 
 # Start development server

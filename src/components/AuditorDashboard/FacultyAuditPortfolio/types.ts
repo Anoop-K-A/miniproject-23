@@ -19,6 +19,7 @@ export interface CourseFile {
   academicYear?: string;
   size?: string;
   status: "Draft" | "Submitted" | "Pending" | "Approved" | "Rejected";
+  adminRemarks?: string;
   auditorRemarks?: string;
   reviewedBy?: string;
   reviewedDate?: string;
@@ -43,7 +44,10 @@ export interface EventReport {
   objectives: string;
   outcomes: string;
   status: "Draft" | "Submitted" | "Approved" | "Rejected";
+  adminRemarks?: string;
   auditorRemarks?: string;
+  facultyResponse?: string;
+  responseDate?: string;
 }
 
 export interface FacultyAuditPortfolioProps {

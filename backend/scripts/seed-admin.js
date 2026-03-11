@@ -1,37 +1,36 @@
 const { connectDB } = require("../config/mongodb.config");
 const { admin } = require("../config/firebase.config");
 const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 
 /**
  * Script to seed admin account in MongoDB
- * Email: anoopka.6.7.2004@gmail.com
- * Password: 123456
+ * Email: admin@college.com
+ * Password: Admin@123
  */
 
 async function seedAdmin() {
   console.log("🔐 Setting up admin account...\n");
 
-  const adminEmail = "anoopka.6.7.2004@gmail.com";
-  const adminPassword = "123456";
+  const adminEmail = "admin@college.com";
+  const adminPassword = "Admin@123";
   const adminName = "Admin User";
 
   try {
     await connectDB();
 
-    // Check if admin already exists in MongoDB
-    const existingAdmin = await User.findOne({ email: adminEmail });
-    if (existingAdmin) {
-      console.log("✅ Admin user already exists in MongoDB");
-      console.log(`  MongoDB ID: ${existingAdmin._id}`);
-      console.log(`  Firebase UID: ${existingAdmin.firebaseUid}`);
-      process.exit(0);
-    }
-
     // Create/get Firebase Auth user
     let userRecord;
     try {
       userRecord = await admin.auth().getUserByEmail(adminEmail);
-      console.log("✅ Admin already exists in Firebase Auth");
+      await admin.auth().updateUser(userRecord.uid, {
+        email: adminEmail,
+        password: adminPassword,
+        displayName: adminName,
+      });
+      console.log(
+        "✅ Admin already exists in Firebase Auth (credentials synced)",
+      );
     } catch (error) {
       if (error.code === "auth/user-not-found") {
         userRecord = await admin.auth().createUser({
@@ -45,19 +44,55 @@ async function seedAdmin() {
       }
     }
 
-    // Create admin user in MongoDB
-    const newAdmin = await User.create({
+    // Keep admin claims aligned in Firebase Auth.
+    await admin.auth().setCustomUserClaims(userRecord.uid, { role: "admin" });
+
+    // Create or update admin user in MongoDB using native collection operations.
+    // This avoids schema casting issues when legacy docs use string _id values.
+    const usersCollection = User.collection;
+    const now = new Date();
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+    let existingMongoAdmin = await usersCollection.findOne({
+      email: adminEmail,
+    });
+    if (!existingMongoAdmin) {
+      existingMongoAdmin = await usersCollection.findOne({
+        firebaseUid: userRecord.uid,
+      });
+    }
+    if (!existingMongoAdmin) {
+      existingMongoAdmin = await usersCollection.findOne({ role: "admin" });
+    }
+
+    const adminPayload = {
       firebaseUid: userRecord.uid,
       email: adminEmail,
       name: adminName,
       role: "admin",
       roles: ["admin"],
-      password: adminPassword,
+      password: hashedPassword,
       status: "active",
       verified: true,
-    });
+      updatedAt: now,
+    };
 
-    console.log("✅ Created admin user in MongoDB");
+    let mongoAdminId;
+    if (existingMongoAdmin) {
+      await usersCollection.updateOne(
+        { _id: existingMongoAdmin._id },
+        { $set: adminPayload },
+      );
+      mongoAdminId = existingMongoAdmin._id;
+      console.log("✅ Updated admin user in MongoDB");
+    } else {
+      const insertResult = await usersCollection.insertOne({
+        ...adminPayload,
+        createdAt: now,
+      });
+      mongoAdminId = insertResult.insertedId;
+      console.log("✅ Created admin user in MongoDB");
+    }
 
     console.log("\n" + "=".repeat(50));
     console.log("✅ ✅ ✅ Admin Account Setup Complete! ✅ ✅ ✅");
@@ -70,7 +105,7 @@ async function seedAdmin() {
     console.log(`  Verified: true`);
     console.log(`\n📝 IDs:`);
     console.log(`  Firebase UID: ${userRecord.uid}`);
-    console.log(`  MongoDB ID: ${newAdmin._id}`);
+    console.log(`  MongoDB ID: ${mongoAdminId}`);
     console.log("\n⚠️  Remember to change the password after first login!\n");
 
     process.exit(0);

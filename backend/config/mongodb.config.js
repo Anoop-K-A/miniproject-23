@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const path = require("path");
 
-dotenv.config({ path: "../.env.local" });
+// Load env from project root reliably regardless of process cwd.
+dotenv.config({ path: path.resolve(__dirname, "../../.env.local") });
 
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/faculty-portal";
@@ -12,12 +14,16 @@ const MONGODB_URI =
 async function connectDB() {
   try {
     await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000,
     });
     console.log("✅ MongoDB connected successfully");
     return mongoose.connection;
   } catch (error) {
+    if (String(error.message).includes("querySrv ECONNREFUSED")) {
+      console.error(
+        "❌ SRV DNS lookup failed. Use a direct mongodb:// URI (non-SRV) for MONGODB_URI.",
+      );
+    }
     console.error("❌ Error connecting to MongoDB:", error.message);
     process.exit(1);
   }

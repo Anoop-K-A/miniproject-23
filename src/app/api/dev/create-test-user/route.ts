@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { email, password, name, role, department } = body;
 
     // Use defaults if not provided
-    const testEmail = email || "admin@college.edu";
+    const testEmail = email || "admin@college.com";
     const testPassword = password || "Admin@123";
     const testName = name || "Admin User";
     const testRole = role || "admin";
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const testEmail = "admin@college.edu";
+    const testEmail = "admin@college.com";
     const testPassword = "Admin@123";
 
     // Check if user already exists

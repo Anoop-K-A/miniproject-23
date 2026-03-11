@@ -44,7 +44,7 @@ ts-node scripts/migrate-users-to-firebase.ts
 
 Once migrated, users can sign in with their email and password from users.json:
 
-- Admin: `admin@college.edu` / `Admin@123`
+- Admin: `admin@college.com` / `Admin@123`
 - Faculty: `faculty@test.com` / `password123`
 
 ### Security Note

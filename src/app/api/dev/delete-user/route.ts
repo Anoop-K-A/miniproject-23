@@ -5,7 +5,7 @@
  * to allow re-registration during development.
  *
  * Usage:
- * - GET: http://localhost:3000/api/dev/delete-user?email=admin@college.edu
+ * - GET: http://localhost:3000/api/dev/delete-user?email=admin@college.com
  * - POST: http://localhost:3000/api/dev/delete-user (with JSON body)
  *
  * ⚠️ SECURITY WARNING: Remove or protect this endpoint in production!

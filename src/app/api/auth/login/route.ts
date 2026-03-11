@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserByUsername, updateUserLastActive } from "@/lib/userStore";
+import {
+  createUser,
+  findUserByUsername,
+  updateUserLastActive,
+} from "@/lib/userStore";
+
+const DEFAULT_ADMIN_EMAIL = "admin@college.com";
+const DEFAULT_ADMIN_NAME = "Admin User";
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,6 +44,13 @@ export async function POST(request: NextRequest) {
       },
     );
 
+    type FirebaseLoginSuccess = {
+      localId: string;
+      email?: string;
+    };
+
+    let firebaseData: FirebaseLoginSuccess | null = null;
+
     if (!firebaseResponse.ok) {
       const firebaseError = (await firebaseResponse.json()) as {
         error?: { message?: string };
@@ -68,7 +82,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await findUserByUsername(normalizedEmail);
+    firebaseData = (await firebaseResponse.json()) as FirebaseLoginSuccess;
+
+    let user = await findUserByUsername(normalizedEmail);
+
+    // Keep the default admin account usable even when only Firebase Auth exists.
+    if (
+      !user &&
+      normalizedEmail === DEFAULT_ADMIN_EMAIL &&
+      firebaseData?.localId
+    ) {
+      try {
+        user = await createUser({
+          username: normalizedEmail,
+          email: normalizedEmail,
+          name: DEFAULT_ADMIN_NAME,
+          role: "admin",
+          roles: ["admin"],
+          department: "Administration",
+          status: "active",
+          firebaseUid: firebaseData.localId,
+        });
+      } catch (createError) {
+        if (
+          !(createError instanceof Error) ||
+          createError.message !== "DUPLICATE_USER"
+        ) {
+          console.error(
+            "Failed to auto-provision admin profile after Firebase login:",
+            createError,
+          );
+        }
+        user = await findUserByUsername(normalizedEmail);
+      }
+    }
+
     if (!user) {
       return NextResponse.json(
         {

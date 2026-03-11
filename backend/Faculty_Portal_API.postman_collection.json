@@ -53,7 +53,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"anoopka.6.7.2004@gmail.com\",\n  \"password\": \"123\"\n}"
+              "raw": "{\n  \"email\": \"admin@college.com\",\n  \"password\": \"Admin@123\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",

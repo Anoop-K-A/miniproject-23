@@ -9,6 +9,7 @@ export interface PeerReview {
 
 export interface EventReport {
   id: string;
+  facultyId?: string;
   eventName: string;
   community: string;
   eventDate: string;

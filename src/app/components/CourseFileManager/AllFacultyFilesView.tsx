@@ -2,9 +2,29 @@ import { useState } from "react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { FileText, Download, Search, Filter, Eye, MessageSquare } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import {
+  FileText,
+  Download,
+  Search,
+  Filter,
+  Eye,
+  MessageSquare,
+} from "lucide-react";
 import { Badge } from "../ui/badge";
 import { toast } from "sonner";
 import { DocumentViewerInterface } from "../DocumentViewerInterface";
@@ -19,7 +39,10 @@ interface AllFacultyFilesViewProps {
   onFileUpdate?: (updatedFile: CourseFile) => void;
 }
 
-export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesViewProps) {
+export function AllFacultyFilesView({
+  files,
+  onFileUpdate,
+}: AllFacultyFilesViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -36,6 +59,12 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
   };
 
   const handleDownload = (file: CourseFile) => {
+    const link = document.createElement("a");
+    link.href = `/api/course-files/${encodeURIComponent(file.id)}/download`;
+    link.download = file.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     toast.success(`Downloading ${file.fileName}`);
   };
 
@@ -45,15 +74,15 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
     const newReview: PeerReview = {
       id: `pr${Date.now()}`,
       reviewerName: CURRENT_USER,
-      reviewDate: new Date().toISOString().split('T')[0],
-      comment: review
+      reviewDate: new Date().toISOString().split("T")[0],
+      comment: review,
     };
 
     const updatedFile = {
       ...selectedFile,
-      peerReviews: [...(selectedFile.peerReviews || []), newReview]
+      peerReviews: [...(selectedFile.peerReviews || []), newReview],
     };
-    
+
     setSelectedFile(updatedFile);
     onFileUpdate?.(updatedFile);
     setIsPeerReviewOpen(false);
@@ -64,11 +93,15 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
 
     const updatedFile = {
       ...selectedFile,
-      peerReviews: selectedFile.peerReviews?.map(pr =>
+      peerReviews: selectedFile.peerReviews?.map((pr) =>
         pr.id === selectedReview.id
-          ? { ...pr, facultyResponse: response, responseDate: new Date().toISOString().split('T')[0] }
-          : pr
-      )
+          ? {
+              ...pr,
+              facultyResponse: response,
+              responseDate: new Date().toISOString().split("T")[0],
+            }
+          : pr,
+      ),
     };
 
     setSelectedFile(updatedFile);
@@ -77,19 +110,23 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
     setIsResponseOpen(false);
   };
 
-  const filteredFiles = files.filter(file => {
-    const matchesSearch = file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         file.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         file.facultyName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = filterDepartment === "all" || file.department === filterDepartment;
-    const matchesStatus = filterStatus === "all" || file.status === filterStatus;
-    const matchesYear = filterYear === "all" || file.academicYear === filterYear;
-    
+  const filteredFiles = files.filter((file) => {
+    const matchesSearch =
+      file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      file.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      file.facultyName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDepartment =
+      filterDepartment === "all" || file.department === filterDepartment;
+    const matchesStatus =
+      filterStatus === "all" || file.status === filterStatus;
+    const matchesYear =
+      filterYear === "all" || file.academicYear === filterYear;
+
     return matchesSearch && matchesDepartment && matchesStatus && matchesYear;
   });
 
-  const uniqueDepartments = Array.from(new Set(files.map(f => f.department)));
-  const uniqueYears = Array.from(new Set(files.map(f => f.academicYear)));
+  const uniqueDepartments = Array.from(new Set(files.map((f) => f.department)));
+  const uniqueYears = Array.from(new Set(files.map((f) => f.academicYear)));
 
   if (isViewOpen && selectedFile) {
     return (
@@ -124,8 +161,10 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Departments</SelectItem>
-              {uniqueDepartments.map(dept => (
-                <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+              {uniqueDepartments.map((dept) => (
+                <SelectItem key={dept} value={dept}>
+                  {dept}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -148,8 +187,10 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Years</SelectItem>
-              {uniqueYears.map(year => (
-                <SelectItem key={year} value={year}>{year}</SelectItem>
+              {uniqueYears.map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -170,7 +211,10 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
             <TableBody>
               {filteredFiles.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-500 py-8">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-gray-500 py-8"
+                  >
                     No files found matching your criteria.
                   </TableCell>
                 </TableRow>
@@ -181,28 +225,34 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
                       <FileText className="h-4 w-4 text-blue-600" />
                       <div>
                         <div>{file.fileName}</div>
-                        <div className="text-sm text-gray-500">{file.fileType}</div>
+                        <div className="text-sm text-gray-500">
+                          {file.fileType}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
                         <div>{file.facultyName}</div>
-                        <div className="text-sm text-gray-500">{file.department}</div>
+                        <div className="text-sm text-gray-500">
+                          {file.department}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>{file.courseCode}</div>
-                      <div className="text-sm text-gray-500">{file.courseName}</div>
+                      <div className="text-sm text-gray-500">
+                        {file.courseName}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {file.status && (
-                        <Badge 
+                        <Badge
                           className={
-                            file.status === "Approved" 
-                              ? "bg-green-100 text-green-800" 
+                            file.status === "Approved"
+                              ? "bg-green-100 text-green-800"
                               : file.status === "Rejected"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
                           }
                         >
                           {file.status}
@@ -212,7 +262,9 @@ export function AllFacultyFilesView({ files, onFileUpdate }: AllFacultyFilesView
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm">{file.peerReviews?.length || 0}</span>
+                        <span className="text-sm">
+                          {file.peerReviews?.length || 0}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>

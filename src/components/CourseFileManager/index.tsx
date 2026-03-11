@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -41,27 +41,58 @@ import {
   Trash2,
   Search,
   Filter,
-  MessageSquare,
   Eye,
-  Reply,
   Users,
+  Folder,
+  ChevronDown,
+  ChevronRight,
+  CheckCircle2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ResponseDialog } from "@/components/shared/dialogs/ResponseDialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PeerReviewDialog } from "@/components/shared/dialogs/PeerReviewDialog";
 import { AllFacultyFilesView } from "./AllFacultyFilesView";
 import { CourseFile } from "./types";
 import { useAuth } from "@/context/AuthContext";
+import { EntityMessagesPanel } from "@/components/shared/messages/EntityMessagesPanel";
+import {
+  downloadFromServer,
+  downloadTextFile,
+  sanitizeFileName,
+} from "@/lib/download";
 
 interface CourseFileManagerProps {
   initialFiles?: CourseFile[];
   fileCategories?: string[];
   fileTypes?: string[];
 }
+
+interface AuditorMessage {
+  id: string;
+  entityType: "course-file" | "event-report" | string;
+  entityId: string;
+  threadId?: string;
+  senderRole?: "auditor" | "faculty" | string;
+  createdAt?: string;
+}
+
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+      reject(new Error("Unable to read file data"));
+    };
+    reader.onerror = () => {
+      reject(reader.error ?? new Error("Unable to read file data"));
+    };
+    reader.readAsDataURL(file);
+  });
 
 export function CourseFileManager({
   initialFiles = [],
@@ -85,6 +116,9 @@ export function CourseFileManager({
   const [courseName, setCourseName] = useState("");
   const [semester, setSemester] = useState("");
   const [fileName, setFileName] = useState("");
+  const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(
+    null,
+  );
   const [selectedYear, setSelectedYear] = useState(
     new Date().getFullYear().toString(),
   );
@@ -93,7 +127,18 @@ export function CourseFileManager({
   );
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const [isResponseOpen, setIsResponseOpen] = useState(false);
+  const [pendingAuditorMessagesByFile, setPendingAuditorMessagesByFile] =
+    useState<Record<string, number>>({});
+  const [expandedFolders, setExpandedFolders] = useState<
+    Record<string, boolean>
+  >({});
+
+  const toggleFolder = (folderKey: string) => {
+    setExpandedFolders((prev) => ({
+      ...prev,
+      [folderKey]: !prev[folderKey],
+    }));
+  };
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -116,15 +161,101 @@ export function CourseFileManager({
     fetchFiles();
   }, []);
 
+  useEffect(() => {
+    const loadMessageNotifications = async () => {
+      if (userRole !== "faculty" || !user?.id) {
+        setPendingAuditorMessagesByFile({});
+        return;
+      }
+
+      try {
+        const searchParams = new URLSearchParams({
+          facultyId: user.id,
+          entityType: "course-file",
+        });
+
+        const response = await fetch(
+          `/api/messages?${searchParams.toString()}`,
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+          setPendingAuditorMessagesByFile({});
+          return;
+        }
+
+        const groupedThreads = (data.messages ?? []).reduce<
+          Record<string, AuditorMessage[]>
+        >(
+          (
+            accumulator: Record<string, AuditorMessage[]>,
+            message: AuditorMessage,
+          ) => {
+            const threadId =
+              message.threadId ?? `${message.entityType}:${message.entityId}`;
+            if (!accumulator[threadId]) {
+              accumulator[threadId] = [];
+            }
+            accumulator[threadId].push(message);
+            return accumulator;
+          },
+          {},
+        );
+
+        const pendingByEntity = Object.values(groupedThreads).reduce<
+          Record<string, number>
+        >((accumulator, threadMessages) => {
+          const latestMessage = [...threadMessages].sort((a, b) => {
+            const aTime = new Date(a.createdAt ?? 0).getTime();
+            const bTime = new Date(b.createdAt ?? 0).getTime();
+            return aTime - bTime;
+          })[threadMessages.length - 1];
+
+          if (latestMessage?.senderRole === "auditor") {
+            accumulator[latestMessage.entityId] =
+              (accumulator[latestMessage.entityId] ?? 0) + 1;
+          }
+          return accumulator;
+        }, {});
+
+        setPendingAuditorMessagesByFile(pendingByEntity);
+      } catch (error) {
+        console.error("Load course file message notifications error:", error);
+        setPendingAuditorMessagesByFile({});
+      }
+    };
+
+    void loadMessageNotifications();
+
+    if (typeof window !== "undefined") {
+      const handler = () => {
+        void loadMessageNotifications();
+      };
+      window.addEventListener("dashboard:data-updated", handler);
+      return () => {
+        window.removeEventListener("dashboard:data-updated", handler);
+      };
+    }
+  }, [user?.id, userRole]);
+
   const handleFileUpload = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!fileName || !courseCode || !courseName || !selectedFileType) {
+    if (
+      !selectedUploadFile ||
+      !fileName ||
+      !courseCode ||
+      !courseName ||
+      !selectedFileType
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     try {
+      const documentUrl = await fileToDataUrl(selectedUploadFile);
+      const fileSizeMb = (selectedUploadFile.size / (1024 * 1024)).toFixed(2);
+
       const response = await fetch("/api/course-files", {
         method: "POST",
         headers: {
@@ -135,13 +266,14 @@ export function CourseFileManager({
           facultyName: user?.name ?? "",
           department: user?.department ?? "",
           fileName,
+          documentUrl,
           courseCode,
           courseName,
           fileType: selectedFileType,
           uploadDate: new Date().toISOString().split("T")[0],
           semester,
           academicYear: selectedYear,
-          size: "1.5 MB",
+          size: `${fileSizeMb} MB`,
           status: "Pending",
         }),
       });
@@ -164,6 +296,7 @@ export function CourseFileManager({
       setCourseName("");
       setSemester("");
       setFileName("");
+      setSelectedUploadFile(null);
       setSelectedYear(new Date().getFullYear().toString());
     } catch (error) {
       console.error("File upload error:", error);
@@ -193,46 +326,36 @@ export function CourseFileManager({
   };
 
   const handleDownload = (file: CourseFile) => {
-    toast.success(`Downloading ${file.fileName}`);
+    const safeName = sanitizeFileName(file.fileName, "course-file");
+    if (file.documentUrl) {
+      downloadFromServer(
+        `/api/course-files/${encodeURIComponent(file.id)}/download`,
+        safeName,
+      );
+      toast.success(`Downloading ${file.fileName}`);
+      return;
+    }
+
+    const baseName = safeName.replace(/\.[^/.]+$/, "");
+    const summaryName = `${baseName || "course-file"}-summary.txt`;
+    const summary = [
+      `File Name: ${file.fileName}`,
+      `Course: ${file.courseCode} - ${file.courseName}`,
+      `Type: ${file.fileType}`,
+      `Semester: ${file.semester}`,
+      `Academic Year: ${file.academicYear}`,
+      `Uploaded: ${file.uploadDate}`,
+      `Faculty: ${file.facultyName || "Unknown"}`,
+      `Department: ${file.department || "Unknown"}`,
+      `Status: ${file.status ?? "Unknown"}`,
+    ].join("\n");
+    downloadTextFile(summary, summaryName);
+    toast.success(`Downloaded summary for ${file.fileName}`);
   };
 
   const handleView = (file: CourseFile) => {
     setSelectedFile(file);
     setIsViewOpen(true);
-  };
-
-  const handleResponse = async (response: string) => {
-    if (!selectedFile) return;
-
-    try {
-      const apiResponse = await fetch(`/api/course-files/${selectedFile.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          facultyResponse: response,
-        }),
-      });
-      const data = await apiResponse.json();
-      if (!apiResponse.ok) {
-        toast.error(data.error || "Response update failed");
-        return;
-      }
-      setFiles(data.files);
-      const updated = data.files
-        .filter((file: CourseFile) => file.id === selectedFile.id)
-        .reduce<CourseFile | undefined>((acc, file) => acc ?? file, undefined);
-      if (updated) {
-        setSelectedFile(updated);
-      }
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("dashboard:data-updated"));
-      }
-    } catch (error) {
-      console.error("Response error:", error);
-      toast.error("An error occurred while saving response");
-    }
   };
 
   const facultyFiles = useMemo(() => {
@@ -260,6 +383,30 @@ export function CourseFileManager({
     new Set(facultyFiles.map((f) => f.status).filter(Boolean)),
   );
   const years = Array.from(new Set(facultyFiles.map((f) => f.academicYear)));
+
+  // Group files by course code and academic year
+  const groupedFiles = useMemo(() => {
+    const groups: Record<string, CourseFile[]> = {};
+    resolvedFiles.forEach((file) => {
+      const groupKey = `${file.courseCode}|${file.academicYear}`;
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(file);
+    });
+
+    return Object.entries(groups).map(([groupKey, fileList]) => {
+      const [courseCode, academicYear] = groupKey.split("|");
+      const firstFile = fileList[0];
+      return {
+        courseCode,
+        courseName: firstFile.courseName,
+        academicYear,
+        semester: firstFile.semester,
+        files: fileList.sort((a, b) => a.fileName.localeCompare(b.fileName)),
+      };
+    });
+  }, [resolvedFiles]);
 
   return (
     <Card>
@@ -362,9 +509,11 @@ export function CourseFileManager({
                         type="file"
                         required
                         accept=".pdf,.doc,.docx,.ppt,.pptx"
-                        onChange={(e) =>
-                          setFileName(e.target.files?.[0]?.name || "")
-                        }
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          setSelectedUploadFile(file);
+                          setFileName(file?.name || "");
+                        }}
                       />
                     </div>
                     <div>
@@ -460,84 +609,129 @@ export function CourseFileManager({
               </Dialog>
             </div>
 
-            {/* Files Table */}
-            <div className="border rounded-lg">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>File Name</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <TableHead>Upload Date</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {resolvedFiles.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="text-center text-gray-500 py-8"
+            {/* Files Folder View */}
+            <div className="border rounded-lg divide-y border-l-4 border-l-blue-500">
+              {resolvedFiles.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  No files found. Upload your first course file to get started.
+                </div>
+              ) : (
+                groupedFiles.map((group) => {
+                  const folderKey = `${group.courseCode}-${group.academicYear}`;
+                  const isExpanded = expandedFolders[folderKey] ?? true;
+
+                  return (
+                    <React.Fragment key={folderKey}>
+                      {/* Folder Header */}
+                      <button
+                        onClick={() => toggleFolder(folderKey)}
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
                       >
-                        No files found. Upload your first course file to get
-                        started.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    resolvedFiles.map((file) => (
-                      <TableRow key={file.id}>
-                        <TableCell className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-blue-600" />
-                          <span>{file.fileName}</span>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div>{file.courseCode}</div>
-                            <div className="text-sm text-gray-500">
-                              {file.courseName}
+                        {isExpanded ? (
+                          <ChevronDown className="h-5 w-5 text-gray-600" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-gray-600" />
+                        )}
+                        <Folder className="h-5 w-5 text-blue-500" />
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-800">
+                            {group.courseCode}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            {group.courseName}
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {group.files.length} Files
+                          </Badge>
+                          <Badge className="text-xs bg-green-100 text-green-800">
+                            {group.files.length}
+                          </Badge>
+                        </div>
+                      </button>
+
+                      {/* Files in folder */}
+                      {isExpanded && (
+                        <div className="divide-y">
+                          {group.files.map((file) => (
+                            <div
+                              key={file.id}
+                              className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 gap-3"
+                            >
+                              <div className="flex-1 flex items-center gap-3">
+                                {/* Status icon */}
+                                <CheckCircle2
+                                  className={`h-5 w-5 shrink-0 ${
+                                    file.status === "Approved"
+                                      ? "text-green-600"
+                                      : file.status === "Rejected"
+                                        ? "text-red-600"
+                                        : "text-yellow-600"
+                                  }`}
+                                />
+                                {/* File info */}
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {file.fileName}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs mr-2"
+                                    >
+                                      {file.fileType}
+                                    </Badge>
+                                    <span>
+                                      {file.uploadDate} • {group.semester}{" "}
+                                      {file.academicYear}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Status and actions */}
+                              <div className="flex items-center gap-3 shrink-0">
+                                {file.status && (
+                                  <Badge
+                                    className={`text-xs ${
+                                      file.status === "Approved"
+                                        ? "bg-green-100 text-green-800"
+                                        : file.status === "Rejected"
+                                          ? "bg-red-100 text-red-800"
+                                          : "bg-yellow-100 text-yellow-800"
+                                    }`}
+                                  >
+                                    {file.status}
+                                  </Badge>
+                                )}
+                                <div className="flex gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleView(file)}
+                                    title="View Details"
+                                  >
+                                    <Eye className="h-4 w-4 text-blue-600" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDownload(file)}
+                                    title="Download"
+                                  >
+                                    <Download className="h-4 w-4 text-gray-600" />
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">{file.fileType}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {file.semester} {file.academicYear}
-                        </TableCell>
-                        <TableCell>{file.uploadDate}</TableCell>
-                        <TableCell>{file.size}</TableCell>
-                        <TableCell>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDownload(file)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(file.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleView(file)}
-                            >
-                              <Eye className="h-4 w-4 text-blue-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                          ))}
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              )}
             </div>
 
             {/* Summary Stats */}
@@ -564,15 +758,18 @@ export function CourseFileManager({
 
             {/* View File Details Dialog */}
             <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-              <DialogContent className="max-w-2xl">
+              <DialogContent
+                className="max-w-3xl overflow-y-auto"
+                style={{ maxHeight: "calc(100vh - 4rem)" }}
+              >
                 <DialogHeader>
                   <DialogTitle>File Details</DialogTitle>
                   <DialogDescription>
                     {selectedFile && (
-                      <div className="flex items-center gap-2 mt-2">
+                      <span className="inline-flex items-center gap-2 mt-2">
                         <FileText className="h-4 w-4" />
                         {selectedFile.fileName}
-                      </div>
+                      </span>
                     )}
                   </DialogDescription>
                 </DialogHeader>
@@ -607,97 +804,13 @@ export function CourseFileManager({
                       </div>
                     </div>
 
-                    {/* Admin Review Section */}
-                    {selectedFile.status && (
-                      <div className="border-t pt-4 mt-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="flex items-center gap-2">
-                            <MessageSquare className="h-5 w-5 text-gray-600" />
-                            Admin Review
-                          </h4>
-                          <Badge
-                            className={
-                              selectedFile.status === "Approved"
-                                ? "bg-green-100 text-green-800"
-                                : selectedFile.status === "Rejected"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                            }
-                          >
-                            {selectedFile.status}
-                          </Badge>
-                        </div>
-
-                        {selectedFile.adminRemarks ? (
-                          <div className="space-y-3">
-                            <Alert
-                              className={
-                                selectedFile.status === "Approved"
-                                  ? "border-green-200 bg-green-50"
-                                  : selectedFile.status === "Rejected"
-                                    ? "border-red-200 bg-red-50"
-                                    : "border-yellow-200 bg-yellow-50"
-                              }
-                            >
-                              <AlertDescription>
-                                <p className="text-sm mb-3">
-                                  {selectedFile.adminRemarks}
-                                </p>
-                                {selectedFile.reviewedBy && (
-                                  <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
-                                    <p>
-                                      Reviewed by: {selectedFile.reviewedBy}
-                                    </p>
-                                    {selectedFile.reviewedDate && (
-                                      <p>Date: {selectedFile.reviewedDate}</p>
-                                    )}
-                                  </div>
-                                )}
-                              </AlertDescription>
-                            </Alert>
-
-                            {/* Faculty Response */}
-                            {selectedFile.facultyResponse ? (
-                              <Alert className="border-blue-200 bg-blue-50">
-                                <AlertDescription>
-                                  <p className="text-xs text-blue-800 mb-2">
-                                    Your Response:
-                                  </p>
-                                  <p className="text-sm mb-3">
-                                    {selectedFile.facultyResponse}
-                                  </p>
-                                  {selectedFile.responseDate && (
-                                    <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
-                                      <p>
-                                        Response Date:{" "}
-                                        {selectedFile.responseDate}
-                                      </p>
-                                    </div>
-                                  )}
-                                </AlertDescription>
-                              </Alert>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsResponseOpen(true)}
-                                className="w-full"
-                              >
-                                <Reply className="h-4 w-4 mr-2" />
-                                Respond to Admin Review
-                              </Button>
-                            )}
-                          </div>
-                        ) : (
-                          <Alert>
-                            <AlertDescription className="text-sm text-gray-500">
-                              This file is pending admin review. You will be
-                              notified once the review is complete.
-                            </AlertDescription>
-                          </Alert>
-                        )}
-                      </div>
-                    )}
+                    {/* Auditor–Faculty Chat */}
+                    <EntityMessagesPanel
+                      facultyId={user?.id}
+                      entityType="course-file"
+                      entityId={selectedFile.id}
+                      itemType="file"
+                    />
 
                     <div className="flex gap-2 pt-4">
                       <Button
@@ -718,14 +831,6 @@ export function CourseFileManager({
                 )}
               </DialogContent>
             </Dialog>
-
-            {/* Response Dialog */}
-            <ResponseDialog
-              open={isResponseOpen}
-              onOpenChange={setIsResponseOpen}
-              onSubmit={handleResponse}
-              itemType="file"
-            />
           </TabsContent>
 
           <TabsContent value="all-files" className="space-y-4 mt-4">

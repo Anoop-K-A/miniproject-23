@@ -165,59 +165,64 @@ export function CourseCodeCards({
             {isExpanded && (
               <CardContent>
                 <div className="space-y-3">
-                  {files.map((file) => (
-                    <div
-                      key={file.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {getStatusIcon(file.status)}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 truncate">
-                            {file.fileName}
-                          </p>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <FileText className="h-3 w-3" />
-                              {file.fileType}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(file.uploadDate).toLocaleDateString()}
-                            </span>
-                            {file.semester && <span>{file.semester}</span>}
-                          </div>
-                          {file.auditorRemarks && (
-                            <p className="text-xs text-gray-600 mt-1 italic">
-                              Remarks: {file.auditorRemarks}
+                  {files.map((file) => {
+                    const reviewRemarks =
+                      file.adminRemarks ?? file.auditorRemarks;
+
+                    return (
+                      <div
+                        key={file.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          {getStatusIcon(file.status)}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 truncate">
+                              {file.fileName}
                             </p>
-                          )}
+                            <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <FileText className="h-3 w-3" />
+                                {file.fileType}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {new Date(file.uploadDate).toLocaleDateString()}
+                              </span>
+                              {file.semester && <span>{file.semester}</span>}
+                            </div>
+                            {reviewRemarks && (
+                              <p className="text-xs text-gray-600 mt-1 italic">
+                                Remarks: {reviewRemarks}
+                              </p>
+                            )}
+                          </div>
+                          <Badge className={getStatusColor(file.status)}>
+                            {file.status}
+                          </Badge>
                         </div>
-                        <Badge className={getStatusColor(file.status)}>
-                          {file.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2 ml-3">
-                        <Button
-                          size="sm"
-                          variant={
-                            file.status === "Submitted" ||
+                        <div className="flex items-center gap-2 ml-3">
+                          <Button
+                            size="sm"
+                            variant={
+                              file.status === "Submitted" ||
+                              file.status === "Pending"
+                                ? "default"
+                                : "outline"
+                            }
+                            onClick={() => onReviewFile(file)}
+                            className="h-8 px-3"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            {file.status === "Submitted" ||
                             file.status === "Pending"
-                              ? "default"
-                              : "outline"
-                          }
-                          onClick={() => onReviewFile(file)}
-                          className="h-8 px-3"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          {file.status === "Submitted" ||
-                          file.status === "Pending"
-                            ? "Review"
-                            : "View"}
-                        </Button>
+                              ? "Review"
+                              : "View"}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             )}

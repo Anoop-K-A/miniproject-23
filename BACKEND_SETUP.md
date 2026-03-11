@@ -172,8 +172,8 @@ Copy `.env.template` to `.env.local` and fill in your Firebase values.
 ## 🔐 Default Admin Account
 
 ```
-Email: anoopka.6.7.2004@gmail.com
-Password: 123
+Email: admin@college.com
+Password: Admin@123
 ```
 
 ⚠️ **IMPORTANT**: Change this password immediately after first login!

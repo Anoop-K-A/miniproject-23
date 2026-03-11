@@ -11,7 +11,7 @@ import { AuditorRemarks } from "./AuditorRemarks";
 import { AuditReviewInterfaceProps, ChecklistItem } from "./types";
 import { useAuth } from "@/context/AuthContext";
 import {
-  downloadFromDataUrl,
+  downloadFromServer,
   downloadJsonFile,
   downloadTextFile,
   sanitizeFileName,
@@ -144,6 +144,7 @@ export function AuditReviewInterface({
       const reviewPayload = {
         status,
         adminRemarks: auditorRemarks,
+        auditorRemarks,
         reviewedBy: reviewerName,
         reviewedDate,
       };
@@ -263,10 +264,17 @@ export function AuditReviewInterface({
 
   const handleDownloadDocument = () => {
     if (type === "file") {
-      const fileItem = item as { fileName: string; documentUrl?: string };
+      const fileItem = item as {
+        id: string;
+        fileName: string;
+        documentUrl?: string;
+      };
       const safeName = sanitizeFileName(fileItem.fileName, "course-file");
       if (fileItem.documentUrl) {
-        downloadFromDataUrl(fileItem.documentUrl, safeName);
+        downloadFromServer(
+          `/api/course-files/${encodeURIComponent(fileItem.id)}/download`,
+          safeName,
+        );
         toast.success(`Downloading ${fileItem.fileName}`);
         return;
       }

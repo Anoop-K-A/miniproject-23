@@ -15,6 +15,8 @@ export function EventReportCard({
   onReview,
   getStatusColor,
 }: EventReportCardProps) {
+  const reviewRemarks = report.adminRemarks ?? report.auditorRemarks;
+
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="pt-6">
@@ -37,16 +39,18 @@ export function EventReportCard({
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <Badge variant="outline">{report.eventType}</Badge>
-              <span className="text-gray-500">{report.participants} participants</span>
+              <span className="text-gray-500">
+                {report.participants} participants
+              </span>
             </div>
           </div>
 
-          {report.auditorRemarks && (
+          {reviewRemarks && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               <p className="text-xs font-medium text-green-800 mb-1">
                 Auditor Remarks:
               </p>
-              <p className="text-sm text-green-700">{report.auditorRemarks}</p>
+              <p className="text-sm text-green-700">{reviewRemarks}</p>
             </div>
           )}
 

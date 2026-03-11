@@ -18,6 +18,17 @@ export function downloadFromDataUrl(dataUrl: string, fileName: string) {
   document.body.removeChild(link);
 }
 
+export function downloadFromServer(endpoint: string, fileName?: string) {
+  const link = document.createElement("a");
+  link.href = endpoint;
+  if (fileName) {
+    link.download = fileName;
+  }
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 export function downloadTextFile(
   content: string,
   fileName: string,

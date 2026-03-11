@@ -3,13 +3,13 @@ import type { UserRecord } from "@/lib/userStore";
 export const userSeedData: UserRecord[] = [
   {
     id: "admin-1",
-    username: "admin@college.edu",
+    username: "admin@college.com",
     password: "Admin@123",
     name: "Admin User",
     role: "admin",
     roles: ["admin"],
     department: "Administration",
-    email: "admin@college.edu",
+    email: "admin@college.com",
     status: "active",
     createdAt: "2026-02-13T00:00:00.000Z",
     updatedAt: "2026-02-18T10:24:05.555Z",

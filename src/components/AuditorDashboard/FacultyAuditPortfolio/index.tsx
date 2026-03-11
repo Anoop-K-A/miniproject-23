@@ -75,7 +75,7 @@ export function FacultyAuditPortfolio({
       const sortedMessages = [...threadMessages].sort((a, b) => {
         const aTime = new Date(a.createdAt ?? 0).getTime();
         const bTime = new Date(b.createdAt ?? 0).getTime();
-        return bTime - aTime;
+        return aTime - bTime;
       });
       const lastMessage = sortedMessages[sortedMessages.length - 1];
       return {
@@ -331,7 +331,7 @@ export function FacultyAuditPortfolio({
           {fileThreadGroups.length === 0 && reportThreadGroups.length === 0 ? (
             <p className="text-sm text-gray-500">No messages yet.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-130 overflow-y-auto pr-1">
               {fileThreadGroups.map((group) => (
                 <div key={group.fileId} className="border rounded-lg p-3">
                   <div className="flex items-center justify-between">
@@ -380,7 +380,7 @@ export function FacultyAuditPortfolio({
                             </Button>
                           </div>
                         </div>
-                        <div className="mt-3 space-y-2">
+                        <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1">
                           {thread.messages.map((msg) => (
                             <div
                               key={msg.id}
@@ -457,7 +457,7 @@ export function FacultyAuditPortfolio({
                             </Button>
                           </div>
                         </div>
-                        <div className="mt-3 space-y-2">
+                        <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1">
                           {thread.messages.map((msg) => (
                             <div
                               key={msg.id}
