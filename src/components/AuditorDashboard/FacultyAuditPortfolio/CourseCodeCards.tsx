@@ -12,12 +12,15 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronRight,
+  BookOpen,
 } from "lucide-react";
 import { CourseFile } from "./types";
+import { CourseReviewGroup } from "../AuditReviewInterface/CourseReviewInterface";
 
 interface CourseCodeCardsProps {
   courseFiles: CourseFile[];
   onReviewFile: (file: CourseFile) => void;
+  onReviewCourse: (group: CourseReviewGroup) => void;
   getStatusColor: (status: string) => string;
 }
 
@@ -82,6 +85,7 @@ const getStatusIcon = (status: string) => {
 export function CourseCodeCards({
   courseFiles,
   onReviewFile,
+  onReviewCourse,
   getStatusColor,
 }: CourseCodeCardsProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -185,6 +189,24 @@ export function CourseCodeCards({
                       {rejectedCount}
                     </Badge>
                   )}
+                  <Button
+                    size="sm"
+                    variant={needsReviewCount > 0 ? "default" : "outline"}
+                    className="shrink-0"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onReviewCourse({
+                        courseCode: group.courseCode,
+                        courseName: group.courseName,
+                        academicYear: group.academicYear,
+                        files: group.files,
+                      });
+                    }}
+                  >
+                    <BookOpen className="h-4 w-4 mr-1" />
+                    Review Course
+                  </Button>
                 </div>
               </div>
             </CardHeader>

@@ -4,6 +4,10 @@ import { BackButton } from "./BackButton";
 import { FacultyHeader } from "./FacultyHeader";
 import { PortfolioTabs } from "./PortfolioTabs";
 import { CourseFile, EventReport, FacultyAuditPortfolioProps } from "./types";
+import {
+  CourseReviewInterface,
+  CourseReviewGroup,
+} from "@/components/AuditorDashboard/AuditReviewInterface/CourseReviewInterface";
 import { Card, CardContent } from "../../ui/card";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
@@ -34,6 +38,8 @@ export function FacultyAuditPortfolio({
   );
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviewType, setReviewType] = useState<"file" | "report">("file");
+  const [selectedCourseGroup, setSelectedCourseGroup] =
+    useState<CourseReviewGroup | null>(null);
   const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
   const [eventReports, setEventReports] = useState<EventReport[]>([]);
   const [messages, setMessages] = useState<
@@ -318,6 +324,22 @@ export function FacultyAuditPortfolio({
     );
   }
 
+  if (selectedCourseGroup) {
+    return (
+      <CourseReviewInterface
+        group={selectedCourseGroup}
+        facultyName={faculty.name}
+        facultyId={faculty.id}
+        onBack={() => setSelectedCourseGroup(null)}
+        onReviewCompleted={(updatedFiles) => {
+          setCourseFiles((prev) =>
+            prev.map((f) => updatedFiles.find((u) => u.id === f.id) ?? f),
+          );
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <BackButton onBack={onBack} />
@@ -495,6 +517,7 @@ export function FacultyAuditPortfolio({
         eventReports={eventReports}
         onReviewFile={handleReviewFile}
         onReviewReport={handleReviewReport}
+        onReviewCourse={setSelectedCourseGroup}
         getStatusColor={getStatusColor}
       />
       <ResponseDialog

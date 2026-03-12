@@ -3,12 +3,14 @@ import { FileText, Calendar } from "lucide-react";
 import { CourseFile, EventReport } from "./types";
 import { EventReportCard } from "./EventReportCard";
 import { CourseCodeCards } from "./CourseCodeCards";
+import { CourseReviewGroup } from "../AuditReviewInterface/CourseReviewInterface";
 
 interface PortfolioTabsProps {
   courseFiles: CourseFile[];
   eventReports: EventReport[];
   onReviewFile: (file: CourseFile) => void;
   onReviewReport: (report: EventReport) => void;
+  onReviewCourse: (group: CourseReviewGroup) => void;
   getStatusColor: (status: string) => string;
 }
 
@@ -17,6 +19,7 @@ export function PortfolioTabs({
   eventReports,
   onReviewFile,
   onReviewReport,
+  onReviewCourse,
   getStatusColor,
 }: PortfolioTabsProps) {
   return (
@@ -37,6 +40,7 @@ export function PortfolioTabs({
         <CourseCodeCards
           courseFiles={courseFiles}
           onReviewFile={onReviewFile}
+          onReviewCourse={onReviewCourse}
           getStatusColor={getStatusColor}
         />
       </TabsContent>
