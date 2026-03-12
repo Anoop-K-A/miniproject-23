@@ -707,6 +707,14 @@ export function CourseFileManager({
                                 >
                                   <Download className="h-4 w-4 text-gray-600" />
                                 </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(file.id)}
+                                  title="Delete File"
+                                >
+                                  <Trash2 className="h-4 w-4 text-red-600" />
+                                </Button>
                               </div>
                             </div>
                           </div>
