@@ -502,25 +502,6 @@ export function CourseFileManager({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="category">File Category *</Label>
-                    <Select
-                      value={selectedCategory}
-                      onValueChange={(value) => setSelectedCategory(value)}
-                      required
-                    >
-                      <SelectTrigger id="category">
-                        <SelectValue placeholder="Select file category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categoryOptions.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
                     <Label htmlFor="courseCode">Course Code</Label>
                     <Input
                       id="courseCode"
@@ -569,9 +550,8 @@ export function CourseFileManager({
                           <SelectValue placeholder="Select semester" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Fall">Fall</SelectItem>
-                          <SelectItem value="Spring">Spring</SelectItem>
-                          <SelectItem value="Summer">Summer</SelectItem>
+                          <SelectItem value="Even">Even</SelectItem>
+                          <SelectItem value="Odd">Odd</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
