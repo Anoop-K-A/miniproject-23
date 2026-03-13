@@ -15,6 +15,8 @@ export function CourseFileCard({
   onReview,
   getStatusColor,
 }: CourseFileCardProps) {
+  const reviewRemarks = file.adminRemarks ?? file.auditorRemarks;
+
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="pt-6">
@@ -29,9 +31,7 @@ export function CourseFileCard({
                 <p className="text-sm text-gray-600">{file.courseName}</p>
               </div>
             </div>
-            <Badge className={getStatusColor(file.status)}>
-              {file.status}
-            </Badge>
+            <Badge className={getStatusColor(file.status)}>{file.status}</Badge>
           </div>
 
           <div className="flex items-center justify-between text-sm">
@@ -42,12 +42,12 @@ export function CourseFileCard({
             <span className="text-xs text-gray-500">{file.uploadDate}</span>
           </div>
 
-          {file.auditorRemarks && (
+          {reviewRemarks && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               <p className="text-xs font-medium text-green-800 mb-1">
                 Auditor Remarks:
               </p>
-              <p className="text-sm text-green-700">{file.auditorRemarks}</p>
+              <p className="text-sm text-green-700">{reviewRemarks}</p>
             </div>
           )}
 

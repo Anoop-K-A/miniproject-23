@@ -1,18 +1,8 @@
 import type { UserRole } from "@/lib/roles";
-import { readJsonFile } from "@/lib/jsonDb";
-
-export interface UserRecord {
-  id: string;
-  username: string;
-  password: string;
-  name: string;
-  role: UserRole;
-  roles?: UserRole[];
-  department?: string;
-  status?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import {
+  findUserByUsername as findStoredUserByUsername,
+  type UserRecord,
+} from "@/lib/userStore";
 
 export interface AuthUser {
   id: string;
@@ -29,8 +19,7 @@ export interface AuthResult {
 }
 
 export async function findUserByUsername(username: string) {
-  const users = await readJsonFile<UserRecord[]>("users.json");
-  return users.find((user) => user.username === username);
+  return findStoredUserByUsername(username);
 }
 
 export async function verifyCredentials(username: string, password: string) {

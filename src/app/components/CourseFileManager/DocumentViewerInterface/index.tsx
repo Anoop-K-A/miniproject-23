@@ -37,8 +37,8 @@ export function DocumentViewerInterface({
         reviews.map((review) =>
           review.id === selectedReview.id
             ? { ...review, facultyResponse: response }
-            : review
-        )
+            : review,
+        ),
       );
       setSelectedReview(null);
       setIsResponseOpen(false);
@@ -46,8 +46,12 @@ export function DocumentViewerInterface({
   };
 
   const handleDownloadDocument = (file: CourseFile) => {
-    console.log("Downloading:", file.fileName);
-    // Download logic here
+    const link = document.createElement("a");
+    link.href = `/api/course-files/${encodeURIComponent(file.id)}/download`;
+    link.download = file.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (

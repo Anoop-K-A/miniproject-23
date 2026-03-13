@@ -3,6 +3,10 @@ import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { CourseFile } from "@/components/CourseFileManager/types";
 import { recomputeEngagementForFaculty } from "@/lib/engagements";
 import { saveDataUrlAsFile } from "@/lib/fileUpload";
+import { getAllUsers } from "@/lib/userStore";
+import { unlink } from "fs/promises";
+import { existsSync } from "fs";
+import { join } from "path";
 
 // Force Node.js runtime for file system operations
 export const runtime = "nodejs";
@@ -27,10 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     const files = await readJsonFile<CourseFile[]>("courseFiles.json");
-    const users =
-      await readJsonFile<{ id: string; name: string; department?: string }[]>(
-        "users.json",
-      );
+    const users = await getAllUsers();
     const facultyUser = users.find((user) => user.id === payload.facultyId);
     const timestamp = new Date().toISOString();
 
@@ -74,7 +75,40 @@ export async function POST(request: NextRequest) {
       updatedAt: timestamp,
     };
 
-    const updatedFiles = [newFile, ...files];
+    // Check for a duplicate: same facultyId + courseCode + fileType + academicYear
+    const duplicateIndex = files.findIndex(
+      (f) =>
+        f.facultyId === payload.facultyId &&
+        f.courseCode === payload.courseCode &&
+        f.fileType === payload.fileType &&
+        f.academicYear === payload.academicYear,
+    );
+
+    let updatedFiles: CourseFile[];
+    if (duplicateIndex !== -1) {
+      // Delete the old file from disk if it exists
+      const oldFile = files[duplicateIndex];
+      if (oldFile.documentUrl && oldFile.documentUrl.startsWith("/uploads/")) {
+        const oldFilePath = join(process.cwd(), "public", oldFile.documentUrl);
+        if (existsSync(oldFilePath)) {
+          try {
+            await unlink(oldFilePath);
+          } catch {
+            // Non-fatal: proceed even if old file can't be removed
+          }
+        }
+      }
+      // Replace in place; preserve original id and createdAt
+      const replacedFile: CourseFile = {
+        ...newFile,
+        id: oldFile.id,
+        createdAt: oldFile.createdAt,
+      };
+      updatedFiles = [...files];
+      updatedFiles[duplicateIndex] = replacedFile;
+    } else {
+      updatedFiles = [newFile, ...files];
+    }
 
     try {
       console.log("Writing to courseFiles.json...");
@@ -114,10 +148,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const files = await readJsonFile<CourseFile[]>("courseFiles.json");
-    const users =
-      await readJsonFile<{ id: string; name: string; department?: string }[]>(
-        "users.json",
-      );
+    const users = await getAllUsers();
     const fileCategories = await readJsonFile<string[]>(
       "files/course-file-categories.json",
     );

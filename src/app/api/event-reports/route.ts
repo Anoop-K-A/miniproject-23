@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { EventReport } from "@/components/EventReportManager/types";
 import { recomputeEngagementForFaculty } from "@/lib/engagements";
+import { getAllUsers } from "@/lib/userStore";
 
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.json();
     const reports = await readJsonFile<EventReport[]>("eventReports.json");
-    const users =
-      await readJsonFile<{ id: string; name: string; department?: string }[]>(
-        "users.json",
-      );
+    const users = await getAllUsers();
     const facultyUser = users.find((user) => user.id === payload.facultyId);
     const timestamp = new Date().toISOString();
 
@@ -59,10 +57,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const reports = await readJsonFile<EventReport[]>("eventReports.json");
-    const users =
-      await readJsonFile<{ id: string; name: string; department?: string }[]>(
-        "users.json",
-      );
+    const users = await getAllUsers();
     const communities = await readJsonFile<string[]>(
       "reports/communities.json",
     );

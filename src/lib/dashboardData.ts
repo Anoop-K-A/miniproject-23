@@ -14,6 +14,23 @@ import type {
   Student,
 } from "@/components/StaffAdvisorDashboard/types";
 import { readJsonFile } from "@/lib/jsonDb";
+import { getAllUsers } from "@/lib/userStore";
+
+// Helper to serialize objects with MongoDB ObjectIds for client components
+function serializeId(id: unknown): string {
+  if (id === null || id === undefined) return "";
+  if (typeof id === "string") return id;
+  if (typeof id === "object" && "toString" in id) {
+    return String(id);
+  }
+  return String(id);
+}
+
+function normalizeIdentity(value?: string | null) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
+}
 
 interface UserRecord {
   id: string;
@@ -87,7 +104,7 @@ function toTimeAgo(isoDate?: string) {
 export async function getFacultyDashboardData(
   username?: string | null,
 ): Promise<FacultyDashboardData> {
-  const users = await readJsonFile<UserRecord[]>("users.json");
+  const users = await getAllUsers();
   const facultyUsers = users.filter(
     (user) =>
       (user.roles?.includes("faculty") || user.role === "faculty") &&
@@ -102,7 +119,7 @@ export async function getFacultyDashboardData(
     ? facultyUsers.find((user) => user.username === username)
     : facultyUsers[0];
 
-  const userId = selectedUser?.id;
+  const userId = selectedUser ? serializeId(selectedUser.id) : undefined;
   const userFiles = userId
     ? courseFiles.filter((file) => file.facultyId === userId)
     : [];
@@ -152,7 +169,7 @@ export async function getFacultyDashboardData(
   };
 
   const facultyMembers: FacultyMember[] = facultyUsers.map((user) => ({
-    id: user.id,
+    id: serializeId(user.id),
     name: user.name,
     department: user.department ?? "",
     role: user.facultyRole ?? "Faculty",
@@ -171,7 +188,7 @@ export async function getFacultyDashboardData(
 }
 
 export async function getAuditorDashboardData() {
-  const users = await readJsonFile<UserRecord[]>("users.json");
+  const users = await getAllUsers();
   const courseFiles =
     await readJsonFile<CourseFileRecord[]>("courseFiles.json");
   const eventReports =
@@ -229,14 +246,15 @@ export async function getAuditorDashboardData() {
   };
 
   const facultyMembers: AuditorFacultyMember[] = facultyUsers.map((user) => {
+    const userIdStr = serializeId(user.id);
     const facultyFiles = courseFiles.filter(
-      (file) => file.facultyId === user.id,
+      (file) => file.facultyId === userIdStr,
     );
     const facultyReports = eventReports.filter(
-      (report) => report.facultyId === user.id,
+      (report) => report.facultyId === userIdStr,
     );
     return {
-      id: user.id,
+      id: userIdStr,
       name: user.name,
       department: user.department ?? "",
       totalFiles: facultyFiles.length,
@@ -265,7 +283,7 @@ export async function getAuditorDashboardData() {
       const report = eventReports.find((item) => item.id === audit.entityId);
       const facultyId = file?.facultyId ?? report?.facultyId;
       const facultyName = facultyUsers.find(
-        (user) => user.id === facultyId,
+        (user) => serializeId(user.id) === facultyId,
       )?.name;
       return {
         faculty: facultyName ?? "Faculty",
@@ -287,7 +305,7 @@ export async function getAuditorDashboardData() {
 }
 
 export async function getStaffAdvisorDashboardData(username?: string | null) {
-  const users = await readJsonFile<UserRecord[]>("users.json");
+  const users = await getAllUsers();
   const students = await readJsonFile<Student[]>("students.json");
   const courseFiles =
     await readJsonFile<CourseFileRecord[]>("courseFiles.json");
@@ -297,12 +315,24 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
     "careerActivities.json",
   );
 
-  const staffAdvisor = username
-    ? users.find((user) => user.username === username)
+  const normalizedUsername = normalizeIdentity(username);
+  const staffAdvisor = normalizedUsername
+    ? users.find((user) => {
+        const userRoles = user.roles?.length ? user.roles : [user.role];
+        const isStaffAdvisor =
+          userRoles.includes("staff-advisor") || user.role === "staff-advisor";
+        return (
+          isStaffAdvisor &&
+          normalizeIdentity(user.username) === normalizedUsername
+        );
+      })
     : undefined;
-  const scopedStudents = staffAdvisor
-    ? students.filter((student) => student.advisorId === staffAdvisor.id)
-    : students;
+  const staffAdvisorId = staffAdvisor ? serializeId(staffAdvisor.id) : "";
+  const scopedStudents = staffAdvisorId
+    ? students.filter(
+        (student) => serializeId(student.advisorId) === staffAdvisorId,
+      )
+    : [];
 
   const totalStudents = scopedStudents.length;
   const batchYear =
@@ -407,13 +437,14 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
 
       batchCourseFiles.forEach((file) => {
         if (!file.facultyId) return;
+        const userId = serializeId(file.facultyId);
         const facultyUser = facultyUsers.find(
-          (user) => user.id === file.facultyId,
+          (user) => serializeId(user.id) === userId,
         );
         if (!facultyUser) return;
-        if (!batchFacultyMap.has(file.facultyId)) {
-          batchFacultyMap.set(file.facultyId, {
-            id: facultyUser.id,
+        if (!batchFacultyMap.has(userId)) {
+          batchFacultyMap.set(userId, {
+            id: serializeId(facultyUser.id),
             name: facultyUser.name,
             department: facultyUser.department ?? "",
             role: facultyUser.facultyRole ?? "Faculty",
@@ -423,7 +454,7 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
             filesRejected: 0,
           });
         }
-        const entry = batchFacultyMap.get(file.facultyId);
+        const entry = batchFacultyMap.get(userId);
         if (!entry) return;
         entry.filesTotal += 1;
         if (file.status === "Approved") {

@@ -12,28 +12,59 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronRight,
+  BookOpen,
 } from "lucide-react";
 import { CourseFile } from "./types";
+import { CourseReviewGroup } from "../AuditReviewInterface/CourseReviewInterface";
 
 interface CourseCodeCardsProps {
   courseFiles: CourseFile[];
   onReviewFile: (file: CourseFile) => void;
+  onReviewCourse: (group: CourseReviewGroup) => void;
   getStatusColor: (status: string) => string;
 }
 
-// Helper function to group files by course code
-const groupByCourseCode = (files: CourseFile[]) => {
-  const grouped: Record<string, CourseFile[]> = {};
+interface CourseYearGroup {
+  key: string;
+  courseCode: string;
+  academicYear: string;
+  courseName: string;
+  files: CourseFile[];
+}
+
+// Group files by course code + academic year so batches are shown separately.
+const groupByCourseCodeAndYear = (files: CourseFile[]): CourseYearGroup[] => {
+  const grouped: Record<string, CourseYearGroup> = {};
 
   files.forEach((file) => {
     const courseCode = file.courseCode || "Unknown";
-    if (!grouped[courseCode]) {
-      grouped[courseCode] = [];
+    const academicYear = file.academicYear || "Unknown Year";
+    const key = `${courseCode}|${academicYear}`;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        key,
+        courseCode,
+        academicYear,
+        courseName: file.courseName || courseCode,
+        files: [],
+      };
     }
-    grouped[courseCode].push(file);
+    grouped[key].files.push(file);
   });
 
-  return grouped;
+  return Object.values(grouped).sort((a, b) => {
+    if (a.courseCode === b.courseCode) {
+      return b.academicYear.localeCompare(a.academicYear, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
+    }
+    return a.courseCode.localeCompare(b.courseCode, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
 };
 
 // Helper function to get status icon
@@ -54,25 +85,25 @@ const getStatusIcon = (status: string) => {
 export function CourseCodeCards({
   courseFiles,
   onReviewFile,
+  onReviewCourse,
   getStatusColor,
 }: CourseCodeCardsProps) {
-  const [expandedCodes, setExpandedCodes] = useState<Set<string>>(new Set());
-  const groupedFiles = groupByCourseCode(courseFiles);
-  const courseCodes = Object.keys(groupedFiles).sort();
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const groupedFiles = groupByCourseCodeAndYear(courseFiles);
 
-  const toggleExpand = (courseCode: string) => {
-    setExpandedCodes((prev) => {
+  const toggleExpand = (groupKey: string) => {
+    setExpandedGroups((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(courseCode)) {
-        newSet.delete(courseCode);
+      if (newSet.has(groupKey)) {
+        newSet.delete(groupKey);
       } else {
-        newSet.add(courseCode);
+        newSet.add(groupKey);
       }
       return newSet;
     });
   };
 
-  if (courseCodes.length === 0) {
+  if (groupedFiles.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
         <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -83,8 +114,8 @@ export function CourseCodeCards({
 
   return (
     <div className="space-y-6">
-      {courseCodes.map((courseCode) => {
-        const files = groupedFiles[courseCode];
+      {groupedFiles.map((group) => {
+        const files = group.files;
         const approvedCount = files.filter(
           (f) => f.status === "Approved",
         ).length;
@@ -98,18 +129,17 @@ export function CourseCodeCards({
           (f) => f.status === "Submitted" || f.status === "Pending",
         ).length;
 
-        // Get course name from first file
-        const courseName = files[0]?.courseName || courseCode;
-        const isExpanded = expandedCodes.has(courseCode);
+        const courseName = group.courseName || group.courseCode;
+        const isExpanded = expandedGroups.has(group.key);
 
         return (
           <Card
-            key={courseCode}
+            key={group.key}
             className="border-l-4 border-l-purple-500 hover:shadow-lg transition-shadow"
           >
             <CardHeader
               className="pb-3 cursor-pointer hover:bg-gray-50 transition-colors"
-              onClick={() => toggleExpand(courseCode)}
+              onClick={() => toggleExpand(group.key)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1">
@@ -120,7 +150,7 @@ export function CourseCodeCards({
                   )}
                   <div className="flex-1">
                     <CardTitle className="text-xl font-bold text-gray-900">
-                      {courseCode}
+                      {group.courseCode} • {group.academicYear}
                     </CardTitle>
                     <p className="text-sm text-gray-600 mt-1">{courseName}</p>
                   </div>
@@ -159,65 +189,88 @@ export function CourseCodeCards({
                       {rejectedCount}
                     </Badge>
                   )}
+                  <Button
+                    size="sm"
+                    variant={needsReviewCount > 0 ? "default" : "outline"}
+                    className="shrink-0"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onReviewCourse({
+                        courseCode: group.courseCode,
+                        courseName: group.courseName,
+                        academicYear: group.academicYear,
+                        files: group.files,
+                      });
+                    }}
+                  >
+                    <BookOpen className="h-4 w-4 mr-1" />
+                    Review Course
+                  </Button>
                 </div>
               </div>
             </CardHeader>
             {isExpanded && (
               <CardContent>
                 <div className="space-y-3">
-                  {files.map((file) => (
-                    <div
-                      key={file.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {getStatusIcon(file.status)}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 truncate">
-                            {file.fileName}
-                          </p>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <FileText className="h-3 w-3" />
-                              {file.fileType}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(file.uploadDate).toLocaleDateString()}
-                            </span>
-                            {file.semester && <span>{file.semester}</span>}
-                          </div>
-                          {file.auditorRemarks && (
-                            <p className="text-xs text-gray-600 mt-1 italic">
-                              Remarks: {file.auditorRemarks}
+                  {files.map((file) => {
+                    const reviewRemarks =
+                      file.adminRemarks ?? file.auditorRemarks;
+
+                    return (
+                      <div
+                        key={file.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          {getStatusIcon(file.status)}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 truncate">
+                              {file.fileName}
                             </p>
-                          )}
+                            <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <FileText className="h-3 w-3" />
+                                {file.fileType}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {new Date(file.uploadDate).toLocaleDateString()}
+                              </span>
+                              {file.semester && <span>{file.semester}</span>}
+                            </div>
+                            {reviewRemarks && (
+                              <p className="text-xs text-gray-600 mt-1 italic">
+                                Remarks: {reviewRemarks}
+                              </p>
+                            )}
+                          </div>
+                          <Badge className={getStatusColor(file.status)}>
+                            {file.status}
+                          </Badge>
                         </div>
-                        <Badge className={getStatusColor(file.status)}>
-                          {file.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2 ml-3">
-                        <Button
-                          size="sm"
-                          variant={
-                            file.status === "Submitted" ||
+                        <div className="flex items-center gap-2 ml-3">
+                          <Button
+                            size="sm"
+                            variant={
+                              file.status === "Submitted" ||
+                              file.status === "Pending"
+                                ? "default"
+                                : "outline"
+                            }
+                            onClick={() => onReviewFile(file)}
+                            className="h-8 px-3"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            {file.status === "Submitted" ||
                             file.status === "Pending"
-                              ? "default"
-                              : "outline"
-                          }
-                          onClick={() => onReviewFile(file)}
-                          className="h-8 px-3"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          {file.status === "Submitted" ||
-                          file.status === "Pending"
-                            ? "Review"
-                            : "View"}
-                        </Button>
+                              ? "Review"
+                              : "View"}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             )}

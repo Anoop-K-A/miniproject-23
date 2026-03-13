@@ -21,7 +21,7 @@ import { useState } from "react";
 import { SignUpFormData } from "./types";
 
 interface SignUpFormProps {
-  onSignUpSuccess: (formData: SignUpFormData) => void;
+  onSignUpSuccess: (formData: SignUpFormData) => Promise<void> | void;
   onSwitchToSignIn: () => void;
 }
 
@@ -29,6 +29,7 @@ export function SignUpForm({
   onSignUpSuccess,
   onSwitchToSignIn,
 }: SignUpFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<SignUpFormData>({
     email: "",
     password: "",
@@ -62,11 +63,18 @@ export function SignUpForm({
     }
 
     try {
+      setIsSubmitting(true);
+      await onSignUpSuccess(formData);
       toast.success("Account created! Await admin approval before signing in.");
-      onSignUpSuccess(formData);
     } catch (error) {
       console.error("Register error:", error);
-      toast.error("An error occurred during registration");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "An error occurred during registration",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -169,8 +177,8 @@ export function SignUpForm({
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            Create Account
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Creating Account..." : "Create Account"}
           </Button>
 
           <div className="text-center text-sm">

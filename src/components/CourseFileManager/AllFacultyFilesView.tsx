@@ -32,7 +32,7 @@ import { PeerReviewDialog } from "@/components/shared/dialogs/PeerReviewDialog";
 import { ResponseDialog } from "@/components/shared/dialogs/ResponseDialog";
 import { CourseFile, PeerReview } from "./types";
 import {
-  downloadFromDataUrl,
+  downloadFromServer,
   downloadTextFile,
   sanitizeFileName,
 } from "@/lib/download";
@@ -66,7 +66,10 @@ export function AllFacultyFilesView({
   const handleDownload = (file: CourseFile) => {
     const safeName = sanitizeFileName(file.fileName, "course-file");
     if (file.documentUrl) {
-      downloadFromDataUrl(file.documentUrl, safeName);
+      downloadFromServer(
+        `/api/course-files/${encodeURIComponent(file.id)}/download`,
+        safeName,
+      );
       toast.success(`Downloading ${file.fileName}`);
       return;
     }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SignInForm } from "./SignInForm";
 import { SignUpForm } from "./SignUpForm";
 import { AuthPageProps } from "./types";
+import type { SignUpFormData } from "./types";
 
 export function AuthPage({ onLogin }: AuthPageProps) {
   const [isSignIn, setIsSignIn] = useState(true);
@@ -14,32 +15,28 @@ export function AuthPage({ onLogin }: AuthPageProps) {
     setIsSignIn(true);
   };
 
-  const handleSignUpSuccess = async (formData: any) => {
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          fullName: formData.fullName,
-          department: formData.department,
-        }),
-      });
+  const handleSignUpSuccess = async (formData: SignUpFormData) => {
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+        department: formData.department,
+        role: "faculty",
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Registration failed");
-      }
-
-      setIsSignIn(true);
-    } catch (error) {
-      console.error("Register error:", error);
-      // Error is handled in the form
+    if (!response.ok) {
+      throw new Error(data.error || "Registration failed");
     }
+
+    setIsSignIn(true);
   };
 
   return (

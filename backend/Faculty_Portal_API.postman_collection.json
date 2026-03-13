@@ -1,0 +1,330 @@
+{
+  "info": {
+    "name": "Faculty Portal API",
+    "description": "API collection for Faculty Portal Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "firebase_token",
+      "value": "your-firebase-id-token-here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"fullName\": \"Test User\",\n  \"role\": \"faculty\",\n  \"department\": \"Computer Science\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@college.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Verify Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{firebase_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/verify-token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "verify-token"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Faculty",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/faculty/all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "faculty", "all"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Pending Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", "pending"]
+            }
+          }
+        },
+        {
+          "name": "Verify User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/:id/verify",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "users", ":id", "verify"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user-id-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Course Files",
+      "item": [
+        {
+          "name": "Upload Course File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "path/to/file.pdf"
+                },
+                {
+                  "key": "courseCode",
+                  "value": "CS101",
+                  "type": "text"
+                },
+                {
+                  "key": "courseName",
+                  "value": "Introduction to Programming",
+                  "type": "text"
+                },
+                {
+                  "key": "fileType",
+                  "value": "Syllabus",
+                  "type": "text"
+                },
+                {
+                  "key": "semester",
+                  "value": "Fall",
+                  "type": "text"
+                },
+                {
+                  "key": "academicYear",
+                  "value": "2026",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/course-files/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "course-files", "upload"]
+            }
+          }
+        },
+        {
+          "name": "Get All Course Files",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/course-files",
+              "host": ["{{base_url}}"],
+              "path": ["api", "course-files"]
+            }
+          }
+        },
+        {
+          "name": "Get Course File by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/course-files/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "course-files", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "file-id-here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    }
+  ]
+}

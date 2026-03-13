@@ -153,9 +153,30 @@ export function AuditReviewInterface({
   };
 
   const handleDownloadDocument = () => {
+    if (type === "file") {
+      const fileItem = item as {
+        id: string;
+        fileName: string;
+        documentUrl?: string;
+      };
+
+      if (fileItem.documentUrl) {
+        const link = document.createElement("a");
+        link.href = `/api/course-files/${encodeURIComponent(fileItem.id)}/download`;
+        link.download = fileItem.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success(`Downloading ${fileItem.fileName}`);
+        return;
+      }
+    }
+
     const itemName =
-      type === "file" ? (item as any).fileName : (item as any).eventName;
-    toast.success(`Downloading ${itemName}`);
+      type === "file"
+        ? (item as { fileName: string }).fileName
+        : (item as { eventName: string }).eventName;
+    toast.error(`No document available to download for ${itemName}`);
   };
 
   return (

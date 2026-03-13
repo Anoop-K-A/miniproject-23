@@ -1,0 +1,123 @@
+/**
+ * Data Migration Script: JSON to MongoDB
+ * Run this once to migrate all existing JSON data to MongoDB
+ *
+ * Usage: npx ts-node src/lib/migrateJsonToMongo.ts
+ */
+
+import fs from "fs";
+import path from "path";
+import { prisma } from "./prisma";
+
+async function migrateData() {
+  console.log("Starting data migration from JSON to MongoDB...\n");
+
+  try {
+    // 1. Migrate Course Files
+    console.log("📁 Migrating course files...");
+    const courseFilesPath = path.join(
+      process.cwd(),
+      "src/data/courseFiles.json",
+    );
+    if (fs.existsSync(courseFilesPath)) {
+      const courseFiles = JSON.parse(fs.readFileSync(courseFilesPath, "utf-8"));
+      for (const file of courseFiles) {
+        await prisma.courseFile.create({
+          data: {
+            id: file.id,
+            facultyId: file.facultyId,
+            fileName: file.fileName,
+            documentUrl: file.documentUrl,
+            courseCode: file.courseCode,
+            courseName: file.courseName,
+            fileType: file.fileType,
+            uploadDate: file.uploadDate,
+            semester: file.semester,
+            academicYear: file.academicYear,
+            size: file.size,
+            status: file.status || "Pending",
+            facultyName: file.facultyName,
+            department: file.department,
+            facultyResponse: file.facultyResponse,
+            responseDate: file.responseDate,
+            createdAt: new Date(file.createdAt),
+            updatedAt: new Date(file.updatedAt),
+          },
+        });
+      }
+      console.log(`✅ Migrated ${courseFiles.length} course files\n`);
+    }
+
+    // 2. Migrate Audits
+    console.log("📋 Migrating audits...");
+    const auditsPath = path.join(process.cwd(), "src/data/audits.json");
+    if (fs.existsSync(auditsPath)) {
+      const audits = JSON.parse(fs.readFileSync(auditsPath, "utf-8"));
+      for (const audit of audits) {
+        await prisma.audit.create({
+          data: {
+            id: audit.id,
+            entityType: audit.entityType,
+            entityId: audit.entityId,
+            courseFileId: audit.courseFileId,
+            action: audit.action,
+            performedBy: audit.performedBy,
+            performedAt: new Date(audit.performedAt),
+            details: audit.details,
+          },
+        });
+      }
+      console.log(`✅ Migrated ${audits.length} audits\n`);
+    }
+
+    // 3. Migrate Remarks
+    console.log("💬 Migrating remarks...");
+    const remarksPath = path.join(process.cwd(), "src/data/remarks.json");
+    if (fs.existsSync(remarksPath)) {
+      const remarks = JSON.parse(fs.readFileSync(remarksPath, "utf-8"));
+      for (const remark of remarks) {
+        await prisma.remark.create({
+          data: {
+            id: remark.id,
+            entityType: remark.entityType,
+            entityId: remark.entityId,
+            courseFileId: remark.courseFileId,
+            content: remark.content,
+            createdBy: remark.createdBy,
+            createdAt: new Date(remark.createdAt),
+            updatedAt: new Date(remark.updatedAt),
+          },
+        });
+      }
+      console.log(`✅ Migrated ${remarks.length} remarks\n`);
+    }
+
+    // 4. Migrate Faculty
+    console.log("👨‍🏫 Migrating faculty...");
+    const facultyPath = path.join(process.cwd(), "src/data/faculty.json");
+    if (fs.existsSync(facultyPath)) {
+      const faculty = JSON.parse(fs.readFileSync(facultyPath, "utf-8"));
+      for (const f of faculty) {
+        await prisma.faculty.create({
+          data: {
+            id: f.id || `faculty_${Date.now()}`,
+            name: f.faculty_name || f.name,
+            courses: f.faculty_courses || f.courses || "",
+            reports: f.faculty_reports || f.reports || "",
+            lastUpdated: new Date(f.last_updated || f.lastUpdated),
+          },
+        });
+      }
+      console.log(`✅ Migrated ${faculty.length} faculty members\n`);
+    }
+
+    console.log("🎉 Migration completed successfully!");
+  } catch (error) {
+    console.error("❌ Migration failed:", error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+migrateData();

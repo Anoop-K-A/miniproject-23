@@ -9,7 +9,7 @@ import { AdminReviewSection } from "./AdminReviewSection";
 import { PeerReviewsSection } from "./PeerReviewsSection";
 import { CourseFile, PeerReview, DocumentViewerInterfaceProps } from "./types";
 import {
-  downloadFromDataUrl,
+  downloadFromServer,
   downloadTextFile,
   sanitizeFileName,
 } from "@/lib/download";
@@ -53,7 +53,10 @@ export function DocumentViewerInterface({
   const handleDownloadDocument = (file: CourseFile) => {
     const safeName = sanitizeFileName(file.fileName, "course-file");
     if (file.documentUrl) {
-      downloadFromDataUrl(file.documentUrl, safeName);
+      downloadFromServer(
+        `/api/course-files/${encodeURIComponent(file.id)}/download`,
+        safeName,
+      );
       return;
     }
 
