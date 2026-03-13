@@ -3,6 +3,8 @@ export interface FacultyMember {
   name: string;
   department: string;
   role: string;
+  roles?: string[];
+  isStaffAdvisor?: boolean;
   email: string;
   phone: string;
   courses: string[];
@@ -45,6 +47,8 @@ export interface EventReport {
   description: string;
   objectives: string;
   outcomes: string;
+  thumbnailUrl?: string;
+  galleryImages?: string[];
   status: "Draft" | "Submitted" | "Approved" | "Rejected";
 }
 

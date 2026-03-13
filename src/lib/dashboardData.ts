@@ -173,6 +173,9 @@ export async function getFacultyDashboardData(
     name: user.name,
     department: user.department ?? "",
     role: user.facultyRole ?? "Faculty",
+    roles: Array.from(new Set([...(user.roles ?? []), user.role])).filter(
+      (role) => role !== "admin",
+    ),
     isStaffAdvisor: user.roles?.includes("staff-advisor") ?? false,
     email: user.email ?? user.username,
     phone: user.phone ?? "",

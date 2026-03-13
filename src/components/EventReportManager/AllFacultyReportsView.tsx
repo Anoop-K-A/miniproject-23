@@ -355,6 +355,26 @@ export function AllFacultyReportsView({
               </section>
             )}
 
+            {/* Event Photos */}
+            {selectedReport.galleryImages &&
+              selectedReport.galleryImages.length > 0 && (
+                <section className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                    Event Photos
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {selectedReport.galleryImages.map((imageUrl, index) => (
+                      <img
+                        key={`${selectedReport.id}-gallery-${index}`}
+                        src={imageUrl}
+                        alt={`${selectedReport.eventName} photo ${index + 1}`}
+                        className="w-full h-36 object-cover rounded-lg border"
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
             {/* Admin Review */}
             {selectedReport.adminRemarks && (
               <section className="mb-8 border-t pt-6">
@@ -497,15 +517,7 @@ export function AllFacultyReportsView({
               )}
             </div>
 
-            {/* Download button */}
             <div className="flex gap-3 pt-6 border-t border-gray-200 mt-6">
-              <Button
-                onClick={() => handleDownload(selectedReport)}
-                className="flex items-center gap-2 flex-1"
-              >
-                <Download className="h-4 w-4" />
-                Download Full Report
-              </Button>
               <Button variant="outline" onClick={handleBackToList}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Reports

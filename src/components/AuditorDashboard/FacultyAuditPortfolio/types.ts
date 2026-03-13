@@ -43,6 +43,8 @@ export interface EventReport {
   description: string;
   objectives: string;
   outcomes: string;
+  thumbnailUrl?: string;
+  galleryImages?: string[];
   status: "Draft" | "Submitted" | "Approved" | "Rejected";
   adminRemarks?: string;
   auditorRemarks?: string;

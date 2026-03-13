@@ -35,7 +35,6 @@ export interface EventReport {
 export interface EventReportBlogViewerProps {
   report: EventReport;
   onBack: () => void;
-  onDownload: (report: EventReport) => void;
   onRespondToAdminReview: (response: string) => void;
   currentUser: string;
 }
