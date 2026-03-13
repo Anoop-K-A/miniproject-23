@@ -44,6 +44,18 @@ export async function DELETE(
   try {
     const { id } = await params;
     const files = await readJsonFile<CourseFile[]>("courseFiles.json");
+    const fileToDelete = files.find((file) => file.id === id);
+
+    if (fileToDelete?.auditChecklistStatus === "yes") {
+      return NextResponse.json(
+        {
+          error:
+            "This file is checklist-approved by the auditor and cannot be deleted.",
+        },
+        { status: 403 },
+      );
+    }
+
     const updatedFiles = files.filter((file) => file.id !== id);
     const audits = await readJsonFile<
       {

@@ -29,9 +29,10 @@ export function PortfolioTabs({
   const tabCount = showStudents ? 3 : 2;
   const tabsClassName =
     tabCount === 3 ? "grid w-full grid-cols-3" : "grid w-full grid-cols-2";
+  const defaultTabValue = showStudents ? "students" : "course-files";
 
   return (
-    <Tabs defaultValue="course-files" className="w-full">
+    <Tabs defaultValue={defaultTabValue} className="w-full">
       <TabsList className={tabsClassName}>
         <TabsTrigger value="course-files" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />

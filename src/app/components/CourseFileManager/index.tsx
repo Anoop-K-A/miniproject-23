@@ -316,7 +316,7 @@ export function CourseFileManager() {
                     Upload File
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Upload Course File</DialogTitle>
                     <DialogDescription>
@@ -358,9 +358,16 @@ export function CourseFileManager() {
                       <Select
                         value={selectedFileType}
                         onValueChange={(value) => setSelectedFileType(value)}
+                        disabled={!courseCode.trim()}
                       >
                         <SelectTrigger id="fileType">
-                          <SelectValue placeholder="Select file type" />
+                          <SelectValue
+                            placeholder={
+                              courseCode.trim()
+                                ? "Select file type"
+                                : "Enter course code first"
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {uploadTypeOptions.map((type: any) => (
@@ -370,6 +377,13 @@ export function CourseFileManager() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {courseCode.trim()
+                          ? isTheoryCourseCode(courseCode)
+                            ? "Showing theory course file types"
+                            : "Showing lab course file types"
+                          : "File types are based on course code — ends with \u2018T\u2019 for theory, otherwise lab"}
+                      </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
