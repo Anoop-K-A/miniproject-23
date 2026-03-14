@@ -1,14 +1,12 @@
 import { useState, useMemo } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { StatsOverview } from "./StatsOverview";
-import { FacultyStatusOverview } from "./FacultyStatusOverview";
-import { CareerExplorationStats } from "./CareerExplorationStats";
 import { StudentList } from "./StudentList";
 import { BatchCourseProgress } from "./BatchCourseProgress";
 import { StudentDetailDialog } from "./StudentDetailDialog";
 import { AddActivityDialog } from "./AddActivityDialog";
 import { BatchCourseOverview, Student } from "./types";
-import { mockStats, mockCareerStats, mockStudents } from "./mockData";
+import { mockStats, mockStudents } from "./mockData";
 import { toast } from "sonner";
 
 export function StaffAdvisorDashboard() {
@@ -143,11 +141,6 @@ export function StaffAdvisorDashboard() {
     <div className="space-y-6">
       <DashboardHeader stats={derivedStats} />
       <StatsOverview stats={derivedStats} />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FacultyStatusOverview stats={derivedStats} />
-        <CareerExplorationStats careerStats={mockCareerStats} />
-      </div>
 
       <BatchCourseProgress groups={batchCourseOverview.groups} />
 

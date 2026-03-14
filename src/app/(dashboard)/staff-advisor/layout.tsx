@@ -11,8 +11,14 @@ export default function StaffAdvisorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userRole, switchRole, isAuthenticated, isLoading, assignedRoles } =
-    useAuth();
+  const {
+    userRole,
+    switchRole,
+    isAuthenticated,
+    isLoading,
+    assignedRoles,
+    user,
+  } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +34,9 @@ export default function StaffAdvisorLayout({
   const handleRoleChange = (role: typeof userRole) => {
     switchRole(role);
     document.cookie = `auth_role=${role}; path=/`;
+    if (user?.username) {
+      document.cookie = `auth_user=${user.username}; path=/`;
+    }
     router.push(getDashboardPath(role));
   };
 
