@@ -3,8 +3,6 @@
 import { useState, useMemo } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { StatsOverview } from "./StatsOverview";
-import { FacultyStatusOverview } from "./FacultyStatusOverview";
-import { CareerExplorationStats } from "./CareerExplorationStats";
 import { StudentList } from "./StudentList";
 import { BatchCourseProgress } from "./BatchCourseProgress";
 import { StudentDetailDialog } from "./StudentDetailDialog";
@@ -16,6 +14,7 @@ import {
   Student,
 } from "./types";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 interface StaffAdvisorDashboardProps {
   stats: DashboardStats;
@@ -26,10 +25,10 @@ interface StaffAdvisorDashboardProps {
 
 export function StaffAdvisorDashboard({
   stats,
-  careerStats,
   students,
   batchCourseOverview,
 }: StaffAdvisorDashboardProps) {
+  const { user } = useAuth();
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [studentList, setStudentList] = useState<Student[]>(students);
   const [isStudentViewOpen, setIsStudentViewOpen] = useState(false);
@@ -37,6 +36,9 @@ export function StaffAdvisorDashboard({
   const [selectedActivity, setSelectedActivity] = useState("");
   const [selectedCommunity, setSelectedCommunity] = useState("");
   const [activityPoints, setActivityPoints] = useState("");
+  const studentApiQuery = user?.username
+    ? `?username=${encodeURIComponent(user.username)}`
+    : "";
   const totalStudents = studentList.length;
   const placedStudents = studentList.filter(
     (student) => student.placementStatus === "Placed",
@@ -114,13 +116,16 @@ export function StaffAdvisorDashboard({
 
   const handleUpdateStudent = async (updatedStudent: Student) => {
     try {
-      const response = await fetch(`/api/students/${updatedStudent.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `/api/students/${updatedStudent.id}${studentApiQuery}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedStudent),
         },
-        body: JSON.stringify(updatedStudent),
-      });
+      );
 
       if (response.ok) {
         setStudentList((prev) =>
@@ -160,13 +165,16 @@ export function StaffAdvisorDashboard({
     };
 
     try {
-      const response = await fetch(`/api/students/${updatedStudent.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `/api/students/${updatedStudent.id}${studentApiQuery}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedStudent),
         },
-        body: JSON.stringify(updatedStudent),
-      });
+      );
 
       if (response.ok) {
         setStudentList((prev) =>
@@ -192,7 +200,7 @@ export function StaffAdvisorDashboard({
 
   const handleAddStudent = async (student: Student) => {
     try {
-      const response = await fetch("/api/students", {
+      const response = await fetch(`/api/students${studentApiQuery}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -236,11 +244,6 @@ export function StaffAdvisorDashboard({
     <div className="space-y-6">
       <DashboardHeader stats={derivedStats} />
       <StatsOverview stats={derivedStats} />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FacultyStatusOverview stats={derivedStats} />
-        <CareerExplorationStats careerStats={careerStats} />
-      </div>
 
       <BatchCourseProgress groups={derivedBatchCourseOverview.groups} />
 
