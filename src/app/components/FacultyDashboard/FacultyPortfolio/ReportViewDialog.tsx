@@ -1,4 +1,10 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../ui/dialog";
 import { Badge } from "../../ui/badge";
 import { Alert, AlertDescription } from "../../ui/alert";
 import { EventReport } from "./types";
@@ -16,9 +22,15 @@ export function ReportViewDialog({
   report,
   getStatusColor,
 }: ReportViewDialogProps) {
+  const galleryImageUrls =
+    report?.galleryImages?.filter(
+      (url, index, self): url is string =>
+        Boolean(url) && self.indexOf(url) === index,
+    ) ?? [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[75vw] max-w-[75vw] sm:max-w-[75vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{report?.eventName}</DialogTitle>
           <DialogDescription>
@@ -66,6 +78,22 @@ export function ReportViewDialog({
               <p className="text-sm text-gray-500 mb-1">Outcomes & Impact</p>
               <p className="text-sm text-gray-700">{report.outcomes}</p>
             </div>
+
+            {galleryImageUrls.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Event Photos</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {galleryImageUrls.map((imageUrl, index) => (
+                    <img
+                      key={`${report.id}-gallery-${index}`}
+                      src={imageUrl}
+                      alt={`${report.eventName} photo ${index + 1}`}
+                      className="w-full h-28 rounded-lg object-cover border"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Alert className="bg-blue-50 border-blue-200">
               <AlertDescription className="text-sm">

@@ -6,7 +6,7 @@ import { ArticleHeader } from "./ArticleHeader";
 import { ArticleContent } from "./ArticleContent";
 import { CoordinatorSection } from "./CoordinatorSection";
 import { AdminReviewSection } from "./AdminReviewSection";
-import { GallerySection, DownloadSection } from "./Sections";
+import { GallerySection } from "./Sections";
 import { GalleryLightbox } from "./GalleryLightbox";
 import { EventReport, EventReportBlogViewerProps } from "./types";
 import { EntityMessagesPanel } from "@/components/shared/messages/EntityMessagesPanel";
@@ -14,7 +14,6 @@ import { EntityMessagesPanel } from "@/components/shared/messages/EntityMessages
 export function EventReportBlogViewer({
   report,
   onBack,
-  onDownload,
   onRespondToAdminReview,
   currentUser,
 }: EventReportBlogViewerProps) {
@@ -48,7 +47,6 @@ export function EventReportBlogViewer({
       <EventReportHeader
         report={report}
         onBack={onBack}
-        onDownload={onDownload}
         getStatusColor={getStatusColor}
       />
 
@@ -75,7 +73,6 @@ export function EventReportBlogViewer({
           entityId={report.id}
           itemType="report"
         />
-        <DownloadSection report={report} onDownload={onDownload} />
       </article>
 
       {/* Gallery Lightbox */}

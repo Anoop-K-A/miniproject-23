@@ -3,6 +3,7 @@ export interface FacultyMember {
   name: string;
   department: string;
   role: string;
+  roles?: string[];
   isStaffAdvisor?: boolean;
   email: string;
   phone: string;
@@ -37,6 +38,26 @@ export interface Student {
   }>;
 }
 
+export type AuditChecklistStatus = "yes" | "no" | "pending";
+
+export interface CourseAuditChecklistReportItem {
+  id: string;
+  label: string;
+  status: AuditChecklistStatus;
+}
+
+export interface CourseAuditChecklistReport {
+  courseCode: string;
+  courseName?: string;
+  academicYear?: string;
+  checklist: CourseAuditChecklistReportItem[];
+  remarks?: string;
+  decision?: "approve" | "reject";
+  updatedBy?: string;
+  updatedAt?: string;
+  isFinalized?: boolean;
+}
+
 export interface CourseFile {
   id: string;
   facultyId?: string;
@@ -55,6 +76,10 @@ export interface CourseFile {
   reviewedDate?: string;
   facultyResponse?: string;
   responseDate?: string;
+  auditChecklistStatus?: AuditChecklistStatus;
+  auditChecklistUpdatedAt?: string;
+  auditChecklistFinalized?: boolean;
+  auditChecklistReport?: CourseAuditChecklistReport;
   facultyName: string;
   department: string;
   createdAt?: string;
@@ -73,6 +98,8 @@ export interface EventReport {
   description: string;
   objectives: string;
   outcomes: string;
+  thumbnailUrl?: string;
+  galleryImages?: string[];
   status: "Draft" | "Submitted" | "Approved" | "Rejected";
 }
 

@@ -88,6 +88,15 @@ export async function POST(request: NextRequest) {
     if (duplicateIndex !== -1) {
       // Delete the old file from disk if it exists
       const oldFile = files[duplicateIndex];
+      if (oldFile.auditChecklistStatus === "yes") {
+        return NextResponse.json(
+          {
+            error:
+              "This file type is checklist-approved by the auditor and cannot be replaced.",
+          },
+          { status: 403 },
+        );
+      }
       if (oldFile.documentUrl && oldFile.documentUrl.startsWith("/uploads/")) {
         const oldFilePath = join(process.cwd(), "public", oldFile.documentUrl);
         if (existsSync(oldFilePath)) {

@@ -1,8 +1,6 @@
 import { Dialog, DialogContent, DialogTitle } from "../../ui/dialog";
 import { Badge } from "../../ui/badge";
-import { Button } from "../../ui/button";
-import { Card } from "../../ui/card";
-import { Calendar, Users, Download, Heart } from "lucide-react";
+import { Calendar, Users } from "lucide-react";
 import { EventReport } from "./types";
 
 interface ReportViewDialogProps {
@@ -18,24 +16,15 @@ export function ReportViewDialog({
   report,
   getStatusColor,
 }: ReportViewDialogProps) {
-  const handleDownload = () => {
-    if (report) {
-      const fileName = `${report.eventName.replace(/\s+/g, "_")}_report.pdf`;
-      // Create a simple download - in a real app this would generate a PDF
-      const dataStr = JSON.stringify(report, null, 2);
-      const dataUri =
-        "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-      const exportFileDefaultName = fileName;
-      const linkElement = document.createElement("a");
-      linkElement.setAttribute("href", dataUri);
-      linkElement.setAttribute("download", exportFileDefaultName);
-      linkElement.click();
-    }
-  };
+  const galleryImageUrls =
+    report?.galleryImages?.filter(
+      (url, index, self): url is string =>
+        Boolean(url) && self.indexOf(url) === index,
+    ) ?? [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-0">
+      <DialogContent className="w-[75vw] max-w-[75vw] sm:max-w-[75vw] max-h-[90vh] overflow-y-auto p-0 border-0">
         <DialogTitle className="sr-only">
           {report?.eventName || "Event Report"}
         </DialogTitle>
@@ -49,7 +38,7 @@ export function ReportViewDialog({
                 className="w-full h-80 object-cover"
               />
             ) : (
-              <div className="w-full h-80 bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden flex items-center justify-center">
+              <div className="w-full h-80 bg-linear-to-br from-blue-500 to-purple-600 relative overflow-hidden flex items-center justify-center">
                 <div className="absolute inset-0 opacity-20 bg-pattern"></div>
                 <div className="text-white text-center z-10">
                   <Calendar className="h-16 w-16 mx-auto mb-2 opacity-80" />
@@ -98,7 +87,7 @@ export function ReportViewDialog({
               {/* Author Info */}
               {report.facultyCoordinator && (
                 <div className="flex items-center gap-3 mb-8 pb-6 border-b border-gray-100">
-                  <div className="h-12 w-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                  <div className="h-12 w-12 bg-linear-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
                     {report.facultyCoordinator
                       .split(" ")
                       .map((n) => n[0])
@@ -169,19 +158,24 @@ export function ReportViewDialog({
                 </section>
               )}
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-6 border-t border-gray-200">
-                <Button
-                  onClick={handleDownload}
-                  className="flex items-center gap-2 flex-1"
-                >
-                  <Download className="h-4 w-4" />
-                  Download Full Report
-                </Button>
-                <Button variant="outline" size="icon" className="hidden">
-                  <Heart className="h-4 w-4" />
-                </Button>
-              </div>
+              {/* Event Photos */}
+              {galleryImageUrls.length > 0 && (
+                <section className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                    Event Photos
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {galleryImageUrls.map((imageUrl, index) => (
+                      <img
+                        key={`${report.id}-gallery-${index}`}
+                        src={imageUrl}
+                        alt={`${report.eventName} photo ${index + 1}`}
+                        className="w-full h-36 object-cover rounded-lg border"
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         )}

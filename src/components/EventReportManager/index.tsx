@@ -52,7 +52,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventReportBlogViewer } from "./EventReportBlogViewer";
 import { EventReport } from "./types";
 import { useAuth } from "@/context/AuthContext";
-import { downloadJsonFile, sanitizeFileName } from "@/lib/download";
 
 interface EventReportManagerProps {
   initialReports?: EventReport[];
@@ -397,13 +396,6 @@ export function EventReportManager({
     setIsViewOpen(true);
   };
 
-  const handleDownload = (report: EventReport) => {
-    const safeName = sanitizeFileName(report.eventName, "event-report");
-    const fileName = `${safeName || "event-report"}.json`;
-    downloadJsonFile(report, fileName);
-    toast.success(`Downloading ${report.eventName} report`);
-  };
-
   const visibleReports = useMemo(() => {
     if (userRole === "faculty" && user?.id) {
       return reports.filter((report) => report.facultyId === user.id);
@@ -443,7 +435,6 @@ export function EventReportManager({
       <EventReportBlogViewer
         report={selectedReport}
         onBack={() => setIsViewOpen(false)}
-        onDownload={handleDownload}
         onRespondToAdminReview={async (responseText) => {
           try {
             const apiResponse = await fetch(

@@ -1,4 +1,10 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../ui/dialog";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import { Alert, AlertDescription } from "../../ui/alert";
@@ -31,6 +37,17 @@ export function FileViewDialog({
         </DialogHeader>
         {file && (
           <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Course Code</p>
+                <p className="font-medium">{file.courseCode}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Batch / Academic Year</p>
+                <p className="font-medium">{file.academicYear || "-"}</p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">File Type</p>

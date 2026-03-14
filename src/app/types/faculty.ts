@@ -3,6 +3,8 @@ export interface FacultyMember {
   name: string;
   department: string;
   role: string;
+  roles?: string[];
+  isStaffAdvisor?: boolean;
   email: string;
   phone: string;
   courses: string[];

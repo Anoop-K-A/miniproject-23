@@ -78,6 +78,9 @@ export function CourseCodeCards({
   getStatusColor,
 }: CourseCodeCardsProps) {
   const [expandedCodes, setExpandedCodes] = useState<Set<string>>(new Set());
+  const [expandedChecklistCodes, setExpandedChecklistCodes] = useState<
+    Record<string, boolean>
+  >({});
   const groupedFiles = groupByCourseCode(courseFiles);
   const courseCodes = Object.keys(groupedFiles).sort();
 
@@ -90,6 +93,23 @@ export function CourseCodeCards({
         newSet.add(courseCode);
       }
       return newSet;
+    });
+  };
+
+  const toggleChecklist = (courseCode: string) => {
+    setExpandedChecklistCodes((prev) => {
+      const nextIsOpen = !prev[courseCode];
+      if (nextIsOpen) {
+        setExpandedCodes((expanded) => {
+          const next = new Set(expanded);
+          next.add(courseCode);
+          return next;
+        });
+      }
+      return {
+        ...prev,
+        [courseCode]: nextIsOpen,
+      };
     });
   };
 
@@ -119,6 +139,10 @@ export function CourseCodeCards({
         // Get course name from first file
         const courseName = files[0]?.courseName || courseCode;
         const isExpanded = expandedCodes.has(courseCode);
+        const courseChecklistReport =
+          files.find((file) => file.auditChecklistReport)
+            ?.auditChecklistReport ?? null;
+        const isChecklistOpen = expandedChecklistCodes[courseCode] ?? false;
 
         return (
           <Card
@@ -144,6 +168,21 @@ export function CourseCodeCards({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {courseChecklistReport && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleChecklist(courseCode);
+                      }}
+                    >
+                      {isChecklistOpen
+                        ? "Hide Checklist Sheet"
+                        : "View Checklist Sheet"}
+                    </Button>
+                  )}
                   <Badge
                     variant="outline"
                     className="bg-blue-50 text-blue-700 border-blue-200"
@@ -183,6 +222,47 @@ export function CourseCodeCards({
             {isExpanded && (
               <CardContent>
                 <div className="space-y-3">
+                  {courseChecklistReport && isChecklistOpen && (
+                    <div className="rounded-lg border p-3 space-y-3 bg-white">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          Auditor Checklist Sheet
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {courseChecklistReport.courseCode}
+                          {courseChecklistReport.academicYear
+                            ? ` • ${courseChecklistReport.academicYear}`
+                            : ""}
+                        </p>
+                      </div>
+                      <div className="space-y-2 text-sm max-h-52 overflow-y-auto pr-1">
+                        {courseChecklistReport.checklist.map((entry) => (
+                          <div
+                            key={`${courseCode}-${entry.id}`}
+                            className="flex items-center justify-between gap-3 border-b pb-2 last:border-b-0 last:pb-0"
+                          >
+                            <span className="text-gray-700">{entry.label}</span>
+                            <span
+                              className={`font-medium ${
+                                entry.status === "yes"
+                                  ? "text-green-700"
+                                  : entry.status === "no"
+                                    ? "text-red-700"
+                                    : "text-yellow-700"
+                              }`}
+                            >
+                              {entry.status === "yes"
+                                ? "Completed"
+                                : entry.status === "no"
+                                  ? "Needs Update"
+                                  : "Pending"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {files.map((file) => (
                     <div
                       key={file.id}

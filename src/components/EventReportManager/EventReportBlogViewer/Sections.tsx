@@ -1,16 +1,11 @@
 import { EventReport } from "./types";
-import { FileDown } from "lucide-react";
-import { Button } from "../../ui/button";
 
 interface GallerySectionProps {
   report: EventReport;
   onSelectImage: (image: string) => void;
 }
 
-export function GallerySection({
-  report,
-  onSelectImage,
-}: GallerySectionProps) {
+export function GallerySection({ report, onSelectImage }: GallerySectionProps) {
   if (!report.galleryImages || report.galleryImages.length === 0) return null;
 
   return (
@@ -31,25 +26,6 @@ export function GallerySection({
           </div>
         ))}
       </div>
-    </section>
-  );
-}
-
-interface DownloadSectionProps {
-  report: EventReport;
-  onDownload: (report: EventReport) => void;
-}
-
-export function DownloadSection({
-  report,
-  onDownload,
-}: DownloadSectionProps) {
-  return (
-    <section className="border-t pt-6">
-      <Button onClick={() => onDownload(report)} className="w-full" size="lg">
-        <FileDown className="h-5 w-5 mr-2" />
-        Download Full Report
-      </Button>
     </section>
   );
 }

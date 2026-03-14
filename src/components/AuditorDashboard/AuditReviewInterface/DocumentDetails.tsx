@@ -7,6 +7,14 @@ interface DocumentDetailsProps {
 }
 
 export function DocumentDetails({ type, item }: DocumentDetailsProps) {
+  const reportItem = type === "report" ? (item as EventReport) : null;
+  const reportImageUrls = reportItem
+    ? [reportItem.thumbnailUrl, ...(reportItem.galleryImages ?? [])].filter(
+        (url, index, self): url is string =>
+          Boolean(url) && self.indexOf(url) === index,
+      )
+    : [];
+
   return (
     <Card>
       <CardHeader>
@@ -37,36 +45,52 @@ export function DocumentDetails({ type, item }: DocumentDetailsProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Event Type</p>
-                <p>{(item as EventReport).eventType}</p>
+                <p>{reportItem?.eventType}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Event Date</p>
-                <p>{(item as EventReport).eventDate}</p>
+                <p>{reportItem?.eventDate}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Location</p>
-                <p>{(item as EventReport).location}</p>
+                <p>{reportItem?.location}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Participants</p>
-                <p>{(item as EventReport).participants}</p>
+                <p>{reportItem?.participants}</p>
               </div>
             </div>
 
             <div>
               <p className="text-sm text-gray-500 mb-1">Description</p>
-              <p className="text-sm">{(item as EventReport).description}</p>
+              <p className="text-sm">{reportItem?.description}</p>
             </div>
 
             <div>
               <p className="text-sm text-gray-500 mb-1">Objectives</p>
-              <p className="text-sm">{(item as EventReport).objectives}</p>
+              <p className="text-sm">{reportItem?.objectives}</p>
             </div>
 
             <div>
               <p className="text-sm text-gray-500 mb-1">Outcomes & Impact</p>
-              <p className="text-sm">{(item as EventReport).outcomes}</p>
+              <p className="text-sm">{reportItem?.outcomes}</p>
             </div>
+
+            {reportImageUrls.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Event Photos</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {reportImageUrls.map((imageUrl, index) => (
+                    <img
+                      key={`${reportItem?.id ?? "report"}-image-${index}`}
+                      src={imageUrl}
+                      alt={`${reportItem?.eventName ?? "Event"} photo ${index + 1}`}
+                      className="w-full h-28 rounded-lg object-cover border"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

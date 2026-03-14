@@ -173,6 +173,9 @@ export async function getFacultyDashboardData(
     name: user.name,
     department: user.department ?? "",
     role: user.facultyRole ?? "Faculty",
+    roles: Array.from(new Set([...(user.roles ?? []), user.role])).filter(
+      (role) => role !== "admin",
+    ),
     isStaffAdvisor: user.roles?.includes("staff-advisor") ?? false,
     email: user.email ?? user.username,
     phone: user.phone ?? "",
@@ -333,6 +336,12 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
         (student) => serializeId(student.advisorId) === staffAdvisorId,
       )
     : [];
+  const scopedStudentIds = new Set(
+    scopedStudents.map((student) => serializeId(student.id)),
+  );
+  const scopedCareerActivities = careerActivities.filter((activity) =>
+    scopedStudentIds.has(serializeId(activity.studentId)),
+  );
 
   const totalStudents = scopedStudents.length;
   const batchYear =
@@ -495,21 +504,21 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
   };
 
   const careerStats: CareerStats = {
-    totalInternships: careerActivities.filter(
+    totalInternships: scopedCareerActivities.filter(
       (activity) => activity.type === "internship",
     ).length,
-    activeInternships: careerActivities.filter(
+    activeInternships: scopedCareerActivities.filter(
       (activity) =>
         activity.type === "internship" && activity.status === "active",
     ).length,
-    completedProjects: careerActivities.filter(
+    completedProjects: scopedCareerActivities.filter(
       (activity) =>
         activity.type === "project" && activity.status === "completed",
     ).length,
-    skillWorkshops: careerActivities.filter(
+    skillWorkshops: scopedCareerActivities.filter(
       (activity) => activity.type === "workshop",
     ).length,
-    campusInterviews: careerActivities.filter(
+    campusInterviews: scopedCareerActivities.filter(
       (activity) => activity.type === "interview",
     ).length,
   };

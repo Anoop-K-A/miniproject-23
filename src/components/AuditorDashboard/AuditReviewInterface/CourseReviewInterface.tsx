@@ -15,7 +15,10 @@ import {
 import { toast } from "sonner";
 import { ChecklistSidebar } from "./ChecklistSidebar";
 import { ChecklistItem } from "./types";
-import { CourseFile } from "../FacultyAuditPortfolio/types";
+import {
+  CourseAuditChecklistReport,
+  CourseFile,
+} from "../FacultyAuditPortfolio/types";
 import { useAuth } from "@/context/AuthContext";
 
 // ── Checklists (mirrored from AuditReviewInterface/index.tsx) ──────────────
@@ -75,6 +78,15 @@ const isTheoryCourseCode = (code: string) => {
 
 const getChecklistForCourse = (code: string) =>
   isTheoryCourseCode(code) ? theoryCourseFileChecklist : labCourseFileChecklist;
+
+const normalizeChecklistStatus = (
+  value?: string,
+): "yes" | "no" | "pending" | undefined => {
+  if (value === "yes" || value === "no" || value === "pending") {
+    return value;
+  }
+  return undefined;
+};
 
 // ── Sort helpers ──────────────────────────────────────────────────────────────
 
@@ -138,14 +150,77 @@ export function CourseReviewInterface({
   const checklist = getChecklistForCourse(group.courseCode);
   const sortedFiles = sortFilesByChecklist(group.files, checklist);
 
-  const [checkedItems, setCheckedItems] = useState<
+  const existingChecklistReport =
+    sortedFiles.find((file) => file.auditChecklistReport)
+      ?.auditChecklistReport ?? null;
+
+  const initialCheckedItems = checklist.reduce<
     Record<string, "yes" | "no" | "pending">
-  >({});
-  const [auditorRemarks, setAuditorRemarks] = useState("");
+  >((accumulator, item) => {
+    const reportStatus = normalizeChecklistStatus(
+      existingChecklistReport?.checklist.find(
+        (entry) => entry.id === item.id || entry.label === item.label,
+      )?.status,
+    );
+    if (reportStatus) {
+      accumulator[item.id] = reportStatus;
+      return accumulator;
+    }
+
+    const matchingFileStatus = normalizeChecklistStatus(
+      sortedFiles.find((file) => file.fileType === item.label)
+        ?.auditChecklistStatus,
+    );
+    if (matchingFileStatus) {
+      accumulator[item.id] = matchingFileStatus;
+    }
+    return accumulator;
+  }, {});
+
+  const [checkedItems, setCheckedItems] =
+    useState<Record<string, "yes" | "no" | "pending">>(initialCheckedItems);
+  const [auditorRemarks, setAuditorRemarks] = useState(
+    existingChecklistReport?.remarks ?? sortedFiles[0]?.auditorRemarks ?? "",
+  );
   const [reviewDecision, setReviewDecision] = useState<
     "approve" | "reject" | null
-  >(null);
+  >(() => {
+    if (existingChecklistReport?.decision) {
+      return existingChecklistReport.decision;
+    }
+    if (
+      sortedFiles.length > 0 &&
+      sortedFiles.every((file) => file.status === "Approved")
+    ) {
+      return "approve";
+    }
+    if (
+      sortedFiles.length > 0 &&
+      sortedFiles.every((file) => file.status === "Rejected")
+    ) {
+      return "reject";
+    }
+    return null;
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const buildChecklistReport = (
+    isFinalized: boolean,
+  ): CourseAuditChecklistReport => ({
+    courseCode: group.courseCode,
+    courseName: group.courseName,
+    academicYear: group.academicYear,
+    checklist: checklist.map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: checkedItems[item.id] ?? "pending",
+    })),
+    remarks: auditorRemarks.trim() || undefined,
+    decision: reviewDecision ?? undefined,
+    updatedBy: user?.name ?? "Auditor",
+    updatedAt: new Date().toISOString(),
+    isFinalized,
+  });
 
   const handleChecklistChange = (
     itemId: string,
@@ -171,6 +246,57 @@ export function CourseReviewInterface({
     toast.success("Audit sheet downloaded");
   };
 
+  const handleSaveDraft = async () => {
+    setIsSubmitting(true);
+    const checklistReport = buildChecklistReport(false);
+    const statusByLabel = new Map(
+      checklistReport.checklist.map((entry) => [entry.label, entry.status]),
+    );
+    const updatedFiles: CourseFile[] = [];
+
+    try {
+      for (const file of sortedFiles) {
+        const res = await fetch(`/api/course-files/${file.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            auditorRemarks: auditorRemarks.trim() || file.auditorRemarks,
+            auditChecklistStatus: statusByLabel.get(file.fileType) ?? "pending",
+            auditChecklistUpdatedAt: checklistReport.updatedAt,
+            auditChecklistFinalized: false,
+            auditChecklistReport: checklistReport,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          toast.error(
+            data.error || `Failed to save draft for ${file.fileName}`,
+          );
+          setIsSubmitting(false);
+          return;
+        }
+
+        const updated = (data.files as CourseFile[]).find(
+          (f) => f.id === file.id,
+        );
+        if (updated) {
+          updatedFiles.push(updated);
+        }
+      }
+
+      onReviewCompleted?.(updatedFiles);
+      toast.success("Checklist draft saved");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
+    } catch (error) {
+      console.error("Checklist draft save error:", error);
+      toast.error("Failed to save checklist draft");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmitReview = async () => {
     if (!reviewDecision) {
       toast.error("Please select approve or reject");
@@ -190,6 +316,10 @@ export function CourseReviewInterface({
     const status = reviewDecision === "approve" ? "Approved" : "Rejected";
     const reviewedDate = new Date().toISOString().split("T")[0];
     const reviewerName = user?.name ?? "Auditor";
+    const checklistReport = buildChecklistReport(true);
+    const statusByLabel = new Map(
+      checklistReport.checklist.map((entry) => [entry.label, entry.status]),
+    );
     const updatedFiles: CourseFile[] = [];
 
     try {
@@ -203,6 +333,10 @@ export function CourseReviewInterface({
             auditorRemarks,
             reviewedBy: reviewerName,
             reviewedDate,
+            auditChecklistStatus: statusByLabel.get(file.fileType) ?? "pending",
+            auditChecklistUpdatedAt: checklistReport.updatedAt,
+            auditChecklistFinalized: true,
+            auditChecklistReport: checklistReport,
           }),
         });
         const data = await res.json();
@@ -363,7 +497,7 @@ export function CourseReviewInterface({
                         file.status === "Approved"
                           ? "bg-green-100 text-green-800"
                           : file.status === "Rejected"
-                            ? "bg-red-100 text-reded-800"
+                            ? "bg-red-100 text-red-800"
                             : "bg-yellow-100 text-yellow-800"
                       }
                     >
@@ -432,6 +566,16 @@ export function CourseReviewInterface({
                   Reject All
                 </Button>
               </div>
+              <Button
+                variant="secondary"
+                onClick={handleSaveDraft}
+                className="w-full"
+                size="lg"
+                disabled={isSubmitting}
+                type="button"
+              >
+                {isSubmitting ? "Saving…" : "Save Checklist Draft"}
+              </Button>
               <Button
                 onClick={handleSubmitReview}
                 className="w-full"

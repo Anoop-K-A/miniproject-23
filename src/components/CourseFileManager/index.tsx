@@ -60,6 +60,56 @@ import {
   sanitizeFileName,
 } from "@/lib/download";
 
+const theoryFileTypes = [
+  "CO\u2013PO Mapping (CO\u2013PO Mapping Level)",
+  "CO\u2013PO Mapping (CO\u2013PSO Mapping Level)",
+  "Justification of Mapping",
+  "Course File Coverage",
+  "Test (QP)",
+  "Test (CO Level)",
+  "Test (Sample Answer Sheets)",
+  "Test (QP) \u2013 Second",
+  "Test (CO Level) \u2013 Second",
+  "Test (Sample Answer Sheets) \u2013 Second",
+  "Assignment (QP)",
+  "Assignment (CO Level)",
+  "Assignment (Sample)",
+  "Assignment (QP) \u2013 Second",
+  "Assignment (CO Level) \u2013 Second",
+  "Assignment (Sample) \u2013 Second",
+  "Sample Tutorial",
+  "Attendance (%)",
+  "Internal Marks Display",
+  "Course Exit Survey",
+  "Attainment Calculation",
+  "Score (Faculty/Auditor)",
+];
+
+const labFileTypes = [
+  "CO\u2013PO Mapping",
+  "CO\u2013PSO Mapping",
+  "Justification of Mapping",
+  "Course File Coverage",
+  "Course Execution",
+  "Continuous Evaluation",
+  "Internal Test Conducted",
+  "Internal Test Question Paper",
+  "Internal Test Answer Sheets",
+  "Internal Test Mark Display",
+  "Internal Total Marks",
+  "Attendance (%)",
+  "Assignment / Record",
+  "Record Continuous Evaluation",
+  "Course Exit Survey",
+  "Sample Record",
+  "Mark Calculation",
+];
+
+const isTheoryCourseCode = (code: string) => {
+  const lastLetter = (code.match(/[a-zA-Z](?!.*[a-zA-Z])/g) ?? [""])[0];
+  return lastLetter.toLowerCase() === "t";
+};
+
 interface CourseFileManagerProps {
   initialFiles?: CourseFile[];
   fileCategories?: string[];
@@ -124,17 +174,47 @@ export function CourseFileManager({
   );
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [expandedCourseChecklist, setExpandedCourseChecklist] = useState<
+    Record<string, boolean>
+  >({});
   const [pendingAuditorMessagesByFile, setPendingAuditorMessagesByFile] =
     useState<Record<string, number>>({});
   const [expandedFolders, setExpandedFolders] = useState<
     Record<string, boolean>
   >({});
 
+  const uploadTypeOptions = useMemo(
+    () => (isTheoryCourseCode(courseCode) ? theoryFileTypes : labFileTypes),
+    [courseCode],
+  );
+
+  useEffect(() => {
+    if (selectedFileType && !uploadTypeOptions.includes(selectedFileType)) {
+      setSelectedFileType("");
+    }
+  }, [selectedFileType, uploadTypeOptions]);
+
   const toggleFolder = (folderKey: string) => {
     setExpandedFolders((prev) => ({
       ...prev,
       [folderKey]: !prev[folderKey],
     }));
+  };
+
+  const toggleCourseChecklist = (folderKey: string) => {
+    setExpandedCourseChecklist((prev) => {
+      const nextIsOpen = !prev[folderKey];
+      if (nextIsOpen) {
+        setExpandedFolders((folderState) => ({
+          ...folderState,
+          [folderKey]: true,
+        }));
+      }
+      return {
+        ...prev,
+        [folderKey]: nextIsOpen,
+      };
+    });
   };
 
   useEffect(() => {
@@ -302,6 +382,14 @@ export function CourseFileManager({
   };
 
   const handleDelete = async (id: string) => {
+    const fileToDelete = files.find((file) => file.id === id);
+    if (fileToDelete?.auditChecklistStatus === "yes") {
+      toast.error(
+        "This file is checklist-approved by the auditor and cannot be changed.",
+      );
+      return;
+    }
+
     try {
       const response = await fetch(`/api/course-files/${id}`, {
         method: "DELETE",
@@ -479,7 +567,7 @@ export function CourseFileManager({
                   Upload File
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Upload Course File</DialogTitle>
                   <DialogDescription>
@@ -526,18 +614,32 @@ export function CourseFileManager({
                     <Select
                       value={selectedFileType}
                       onValueChange={(value) => setSelectedFileType(value)}
+                      disabled={!courseCode.trim()}
                     >
                       <SelectTrigger id="fileType">
-                        <SelectValue placeholder="Select file type" />
+                        <SelectValue
+                          placeholder={
+                            courseCode.trim()
+                              ? "Select file type"
+                              : "Enter course code first"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        {typeOptions.map((type) => (
+                        {uploadTypeOptions.map((type) => (
                           <SelectItem key={type} value={type}>
                             {type}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {courseCode.trim()
+                        ? isTheoryCourseCode(courseCode)
+                          ? "Showing theory course file types"
+                          : "Showing lab course file types"
+                        : "File types are based on course code — ends with \u2018T\u2019 for theory, otherwise lab"}
+                    </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -584,29 +686,49 @@ export function CourseFileManager({
               groupedFiles.map((group) => {
                 const folderKey = `${group.courseCode}-${group.academicYear}`;
                 const isExpanded = expandedFolders[folderKey] ?? false;
+                const courseChecklistReport =
+                  group.files.find((file) => file.auditChecklistReport)
+                    ?.auditChecklistReport ?? null;
+                const isChecklistOpen =
+                  expandedCourseChecklist[folderKey] ?? false;
 
                 return (
                   <React.Fragment key={folderKey}>
                     {/* Folder Header */}
-                    <button
-                      onClick={() => toggleFolder(folderKey)}
-                      className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
-                    >
-                      {isExpanded ? (
-                        <ChevronDown className="h-5 w-5 text-gray-600" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5 text-gray-600" />
-                      )}
-                      <Folder className="h-5 w-5 text-blue-500" />
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-800">
-                          {group.courseCode} • {group.academicYear}
+                    <div className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
+                      <button
+                        onClick={() => toggleFolder(folderKey)}
+                        className="flex items-center gap-3 flex-1 min-w-0"
+                        type="button"
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="h-5 w-5 text-gray-600" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-gray-600" />
+                        )}
+                        <Folder className="h-5 w-5 text-blue-500" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-gray-800">
+                            {group.courseCode} • {group.academicYear}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            {group.courseName}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-600">
-                          {group.courseName}
-                        </div>
-                      </div>
+                      </button>
                       <div className="text-sm text-gray-600 flex items-center gap-2">
+                        {courseChecklistReport && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            type="button"
+                            onClick={() => toggleCourseChecklist(folderKey)}
+                          >
+                            {isChecklistOpen
+                              ? "Hide Checklist Sheet"
+                              : "View Checklist Sheet"}
+                          </Button>
+                        )}
                         <Badge variant="secondary" className="text-xs">
                           {group.files.length} Files
                         </Badge>
@@ -614,91 +736,159 @@ export function CourseFileManager({
                           {group.files.length}
                         </Badge>
                       </div>
-                    </button>
+                    </div>
 
                     {/* Files in folder */}
                     {isExpanded && (
                       <div className="divide-y">
-                        {group.files.map((file) => (
-                          <div
-                            key={file.id}
-                            className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 gap-3"
-                          >
-                            <div className="flex-1 flex items-center gap-3">
-                              {/* Status icon */}
-                              <CheckCircle2
-                                className={`h-5 w-5 shrink-0 ${
-                                  file.status === "Approved"
-                                    ? "text-green-600"
-                                    : file.status === "Rejected"
-                                      ? "text-red-600"
-                                      : "text-yellow-600"
-                                }`}
-                              />
-                              {/* File info */}
-                              <div className="flex-1">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {file.fileName}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  <Badge
-                                    variant="outline"
-                                    className="text-xs mr-2"
-                                  >
-                                    {file.fileType}
-                                  </Badge>
-                                  <span>
-                                    {file.uploadDate} • {group.semester}{" "}
-                                    {file.academicYear}
-                                  </span>
+                        {courseChecklistReport && isChecklistOpen && (
+                          <div className="px-6 py-4 bg-white">
+                            <div className="rounded-lg border p-3 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    Auditor Checklist Sheet
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {courseChecklistReport.courseCode}
+                                    {courseChecklistReport.academicYear
+                                      ? ` • ${courseChecklistReport.academicYear}`
+                                      : ""}
+                                  </p>
                                 </div>
                               </div>
-                            </div>
 
-                            {/* Status and actions */}
-                            <div className="flex items-center gap-3 shrink-0">
-                              {file.status && (
-                                <Badge
-                                  className={`text-xs ${
-                                    file.status === "Approved"
-                                      ? "bg-green-100 text-green-800"
-                                      : file.status === "Rejected"
-                                        ? "bg-red-100 text-red-800"
-                                        : "bg-yellow-100 text-yellow-800"
-                                  }`}
-                                >
-                                  {file.status}
-                                </Badge>
-                              )}
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleView(file)}
-                                  title="View Details"
-                                >
-                                  <Eye className="h-4 w-4 text-blue-600" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDownload(file)}
-                                  title="Download"
-                                >
-                                  <Download className="h-4 w-4 text-gray-600" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDelete(file.id)}
-                                  title="Delete File"
-                                >
-                                  <Trash2 className="h-4 w-4 text-red-600" />
-                                </Button>
+                              <div className="space-y-2 text-sm max-h-52 overflow-y-auto pr-1">
+                                {courseChecklistReport.checklist.map(
+                                  (entry) => (
+                                    <div
+                                      key={`${folderKey}-${entry.id}`}
+                                      className="flex items-center justify-between gap-3 border-b pb-2 last:border-b-0 last:pb-0"
+                                    >
+                                      <span className="text-gray-700">
+                                        {entry.label}
+                                      </span>
+                                      <span
+                                        className={`font-medium ${
+                                          entry.status === "yes"
+                                            ? "text-green-700"
+                                            : entry.status === "no"
+                                              ? "text-red-700"
+                                              : "text-yellow-700"
+                                        }`}
+                                      >
+                                        {entry.status === "yes"
+                                          ? "Completed"
+                                          : entry.status === "no"
+                                            ? "Needs Update"
+                                            : "Pending"}
+                                      </span>
+                                    </div>
+                                  ),
+                                )}
                               </div>
                             </div>
                           </div>
-                        ))}
+                        )}
+
+                        {group.files.map((file) => {
+                          const isChecklistLocked =
+                            file.auditChecklistStatus === "yes";
+
+                          return (
+                            <div
+                              key={file.id}
+                              className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 gap-3"
+                            >
+                              <div className="flex-1 flex items-center gap-3">
+                                {/* Status icon */}
+                                <CheckCircle2
+                                  className={`h-5 w-5 shrink-0 ${
+                                    file.status === "Approved"
+                                      ? "text-green-600"
+                                      : file.status === "Rejected"
+                                        ? "text-red-600"
+                                        : "text-yellow-600"
+                                  }`}
+                                />
+                                {/* File info */}
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {file.fileName}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs mr-2"
+                                    >
+                                      {file.fileType}
+                                    </Badge>
+                                    {isChecklistLocked && (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs mr-2 border-green-300 text-green-700"
+                                      >
+                                        Checklist Yes - Locked
+                                      </Badge>
+                                    )}
+                                    <span>
+                                      {file.uploadDate} • {group.semester}{" "}
+                                      {file.academicYear}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Status and actions */}
+                              <div className="flex items-center gap-3 shrink-0">
+                                {file.status && (
+                                  <Badge
+                                    className={`text-xs ${
+                                      file.status === "Approved"
+                                        ? "bg-green-100 text-green-800"
+                                        : file.status === "Rejected"
+                                          ? "bg-red-100 text-red-800"
+                                          : "bg-yellow-100 text-yellow-800"
+                                    }`}
+                                  >
+                                    {file.status}
+                                  </Badge>
+                                )}
+                                <div className="flex gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleView(file)}
+                                    title="View Details"
+                                  >
+                                    <Eye className="h-4 w-4 text-blue-600" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDownload(file)}
+                                    title="Download"
+                                  >
+                                    <Download className="h-4 w-4 text-gray-600" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDelete(file.id)}
+                                    disabled={isChecklistLocked}
+                                    title={
+                                      isChecklistLocked
+                                        ? "Checklist-approved file cannot be deleted"
+                                        : "Delete File"
+                                    }
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-600" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </React.Fragment>
@@ -754,18 +944,25 @@ export function CourseFileManager({
                       <p>{selectedFile.courseCode}</p>
                     </div>
                     <div>
+                      <p className="text-sm text-gray-500">
+                        Batch / Academic Year
+                      </p>
+                      <p>{selectedFile.academicYear}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
                       <p className="text-sm text-gray-500">Course Name</p>
                       <p>{selectedFile.courseName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">File Type</p>
-                      <p>{selectedFile.fileType}</p>
+                      <p className="text-sm text-gray-500">Semester</p>
+                      <p>{selectedFile.semester}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Semester</p>
-                      <p>
-                        {selectedFile.semester} {selectedFile.academicYear}
-                      </p>
+                      <p className="text-sm text-gray-500">File Type</p>
+                      <p>{selectedFile.fileType}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Upload Date</p>

@@ -1,19 +1,17 @@
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { EventReport } from "./types";
 
 interface EventReportHeaderProps {
   report: EventReport;
   onBack: () => void;
-  onDownload: (report: EventReport) => void;
   getStatusColor: (status: string) => string;
 }
 
 export function EventReportHeader({
   report,
   onBack,
-  onDownload,
   getStatusColor,
 }: EventReportHeaderProps) {
   return (
@@ -30,10 +28,6 @@ export function EventReportHeader({
                 {report.status}
               </Badge>
             )}
-            <Button onClick={() => onDownload(report)}>
-              <Download className="h-4 w-4 mr-2" />
-              Download Report
-            </Button>
           </div>
         </div>
       </div>
