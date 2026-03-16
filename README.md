@@ -1,7 +1,7 @@
 
   # Course and Event Management UI
 
-  This is a code bundle for Course and Event Management UI. The original project is available at https://www.figma.com/design/Lk5JMoT9McZJkfZI44fHIY/Course-and-Event-Management-UI.
+  This is a code bundle for Course and Event files auditing and Management system. 
 
   ## Running the code
 
