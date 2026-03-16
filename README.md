@@ -14,6 +14,6 @@
 ## 📦 Installation
 ```bash
 git clone https://github.com/bytesgeci/miniproject-23.git
-cd Fac_management_vibecodedGUI
+cd miniproject-23
 # install dependencies
   
