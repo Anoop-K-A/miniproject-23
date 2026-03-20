@@ -10,6 +10,11 @@ export interface FacultyMember {
   pendingReports: number;
   rejectedFiles: number;
   rejectedReports: number;
+  email?: string;
+  phone?: string;
+  experience?: string;
+  resumeUrl?: string;
+  resumeFileName?: string;
 }
 
 export interface DashboardStats {

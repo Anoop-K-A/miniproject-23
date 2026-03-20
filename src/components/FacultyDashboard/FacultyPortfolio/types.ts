@@ -10,6 +10,8 @@ export interface FacultyMember {
   courses: string[];
   specialization: string;
   experience: string;
+  resumeUrl?: string;
+  resumeFileName?: string;
 }
 
 export interface Student {

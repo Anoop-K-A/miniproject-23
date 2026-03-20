@@ -1,7 +1,7 @@
 import type { UserRole } from "@/lib/roles";
 
 export interface SignInFormData {
-  email: string;
+  username: string;
   password: string;
 }
 

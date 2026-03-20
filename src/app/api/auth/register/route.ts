@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import type { UserRole } from "@/lib/roles";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { createUser, findUserByUsername } from "@/lib/userStore";
+import {
+  isPrimaryAdminUsername,
+  normalizeRoleInput,
+  normalizeUsername,
+} from "@/lib/adminConfig";
 
 export async function POST(request: NextRequest) {
   let createdFirebaseUid: string | null = null;
@@ -30,22 +35,37 @@ export async function POST(request: NextRequest) {
         ? role.trim().toLowerCase()
         : "faculty";
 
+    const mappedRole = normalizeRoleInput(requestedRole);
+    if (mappedRole === "admin") {
+      return NextResponse.json(
+        { error: "Creating admin users is disabled" },
+        { status: 403 },
+      );
+    }
+
     const normalizedRole: UserRole =
-      requestedRole === "auditor"
+      mappedRole === "auditor"
         ? "auditor"
-        : requestedRole === "staffadvisor" ||
-            requestedRole === "staff advisor" ||
-            requestedRole === "staff-advisor"
+        : mappedRole === "staff-advisor"
           ? "staff-advisor"
-          : requestedRole === "admin"
-            ? "admin"
-            : "faculty";
+          : "faculty";
 
     const normalizedEmail = String(email).trim().toLowerCase();
-    const existingProfile = await findUserByUsername(normalizedEmail);
-    if (existingProfile) {
+    const normalizedOfficialName = normalizeUsername(fullName);
+
+    if (isPrimaryAdminUsername(normalizedOfficialName)) {
       return NextResponse.json(
-        { error: "Email already exists" },
+        { error: "This username is reserved" },
+        { status: 403 },
+      );
+    }
+
+    const existingByUsername = await findUserByUsername(normalizedOfficialName);
+    const existingByEmail = await findUserByUsername(normalizedEmail);
+
+    if (existingByUsername || existingByEmail) {
+      return NextResponse.json(
+        { error: "Username or email already exists" },
         { status: 400 },
       );
     }
@@ -58,7 +78,7 @@ export async function POST(request: NextRequest) {
     createdFirebaseUid = firebaseUser.uid;
 
     await createUser({
-      username: normalizedEmail,
+      username: fullName,
       email: normalizedEmail,
       name: fullName,
       role: normalizedRole,
@@ -84,15 +104,35 @@ export async function POST(request: NextRequest) {
     const firebaseError = error as { code?: string; message?: string };
     if (firebaseError?.code === "auth/email-already-exists") {
       return NextResponse.json(
-        { error: "Email already exists" },
+        { error: "Username or email already exists" },
         { status: 400 },
       );
     }
 
     if (error instanceof Error && error.message === "DUPLICATE_USER") {
       return NextResponse.json(
-        { error: "Email already exists" },
+        { error: "Username or email already exists" },
         { status: 400 },
+      );
+    }
+
+    if (
+      error instanceof Error &&
+      error.message === "PRIMARY_ADMIN_IDENTITY_RESERVED"
+    ) {
+      return NextResponse.json(
+        { error: "This username is reserved" },
+        { status: 403 },
+      );
+    }
+
+    if (
+      error instanceof Error &&
+      error.message === "ADMIN_ROLE_ASSIGNMENT_DISABLED"
+    ) {
+      return NextResponse.json(
+        { error: "Creating admin users is disabled" },
+        { status: 403 },
       );
     }
 

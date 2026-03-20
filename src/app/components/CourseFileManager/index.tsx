@@ -108,6 +108,8 @@ const isTheoryCourseCode = (code: string) => {
 const getFileTypeOptionsForCourse = (code: string) =>
   isTheoryCourseCode(code) ? theoryFileTypes : labFileTypes;
 
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+
 export function CourseFileManager() {
   const [files, setFiles] = useState<CourseFile[]>(mockCourseFiles);
 
@@ -396,8 +398,14 @@ export function CourseFileManager() {
                             <SelectValue placeholder="Select semester" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Even">Even</SelectItem>
-                            <SelectItem value="Odd">Odd</SelectItem>
+                            {semesterOptions.map((semesterOption) => (
+                              <SelectItem
+                                key={semesterOption}
+                                value={semesterOption}
+                              >
+                                {semesterOption}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>

@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { AuthUser } from "@/components/AuthPage/types";
 import { Toaster } from "@/components/ui/sonner";
 import { getDashboardPath } from "@/lib/roles";
+import { safelyNavigate } from "@/lib/safeNavigation";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,20 +16,19 @@ export default function LoginPage() {
   const handleLogin = (user: AuthUser) => {
     login(user);
 
-    // Set auth cookies for middleware
-    document.cookie = `auth_authenticated=true; path=/`;
-    document.cookie = `auth_role=${user.role}; path=/`;
-    document.cookie = `auth_user=${user.username}; path=/`;
+    const targetRole = [user.role, ...(user.roles || [])].includes("admin")
+      ? "admin"
+      : user.role;
 
     // Redirect to dashboard
-    router.replace(getDashboardPath(user.role));
+    safelyNavigate(() => router.replace(getDashboardPath(targetRole)));
   };
 
   return (
     <>
       <SignInForm
         onLogin={handleLogin}
-        onSwitchToSignUp={() => router.push("/register")}
+        onSwitchToSignUp={() => safelyNavigate(() => router.push("/register"))}
       />
       <Toaster />
     </>

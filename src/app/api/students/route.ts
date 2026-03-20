@@ -3,6 +3,27 @@ import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
 
+const VALID_SEMESTERS = new Set([
+  "S1",
+  "S2",
+  "S3",
+  "S4",
+  "S5",
+  "S6",
+  "S7",
+  "S8",
+]);
+
+function normalizeSemesterInput(value: unknown) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return "";
+  }
+
+  const match = raw.toUpperCase().match(/^(?:SEMESTER|SEM|S)?\s*([1-8])$/);
+  return match ? `S${match[1]}` : "";
+}
+
 export async function GET(request: NextRequest) {
   try {
     const advisorScope = await resolveStaffAdvisorScope(request);
@@ -44,10 +65,18 @@ export async function POST(request: NextRequest) {
       .trim()
       .toLowerCase();
     const batchYear = String(payload.batchYear ?? "").trim();
+    const normalizedSemester = normalizeSemesterInput(payload.semester);
 
     if (!payload.name || !rollNumber || !email || !batchYear) {
       return NextResponse.json(
         { error: "Name, roll number, email, and batch year are required" },
+        { status: 400 },
+      );
+    }
+
+    if (!VALID_SEMESTERS.has(normalizedSemester)) {
+      return NextResponse.json(
+        { error: "Semester must be one of S1 to S8" },
         { status: 400 },
       );
     }
@@ -74,7 +103,7 @@ export async function POST(request: NextRequest) {
       email,
       phone: payload.phone,
       department: payload.department,
-      semester: payload.semester,
+      semester: normalizedSemester,
       batchYear,
       cgpa: payload.cgpa ?? 0,
       attendance: payload.attendance ?? 0,

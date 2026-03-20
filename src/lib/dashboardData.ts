@@ -44,13 +44,18 @@ interface UserRecord {
   courses?: string[];
   specialization?: string;
   experience?: string;
+  resumeUrl?: string;
+  resumeFileName?: string;
   facultyRole?: string;
 }
 
 interface CourseFileRecord {
   id: string;
-  facultyId: string;
+  facultyId?: string;
   fileName: string;
+  courseCode?: string;
+  courseName?: string;
+  semester?: string;
   status?: string;
   academicYear?: string;
   createdAt?: string;
@@ -101,6 +106,94 @@ function toTimeAgo(isoDate?: string) {
   return `${diffDays} days ago`;
 }
 
+function normalizeSemesterLabel(semester?: string) {
+  const raw = String(semester ?? "").trim();
+  if (!raw) return "";
+
+  const compact = raw.toLowerCase().replace(/[\s-]+/g, "");
+  const numericMatch = compact.match(/^(?:semester|sem|s)?([1-8])$/);
+  if (numericMatch) {
+    return `S${numericMatch[1]}`;
+  }
+
+  if (compact === "odd") return "Odd";
+  if (compact === "even") return "Even";
+
+  return raw.toUpperCase();
+}
+
+function buildCourseTeachingLabel(
+  file: Pick<
+    CourseFileRecord,
+    "courseCode" | "courseName" | "academicYear" | "semester"
+  >,
+) {
+  const courseCode = String(file.courseCode ?? "").trim();
+  const courseName = String(file.courseName ?? "").trim();
+  const batch = String(file.academicYear ?? "").trim();
+  const semester = normalizeSemesterLabel(file.semester);
+  const title = [courseCode, courseName].filter(Boolean).join(" - ");
+
+  if (!title) {
+    return "";
+  }
+
+  const details: string[] = [];
+  if (batch) {
+    details.push(`Batch ${batch}`);
+  }
+  if (semester) {
+    details.push(`Sem ${semester}`);
+  }
+
+  return details.length > 0 ? `${title} (${details.join(", ")})` : title;
+}
+
+function buildCoursesByFaculty(courseFiles: CourseFileRecord[]) {
+  const coursesByFaculty = new Map<string, Map<string, string>>();
+
+  courseFiles.forEach((file) => {
+    const facultyId = serializeId(file.facultyId);
+    if (!facultyId) {
+      return;
+    }
+
+    const courseLabel = buildCourseTeachingLabel(file);
+    if (!courseLabel) {
+      return;
+    }
+
+    const uniqueKey = [
+      String(file.courseCode ?? "")
+        .trim()
+        .toLowerCase(),
+      String(file.courseName ?? "")
+        .trim()
+        .toLowerCase(),
+      String(file.academicYear ?? "")
+        .trim()
+        .toLowerCase(),
+      normalizeSemesterLabel(file.semester).toLowerCase(),
+    ].join("|");
+
+    if (!coursesByFaculty.has(facultyId)) {
+      coursesByFaculty.set(facultyId, new Map<string, string>());
+    }
+
+    coursesByFaculty.get(facultyId)?.set(uniqueKey, courseLabel);
+  });
+
+  const normalized = new Map<string, string[]>();
+  coursesByFaculty.forEach((coursesMap, facultyId) => {
+    normalized.set(
+      facultyId,
+      Array.from(coursesMap.values()).sort((a, b) => a.localeCompare(b)),
+    );
+  });
+
+  return normalized;
+}
+
 export async function getFacultyDashboardData(
   username?: string | null,
 ): Promise<FacultyDashboardData> {
@@ -114,6 +207,7 @@ export async function getFacultyDashboardData(
     await readJsonFile<CourseFileRecord[]>("courseFiles.json");
   const eventReports =
     await readJsonFile<EventReportRecord[]>("eventReports.json");
+  const coursesByFaculty = buildCoursesByFaculty(courseFiles);
 
   const selectedUser = username
     ? facultyUsers.find((user) => user.username === username)
@@ -168,21 +262,34 @@ export async function getFacultyDashboardData(
     recentActivity,
   };
 
-  const facultyMembers: FacultyMember[] = facultyUsers.map((user) => ({
-    id: serializeId(user.id),
-    name: user.name,
-    department: user.department ?? "",
-    role: user.facultyRole ?? "Faculty",
-    roles: Array.from(new Set([...(user.roles ?? []), user.role])).filter(
-      (role) => role !== "admin",
-    ),
-    isStaffAdvisor: user.roles?.includes("staff-advisor") ?? false,
-    email: user.email ?? user.username,
-    phone: user.phone ?? "",
-    courses: user.courses ?? [],
-    specialization: user.specialization ?? "",
-    experience: user.experience ?? "",
-  }));
+  const facultyMembers: FacultyMember[] = facultyUsers.map((user) => {
+    const userId = serializeId(user.id);
+    const derivedCourses = coursesByFaculty.get(userId) ?? [];
+    const fallbackCourses = (user.courses ?? [])
+      .map((course: string) => course.trim())
+      .filter(Boolean);
+    const mergedCourses = Array.from(
+      new Set([...derivedCourses, ...fallbackCourses]),
+    );
+
+    return {
+      id: userId,
+      name: user.name,
+      department: user.department ?? "",
+      role: user.facultyRole ?? "Faculty",
+      roles: Array.from(new Set([...(user.roles ?? []), user.role])).filter(
+        (role) => role !== "admin",
+      ),
+      isStaffAdvisor: user.roles?.includes("staff-advisor") ?? false,
+      email: user.email ?? user.username,
+      phone: user.phone ?? "",
+      courses: mergedCourses,
+      specialization: user.specialization ?? "",
+      experience: user.experience ?? "",
+      resumeUrl: user.resumeUrl ?? "",
+      resumeFileName: user.resumeFileName ?? "",
+    };
+  });
 
   return {
     stats,
@@ -277,6 +384,11 @@ export async function getAuditorDashboardData() {
       rejectedReports: facultyReports.filter(
         (report) => report.status === "Rejected",
       ).length,
+      email: user.email ?? user.username,
+      phone: user.phone ?? "",
+      experience: user.experience ?? "",
+      resumeUrl: user.resumeUrl ?? "",
+      resumeFileName: user.resumeFileName ?? "",
     };
   });
 

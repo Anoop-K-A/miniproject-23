@@ -53,12 +53,24 @@ const emptyFormState: StudentFormState = {
   skillsInput: "",
 };
 
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+
+function normalizeSemesterValue(value?: string) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return "";
+  }
+
+  const match = raw.toUpperCase().match(/^(?:SEMESTER|SEM|S)?\s*([1-8])$/);
+  return match ? `S${match[1]}` : "";
+}
+
 const buildFormState = (student: Student | null): StudentFormState =>
   student
     ? {
         email: student.email ?? "",
         phone: student.phone ?? "",
-        semester: student.semester ?? "",
+        semester: normalizeSemesterValue(student.semester),
         placementStatus: student.placementStatus,
         companyName: student.companyName ?? "",
         cgpa: Number.isFinite(student.cgpa) ? student.cgpa.toString() : "",
@@ -119,7 +131,7 @@ export function StudentDetailDialog({
       ...student,
       email: form.email.trim(),
       phone: form.phone.trim(),
-      semester: form.semester.trim(),
+      semester: normalizeSemesterValue(form.semester),
       placementStatus: form.placementStatus,
       companyName: nextCompany || undefined,
       cgpa: Number.isFinite(parsedCgpa) ? parsedCgpa : 0,
@@ -156,7 +168,7 @@ export function StudentDetailDialog({
         <div className="space-y-6">
           {/* Student Header */}
           <div className="flex items-start gap-4">
-            <div className="h-16 w-16 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
+            <div className="h-16 w-16 bg-linear-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-2xl shrink-0">
               {student.name
                 .split(" ")
                 .map((n) => n[0])
@@ -307,13 +319,22 @@ export function StudentDetailDialog({
               </div>
               <div className="space-y-2">
                 <Label>Semester</Label>
-                <Input
+                <Select
                   value={form.semester}
-                  onChange={(event) =>
-                    handleFormChange("semester", event.target.value)
-                  }
+                  onValueChange={(value) => handleFormChange("semester", value)}
                   disabled={!isEditing}
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select semester" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {semesterOptions.map((semesterOption) => (
+                      <SelectItem key={semesterOption} value={semesterOption}>
+                        {semesterOption}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Placement Status</Label>

@@ -3,6 +3,27 @@ import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
 
+const VALID_SEMESTERS = new Set([
+  "S1",
+  "S2",
+  "S3",
+  "S4",
+  "S5",
+  "S6",
+  "S7",
+  "S8",
+]);
+
+function normalizeSemesterInput(value: unknown) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return "";
+  }
+
+  const match = raw.toUpperCase().match(/^(?:SEMESTER|SEM|S)?\s*([1-8])$/);
+  return match ? `S${match[1]}` : "";
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -27,6 +48,17 @@ export async function PATCH(
       existingStudent.advisorId !== advisorScope.advisorId
     ) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
+    }
+
+    if (Object.prototype.hasOwnProperty.call(payload, "semester")) {
+      const normalizedSemester = normalizeSemesterInput(payload.semester);
+      if (!VALID_SEMESTERS.has(normalizedSemester)) {
+        return NextResponse.json(
+          { error: "Semester must be one of S1 to S8" },
+          { status: 400 },
+        );
+      }
+      payload.semester = normalizedSemester;
     }
 
     const nextStudent: Student = {

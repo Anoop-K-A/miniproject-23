@@ -2,6 +2,14 @@ import { randomUUID } from "crypto";
 import type { UserRole } from "@/lib/roles";
 import { getMongoDb } from "@/lib/mongoDb";
 import { userSeedData } from "@/lib/userSeed";
+import {
+  PRIMARY_ADMIN_USERNAME,
+  includesAdminRole,
+  isPrimaryAdminEmail,
+  isPrimaryAdminUsername,
+  normalizeRoleInput,
+  sanitizeNonAdminRoles,
+} from "@/lib/adminConfig";
 
 export interface UserRecord {
   id: string;
@@ -56,6 +64,53 @@ function mapUserDocument(document: UserDocument): UserRecord {
   } as UserRecord;
 }
 
+async function enforceSingleAdminPolicy(collection: any) {
+  const usersWithAdmin = await collection
+    .find({ $or: [{ role: "admin" }, { roles: "admin" }] })
+    .toArray();
+
+  if (usersWithAdmin.length === 0) {
+    return;
+  }
+
+  const timestamp = new Date().toISOString();
+  for (const user of usersWithAdmin) {
+    const isPrimary =
+      isPrimaryAdminEmail(user.email) ||
+      isPrimaryAdminUsername(user.username) ||
+      isPrimaryAdminUsername(user.name);
+
+    if (isPrimary) {
+      await collection.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            username: normalizeIdentity(PRIMARY_ADMIN_USERNAME),
+            role: "admin",
+            roles: ["admin"],
+            updatedAt: timestamp,
+          },
+        },
+      );
+      continue;
+    }
+
+    const fallbackRole = normalizeRoleInput(user.role) || "faculty";
+    const nextRoles = sanitizeNonAdminRoles(user.roles || [fallbackRole]);
+
+    await collection.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          role: nextRoles[0],
+          roles: nextRoles,
+          updatedAt: timestamp,
+        },
+      },
+    );
+  }
+}
+
 async function getUsersCollection() {
   const db = await getMongoDb();
   const collection = db.collection<UserDocument>("users");
@@ -92,6 +147,8 @@ async function getUsersCollection() {
         await collection.insertMany(seedDocuments, { ordered: false });
       }
     }
+
+    await enforceSingleAdminPolicy(collection);
   }
 
   return collection;
@@ -111,7 +168,8 @@ export async function findUserByUsername(username: string) {
     users.find(
       (user) =>
         normalizeIdentity(user.username || "") === normalizedUsername ||
-        normalizeIdentity(user.email || "") === normalizedUsername,
+        normalizeIdentity(user.email || "") === normalizedUsername ||
+        normalizeIdentity(user.name || "") === normalizedUsername,
     ) || null
   );
 }
@@ -124,30 +182,72 @@ export async function findUserById(id: string) {
 
 export async function createUser(input: CreateUserInput) {
   const collection = await getUsersCollection();
-  const identifier = input.username || input.email;
+  const usernameSource = input.username || input.name || input.email;
 
-  if (!identifier) {
-    throw new Error("Username or email is required");
+  if (!usernameSource) {
+    throw new Error("Username is required");
   }
 
-  const normalizedIdentity = normalizeIdentity(identifier);
-  const existingUser = await findUserByUsername(normalizedIdentity);
+  const normalizedUsername = normalizeIdentity(usernameSource);
+  const existingUser = await findUserByUsername(normalizedUsername);
 
   if (existingUser) {
     throw new Error("DUPLICATE_USER");
   }
 
+  const normalizedEmail = input.email
+    ? normalizeIdentity(input.email)
+    : normalizedUsername.includes("@")
+      ? normalizedUsername
+      : "";
+
+  if (normalizedEmail) {
+    const existingByEmail = await findUserByUsername(normalizedEmail);
+    if (existingByEmail) {
+      throw new Error("DUPLICATE_USER");
+    }
+  }
+
   const timestamp = new Date().toISOString();
   const id = input.id || randomUUID();
-  const role = input.role;
-  const roles = input.roles || [role];
+  const requestedRole = normalizeRoleInput(input.role);
+  const requestedRoles = Array.isArray(input.roles) ? input.roles : [];
+  const requestedRoleSet =
+    requestedRoles.length > 0
+      ? requestedRoles
+      : [requestedRole || input.role || "faculty"];
+
+  const isPrimaryAdminByEmail = isPrimaryAdminEmail(normalizedEmail);
+  const isPrimaryAdminByUsername = isPrimaryAdminUsername(normalizedUsername);
+
+  if (isPrimaryAdminByUsername && !isPrimaryAdminByEmail) {
+    throw new Error("PRIMARY_ADMIN_IDENTITY_RESERVED");
+  }
+
+  const isPrimaryAdmin = isPrimaryAdminByEmail || isPrimaryAdminByUsername;
+
+  const wantsAdminRole =
+    requestedRole === "admin" || includesAdminRole(requestedRoleSet);
+
+  if (wantsAdminRole && !isPrimaryAdmin) {
+    throw new Error("ADMIN_ROLE_ASSIGNMENT_DISABLED");
+  }
+
+  const role: UserRole = isPrimaryAdmin
+    ? "admin"
+    : requestedRole === "auditor" || requestedRole === "staff-advisor"
+      ? requestedRole
+      : "faculty";
+  const roles: UserRole[] = isPrimaryAdmin
+    ? ["admin"]
+    : sanitizeNonAdminRoles(requestedRoleSet);
 
   const user: UserDocument = {
     ...(input as Omit<UserDocument, "_id">),
     _id: id,
     id,
-    username: normalizedIdentity,
-    email: normalizeIdentity(input.email || normalizedIdentity),
+    username: normalizedUsername,
+    email: normalizedEmail || undefined,
     role,
     roles,
     createdAt: input.createdAt || timestamp,
@@ -165,11 +265,94 @@ export async function createUser(input: CreateUserInput) {
 
 export async function updateUserById(id: string, updates: Partial<UserRecord>) {
   const collection = await getUsersCollection();
+  const existingUser = await collection.findOne({ _id: id });
+
+  if (!existingUser) {
+    return null;
+  }
 
   const payload: Partial<UserDocument> = {
     ...updates,
     updatedAt: new Date().toISOString(),
   };
+
+  const hasRoleUpdate = Object.prototype.hasOwnProperty.call(updates, "role");
+  const hasRolesUpdate = Object.prototype.hasOwnProperty.call(updates, "roles");
+  const requestedRole = hasRoleUpdate
+    ? normalizeRoleInput(String(updates.role || ""))
+    : null;
+
+  if (hasRoleUpdate && updates.role && !requestedRole) {
+    throw new Error("INVALID_ROLE");
+  }
+
+  const requestedRoles = hasRolesUpdate
+    ? Array.isArray(updates.roles)
+      ? updates.roles
+      : []
+    : [];
+
+  if (hasRolesUpdate && requestedRoles.length === 0) {
+    throw new Error("INVALID_ROLES");
+  }
+
+  const isPrimaryAdmin =
+    isPrimaryAdminEmail(existingUser.email) ||
+    isPrimaryAdminUsername(existingUser.username || existingUser.name);
+
+  if (payload.username && isPrimaryAdminUsername(payload.username)) {
+    if (!isPrimaryAdmin) {
+      throw new Error("PRIMARY_ADMIN_IDENTITY_RESERVED");
+    }
+    payload.username = normalizeIdentity(PRIMARY_ADMIN_USERNAME);
+  }
+
+  if (payload.email && isPrimaryAdminEmail(payload.email)) {
+    if (!isPrimaryAdmin) {
+      throw new Error("PRIMARY_ADMIN_IDENTITY_RESERVED");
+    }
+  }
+
+  if (isPrimaryAdmin) {
+    if (payload.email && !isPrimaryAdminEmail(payload.email)) {
+      throw new Error("PRIMARY_ADMIN_LOCKED");
+    }
+
+    if (payload.username && !isPrimaryAdminUsername(payload.username)) {
+      throw new Error("PRIMARY_ADMIN_LOCKED");
+    }
+
+    if (
+      (hasRoleUpdate && requestedRole !== "admin") ||
+      (hasRolesUpdate && !includesAdminRole(requestedRoles))
+    ) {
+      throw new Error("PRIMARY_ADMIN_LOCKED");
+    }
+
+    if (hasRoleUpdate || hasRolesUpdate) {
+      payload.username = normalizeIdentity(PRIMARY_ADMIN_USERNAME);
+      payload.role = "admin";
+      payload.roles = ["admin"];
+    }
+  } else {
+    if (
+      (hasRoleUpdate && requestedRole === "admin") ||
+      (hasRolesUpdate && includesAdminRole(requestedRoles))
+    ) {
+      throw new Error("ADMIN_ROLE_ASSIGNMENT_DISABLED");
+    }
+
+    if (hasRoleUpdate || hasRolesUpdate) {
+      const nextRoles = sanitizeNonAdminRoles(
+        hasRolesUpdate
+          ? requestedRoles
+          : [requestedRole || existingUser.role || "faculty"],
+      );
+
+      payload.role = nextRoles[0];
+      payload.roles = nextRoles;
+    }
+  }
 
   if (payload.username) {
     payload.username = normalizeIdentity(payload.username);

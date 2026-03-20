@@ -79,10 +79,10 @@ export function SignUpForm({
   };
 
   return (
-    <Card className="shadow-2xl border-0">
-      <CardHeader className="space-y-1 text-center">
+    <Card className="w-full border border-border/60 bg-white/90 shadow-[0_24px_54px_rgba(15,38,65,0.2)] backdrop-blur-md">
+      <CardHeader className="space-y-2 pb-2 text-center">
         <div className="flex justify-center mb-4 md:hidden">
-          <div className="h-12 w-12 bg-purple-600 rounded-xl flex items-center justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-teal-500 to-blue-700 shadow-lg">
             <GraduationCap className="h-8 w-8 text-white" />
           </div>
         </div>
@@ -97,7 +97,7 @@ export function SignUpForm({
           <div className="space-y-2">
             <Label htmlFor="fullName">Full Name</Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 id="fullName"
                 placeholder="Dr. John Doe"
@@ -113,7 +113,7 @@ export function SignUpForm({
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 id="email"
                 type="email"
@@ -130,7 +130,7 @@ export function SignUpForm({
           <div className="space-y-2">
             <Label htmlFor="department">Department</Label>
             <div className="relative">
-              <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 id="department"
                 placeholder="e.g., Computer Science"
@@ -146,7 +146,7 @@ export function SignUpForm({
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 id="password"
                 type="password"
@@ -163,7 +163,7 @@ export function SignUpForm({
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 id="confirmPassword"
                 type="password"
@@ -182,11 +182,13 @@ export function SignUpForm({
           </Button>
 
           <div className="text-center text-sm">
-            <span className="text-gray-600">Already have an account? </span>
+            <span className="text-muted-foreground">
+              Already have an account?{" "}
+            </span>
             <Button
               type="button"
               variant="link"
-              className="p-0 h-auto"
+              className="h-auto p-0"
               onClick={onSwitchToSignIn}
             >
               Sign in here

@@ -105,6 +105,8 @@ const labFileTypes = [
   "Mark Calculation",
 ];
 
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+
 const isTheoryCourseCode = (code: string) => {
   const lastLetter = (code.match(/[a-zA-Z](?!.*[a-zA-Z])/g) ?? [""])[0];
   return lastLetter.toLowerCase() === "t";
@@ -323,7 +325,9 @@ export function CourseFileManager({
       !fileName ||
       !courseCode ||
       !courseName ||
-      !selectedFileType
+      !selectedFileType ||
+      !semester ||
+      !selectedYear.trim()
     ) {
       toast.error("Please fill in all required fields");
       return;
@@ -652,8 +656,14 @@ export function CourseFileManager({
                           <SelectValue placeholder="Select semester" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Even">Even</SelectItem>
-                          <SelectItem value="Odd">Odd</SelectItem>
+                          {semesterOptions.map((semesterOption) => (
+                            <SelectItem
+                              key={semesterOption}
+                              value={semesterOption}
+                            >
+                              {semesterOption}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

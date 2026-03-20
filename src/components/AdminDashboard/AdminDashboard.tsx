@@ -29,6 +29,8 @@ interface ApiUser {
   department?: string;
   email?: string;
   phone?: string;
+  resumeUrl?: string;
+  resumeFileName?: string;
   status?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -128,6 +130,8 @@ function mapApiUserWithEngagement(
     email: user.email ?? user.username,
     phone: user.phone,
     department: user.department,
+    resumeUrl: user.resumeUrl,
+    resumeFileName: user.resumeFileName,
     designation: ROLE_LABELS[role],
     role,
     roles: roles || [role],
@@ -245,7 +249,7 @@ export function AdminDashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: payload.email,
+          username: payload.name,
           password: payload.password,
           name: payload.name,
           role: payload.role,
@@ -302,6 +306,7 @@ export function AdminDashboard() {
     status: AdminUserStatus;
   }) => {
     const updated = await updateUser(payload.id, {
+      username: payload.name,
       name: payload.name,
       email: payload.email,
       phone: payload.phone,

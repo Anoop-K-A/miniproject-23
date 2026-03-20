@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, GraduationCap } from "lucide-react";
+import { User, Lock, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { AuthUser, SignInFormData } from "./types";
@@ -25,15 +25,15 @@ export function SignInForm({
   onSwitchToSignUp,
 }: SignInFormProps) {
   const [formData, setFormData] = useState<SignInFormData>({
-    email: "",
+    username: "",
     password: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      toast.error("Please enter email and password");
+    if (!formData.username || !formData.password) {
+      toast.error("Please enter username and password");
       return;
     }
 
@@ -44,7 +44,7 @@ export function SignInForm({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: formData.email,
+          username: formData.username,
           password: formData.password,
         }),
       });
@@ -77,10 +77,10 @@ export function SignInForm({
   };
 
   return (
-    <Card className="shadow-2xl border-0">
-      <CardHeader className="space-y-1 text-center">
+    <Card className="w-full border border-border/60 bg-white/90 shadow-[0_24px_54px_rgba(15,38,65,0.2)] backdrop-blur-md">
+      <CardHeader className="space-y-2 pb-2 text-center">
         <div className="flex justify-center mb-4 md:hidden">
-          <div className="h-12 w-12 bg-blue-600 rounded-xl flex items-center justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-sky-500 to-blue-700 shadow-lg">
             <GraduationCap className="h-8 w-8 text-white" />
           </div>
         </div>
@@ -93,16 +93,16 @@ export function SignInForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
-                id="email"
-                type="email"
-                placeholder="your.email@college.edu"
-                value={formData.email}
+                id="username"
+                type="text"
+                placeholder="Enter username"
+                value={formData.username}
                 onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
+                  setFormData({ ...formData, username: e.target.value })
                 }
                 className="pl-10"
               />
@@ -112,7 +112,7 @@ export function SignInForm({
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 id="password"
                 type="password"
@@ -127,7 +127,7 @@ export function SignInForm({
           </div>
 
           <div className="flex justify-end">
-            <Button type="button" variant="link" className="text-sm p-0 h-auto">
+            <Button type="button" variant="link" className="h-auto p-0 text-sm">
               Forgot password?
             </Button>
           </div>
@@ -137,11 +137,13 @@ export function SignInForm({
           </Button>
 
           <div className="text-center text-sm">
-            <span className="text-gray-600">Don't have an account? </span>
+            <span className="text-muted-foreground">
+              Don't have an account?{" "}
+            </span>
             <Button
               type="button"
               variant="link"
-              className="p-0 h-auto"
+              className="h-auto p-0"
               onClick={onSwitchToSignUp}
             >
               Sign up here

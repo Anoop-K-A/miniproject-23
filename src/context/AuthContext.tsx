@@ -9,6 +9,54 @@ import React, {
 } from "react";
 import type { UserRole } from "@/lib/roles";
 
+const VALID_ROLES: UserRole[] = [
+  "faculty",
+  "auditor",
+  "staff-advisor",
+  "admin",
+];
+
+function sanitizeRoles(
+  inputRoles: Array<UserRole | string | undefined | null>,
+) {
+  const filtered = Array.from(
+    new Set(
+      inputRoles.filter((role): role is UserRole =>
+        VALID_ROLES.includes(role as UserRole),
+      ),
+    ),
+  );
+
+  if (filtered.includes("admin")) {
+    return ["admin"] as UserRole[];
+  }
+
+  return filtered;
+}
+
+function normalizeAuthPayload(authUser: AuthUser) {
+  const candidateRoles = sanitizeRoles([
+    authUser.role,
+    ...(authUser.roles || []),
+  ]);
+  const roles = candidateRoles.length > 0 ? candidateRoles : ["faculty"];
+  const activeRole = roles.includes("admin")
+    ? "admin"
+    : roles.includes(authUser.role)
+      ? authUser.role
+      : roles[0];
+
+  return {
+    user: {
+      ...authUser,
+      role: activeRole,
+      roles,
+    },
+    roles,
+    activeRole,
+  };
+}
+
 export interface AuthUser {
   id: string;
   username: string;
@@ -39,6 +87,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const persistAuthState = (
+    nextUser: AuthUser,
+    activeRole: UserRole,
+    roles: UserRole[],
+  ) => {
+    setUser(nextUser);
+    setUserRole(activeRole);
+    setAssignedRoles(roles);
+    localStorage.setItem("auth_authenticated", "true");
+    localStorage.setItem("auth_role", activeRole);
+    localStorage.setItem("auth_roles", JSON.stringify(roles));
+    localStorage.setItem("auth_user", JSON.stringify(nextUser));
+
+    document.cookie = `auth_authenticated=true; path=/`;
+    document.cookie = `auth_role=${activeRole}; path=/`;
+    document.cookie = `auth_user=${nextUser.username}; path=/`;
+  };
+
   // Load from localStorage on mount
   useEffect(() => {
     const savedAuth = localStorage.getItem("auth_authenticated");
@@ -46,41 +112,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedRoles = localStorage.getItem("auth_roles");
     const savedUser = localStorage.getItem("auth_user");
 
-    if (savedAuth === "true" && savedRole) {
-      setIsAuthenticated(true);
-      setUserRole(savedRole);
+    let parsedUser: AuthUser | null = null;
+    let parsedRoles: UserRole[] = [];
+
+    if (savedUser) {
+      try {
+        parsedUser = JSON.parse(savedUser) as AuthUser;
+      } catch {
+        parsedUser = null;
+      }
     }
 
     if (savedRoles) {
       try {
-        const roles = JSON.parse(savedRoles) as UserRole[];
-        setAssignedRoles(roles);
+        parsedRoles = sanitizeRoles(JSON.parse(savedRoles) as UserRole[]);
       } catch {
-        setAssignedRoles(["faculty"]);
+        parsedRoles = [];
       }
     }
 
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser) as AuthUser);
-      } catch {
-        setUser(null);
+    if (savedAuth === "true" && savedRole) {
+      setIsAuthenticated(true);
+
+      const hydratedRoles = sanitizeRoles([
+        savedRole,
+        ...parsedRoles,
+        parsedUser?.role,
+        ...(parsedUser?.roles || []),
+      ]);
+
+      const normalizedRoles =
+        hydratedRoles.length > 0 ? hydratedRoles : ["faculty"];
+      const normalizedRole = normalizedRoles.includes("admin")
+        ? "admin"
+        : normalizedRoles.includes(savedRole)
+          ? savedRole
+          : normalizedRoles[0];
+
+      setUserRole(normalizedRole);
+      setAssignedRoles(normalizedRoles);
+
+      localStorage.setItem("auth_authenticated", "true");
+      localStorage.setItem("auth_role", normalizedRole);
+      localStorage.setItem("auth_roles", JSON.stringify(normalizedRoles));
+      document.cookie = "auth_authenticated=true; path=/";
+      document.cookie = `auth_role=${normalizedRole}; path=/`;
+
+      if (parsedUser) {
+        const hydratedUser = {
+          ...parsedUser,
+          role: normalizedRole,
+          roles: normalizedRoles,
+        };
+        setUser(hydratedUser);
+        localStorage.setItem("auth_user", JSON.stringify(hydratedUser));
+        document.cookie = `auth_user=${hydratedUser.username}; path=/`;
       }
     }
+
     setIsLoading(false);
   }, []);
 
   const login = (authUser: AuthUser) => {
+    const normalized = normalizeAuthPayload(authUser);
     setIsAuthenticated(true);
-    setUserRole(authUser.role);
-    setUser(authUser);
-    // Use roles array if available, otherwise default to single role in array
-    const roles = authUser.roles || [authUser.role];
-    setAssignedRoles(roles);
-    localStorage.setItem("auth_authenticated", "true");
-    localStorage.setItem("auth_role", authUser.role);
-    localStorage.setItem("auth_roles", JSON.stringify(roles));
-    localStorage.setItem("auth_user", JSON.stringify(authUser));
+    persistAuthState(normalized.user, normalized.activeRole, normalized.roles);
   };
 
   const logout = () => {
@@ -92,15 +188,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("auth_role");
     localStorage.removeItem("auth_roles");
     localStorage.removeItem("auth_user");
+
+    document.cookie = "auth_authenticated=; path=/; Max-Age=0";
+    document.cookie = "auth_role=; path=/; Max-Age=0";
+    document.cookie = "auth_user=; path=/; Max-Age=0";
   };
 
   const switchRole = (role: UserRole) => {
+    if (!assignedRoles.includes(role)) {
+      return;
+    }
+
     setUserRole(role);
     localStorage.setItem("auth_role", role);
+    document.cookie = `auth_role=${role}; path=/`;
+
     if (user) {
       const nextUser = { ...user, role };
       setUser(nextUser);
       localStorage.setItem("auth_user", JSON.stringify(nextUser));
+      document.cookie = `auth_user=${nextUser.username}; path=/`;
     }
   };
 
@@ -111,7 +218,118 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("auth_authenticated", "true");
     localStorage.setItem("auth_role", role);
     localStorage.setItem("auth_roles", JSON.stringify([role]));
+    document.cookie = `auth_authenticated=true; path=/`;
+    document.cookie = `auth_role=${role}; path=/`;
   };
+
+  // Keep role assignments synced so admin role updates reflect without page refresh.
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) {
+      return;
+    }
+
+    let isDisposed = false;
+
+    const syncCurrentUser = async () => {
+      try {
+        const response = await fetch(
+          `/api/users/${encodeURIComponent(user.id)}`,
+          {
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json()) as {
+          user?: Partial<AuthUser> & { role?: string; roles?: string[] };
+        };
+
+        if (isDisposed || !data.user?.role) {
+          return;
+        }
+
+        const resolvedRoles =
+          Array.isArray(data.user.roles) && data.user.roles.length > 0
+            ? data.user.roles
+            : [data.user.role];
+
+        const normalizedRoles = sanitizeRoles([
+          ...resolvedRoles,
+          data.user.role,
+        ]);
+
+        if (normalizedRoles.length === 0) {
+          return;
+        }
+
+        const activeRole = normalizedRoles.includes("admin")
+          ? "admin"
+          : normalizedRoles.includes(userRole)
+            ? userRole
+            : normalizedRoles[0];
+
+        const nextUser: AuthUser = {
+          id: user.id,
+          username: data.user.username || user.username,
+          name: data.user.name || user.name,
+          role: activeRole,
+          roles: normalizedRoles,
+          department:
+            data.user.department !== undefined
+              ? data.user.department
+              : user.department,
+        };
+
+        const rolesChanged =
+          normalizedRoles.join("|") !== assignedRoles.join("|");
+        const roleChanged = activeRole !== userRole;
+        const profileChanged =
+          nextUser.username !== user.username ||
+          nextUser.name !== user.name ||
+          nextUser.department !== user.department;
+
+        if (!rolesChanged && !roleChanged && !profileChanged) {
+          return;
+        }
+
+        persistAuthState(nextUser, activeRole, normalizedRoles);
+      } catch (error) {
+        console.error("Auth sync error:", error);
+      }
+    };
+
+    const intervalId = window.setInterval(syncCurrentUser, 10000);
+    const onFocus = () => {
+      syncCurrentUser();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncCurrentUser();
+      }
+    };
+
+    syncCurrentUser();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      isDisposed = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [
+    isAuthenticated,
+    user?.id,
+    user?.username,
+    user?.name,
+    user?.department,
+    userRole,
+    assignedRoles,
+  ]);
 
   const value = {
     isAuthenticated,

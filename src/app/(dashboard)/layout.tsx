@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { AppHeader } from "@/components/App/AppHeader";
 import { AppFooter } from "@/components/App/AppFooter";
 import { Toaster } from "@/components/ui/sonner";
+import { safelyNavigate } from "@/lib/safeNavigation";
 
 export default function DashboardLayout({
   children,
@@ -17,7 +18,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+      safelyNavigate(() => router.push("/login"));
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -34,9 +35,10 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="relative flex min-h-screen flex-col overflow-x-clip">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(70%_60%_at_50%_0%,rgba(15,76,129,0.13),transparent)]" />
       <AppHeader userRole={userRole} />
-      <main className="flex-1">{children}</main>
+      <main className="relative flex-1">{children}</main>
       <AppFooter />
       <Toaster />
     </div>
