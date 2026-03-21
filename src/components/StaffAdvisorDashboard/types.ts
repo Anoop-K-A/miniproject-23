@@ -70,6 +70,13 @@ export interface BatchFacultySummary {
   name: string;
   department: string;
   role: string;
+  email?: string;
+  phone?: string;
+  specialization?: string;
+  experience?: string;
+  courses?: string[];
+  resumeUrl?: string;
+  resumeFileName?: string;
   filesTotal: number;
   filesApproved: number;
   filesInReview: number;

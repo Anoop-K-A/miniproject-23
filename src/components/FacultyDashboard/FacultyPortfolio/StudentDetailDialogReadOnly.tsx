@@ -55,6 +55,9 @@ export function StudentDetailDialogReadOnly({
               <p className="text-gray-600">
                 {student.rollNumber} • {student.department}
               </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Batch {student.batchYear || "Not set"}
+              </p>
               <Badge
                 className={getPlacementColor(student.placementStatus) + " mt-2"}
               >

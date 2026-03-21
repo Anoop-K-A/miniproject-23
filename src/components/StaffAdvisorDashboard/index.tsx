@@ -39,6 +39,12 @@ export function StaffAdvisorDashboard({
   const studentApiQuery = user?.username
     ? `?username=${encodeURIComponent(user.username)}`
     : "";
+
+  const notifyDashboardDataUpdated = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("dashboard:data-updated"));
+    }
+  };
   const totalStudents = studentList.length;
   const placedStudents = studentList.filter(
     (student) => student.placementStatus === "Placed",
@@ -134,6 +140,7 @@ export function StaffAdvisorDashboard({
           ),
         );
         setSelectedStudent(updatedStudent);
+        notifyDashboardDataUpdated();
         toast.success("Student updated successfully");
       } else {
         const error = await response.json();
@@ -187,6 +194,7 @@ export function StaffAdvisorDashboard({
         setSelectedActivity("");
         setSelectedCommunity("");
         setActivityPoints("");
+        notifyDashboardDataUpdated();
         toast.success("Activity added successfully");
       } else {
         const error = await response.json();
@@ -226,9 +234,9 @@ export function StaffAdvisorDashboard({
 
       if (response.ok) {
         const data = await response.json();
-        // Use the student returned from API which has proper ID and timestamps
-        const savedStudent = (data.students && data.students[0]) || student;
+        const savedStudent = data.student || student;
         setStudentList((prev) => [savedStudent, ...prev]);
+        notifyDashboardDataUpdated();
         toast.success("Student added successfully");
       } else {
         const error = await response.json();
@@ -237,6 +245,34 @@ export function StaffAdvisorDashboard({
     } catch (error) {
       console.error("Error adding student:", error);
       toast.error("Failed to add student");
+    }
+  };
+
+  const handleDeleteStudent = async (studentId: string) => {
+    try {
+      const response = await fetch(
+        `/api/students/${studentId}${studentApiQuery}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        toast.error(error.error || "Failed to delete student");
+        return;
+      }
+
+      setStudentList((prev) =>
+        prev.filter((student) => student.id !== studentId),
+      );
+      setSelectedStudent((prev) => (prev?.id === studentId ? null : prev));
+      setIsStudentViewOpen(false);
+      notifyDashboardDataUpdated();
+      toast.success("Student deleted successfully");
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      toast.error("Failed to delete student");
     }
   };
 
@@ -260,6 +296,7 @@ export function StaffAdvisorDashboard({
         student={selectedStudent}
         onAddActivity={() => setIsActivityDialogOpen(true)}
         onUpdateStudent={handleUpdateStudent}
+        onDeleteStudent={handleDeleteStudent}
       />
 
       <AddActivityDialog

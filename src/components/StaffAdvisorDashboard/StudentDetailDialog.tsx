@@ -20,6 +20,11 @@ import {
 } from "@/components/ui/select";
 import { Student } from "./types";
 import { Mail, Phone, Briefcase, Target, Award } from "lucide-react";
+import {
+  getStandardBatchYearOptions,
+  isValidBatchYear,
+  normalizeBatchYear,
+} from "@/lib/batchYear";
 
 interface StudentDetailDialogProps {
   isOpen: boolean;
@@ -27,12 +32,14 @@ interface StudentDetailDialogProps {
   student: Student | null;
   onAddActivity: () => void;
   onUpdateStudent: (student: Student) => void;
+  onDeleteStudent: (studentId: string) => Promise<void>;
 }
 
 interface StudentFormState {
   email: string;
   phone: string;
   semester: string;
+  batchYear: string;
   placementStatus: Student["placementStatus"];
   companyName: string;
   cgpa: string;
@@ -45,6 +52,7 @@ const emptyFormState: StudentFormState = {
   email: "",
   phone: "",
   semester: "",
+  batchYear: "",
   placementStatus: "Not Started",
   companyName: "",
   cgpa: "",
@@ -54,6 +62,7 @@ const emptyFormState: StudentFormState = {
 };
 
 const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+const batchYearOptions = getStandardBatchYearOptions();
 
 function normalizeSemesterValue(value?: string) {
   const raw = String(value ?? "").trim();
@@ -71,6 +80,7 @@ const buildFormState = (student: Student | null): StudentFormState =>
         email: student.email ?? "",
         phone: student.phone ?? "",
         semester: normalizeSemesterValue(student.semester),
+        batchYear: normalizeBatchYear(student.batchYear),
         placementStatus: student.placementStatus,
         companyName: student.companyName ?? "",
         cgpa: Number.isFinite(student.cgpa) ? student.cgpa.toString() : "",
@@ -88,8 +98,10 @@ export function StudentDetailDialog({
   student,
   onAddActivity,
   onUpdateStudent,
+  onDeleteStudent,
 }: StudentDetailDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [form, setForm] = useState<StudentFormState>(() =>
     buildFormState(student),
   );
@@ -123,6 +135,11 @@ export function StudentDetailDialog({
 
   const handleSave = () => {
     if (!student) return;
+    const normalizedBatchYear = normalizeBatchYear(form.batchYear);
+    if (!isValidBatchYear(normalizedBatchYear)) {
+      return;
+    }
+
     const parsedCgpa = Number.parseFloat(form.cgpa);
     const parsedAttendance = Number.parseFloat(form.attendance);
     const nextCompany =
@@ -132,6 +149,7 @@ export function StudentDetailDialog({
       email: form.email.trim(),
       phone: form.phone.trim(),
       semester: normalizeSemesterValue(form.semester),
+      batchYear: normalizedBatchYear,
       placementStatus: form.placementStatus,
       companyName: nextCompany || undefined,
       cgpa: Number.isFinite(parsedCgpa) ? parsedCgpa : 0,
@@ -147,6 +165,24 @@ export function StudentDetailDialog({
 
     onUpdateStudent(updatedStudent);
     setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
+    if (!student) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `Delete ${student.name}? This action cannot be undone.`,
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setIsDeleting(true);
+    await onDeleteStudent(student.id);
+    setIsDeleting(false);
   };
 
   const handleCancel = () => {
@@ -178,6 +214,9 @@ export function StudentDetailDialog({
               <h3 className="text-xl font-bold">{student.name}</h3>
               <p className="text-gray-600">
                 {student.rollNumber} • {student.department}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Batch {student.batchYear || "Not set"}
               </p>
               <Badge
                 className={getPlacementColor(student.placementStatus) + " mt-2"}
@@ -359,6 +398,27 @@ export function StudentDetailDialog({
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label>Batch Year</Label>
+                <Select
+                  value={form.batchYear}
+                  onValueChange={(value) =>
+                    handleFormChange("batchYear", value)
+                  }
+                  disabled={!isEditing}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select batch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {batchYearOptions.map((batchOption) => (
+                      <SelectItem key={batchOption} value={batchOption}>
+                        {batchOption}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label>Company Name</Label>
                 <Input
                   value={form.companyName}
@@ -422,10 +482,25 @@ export function StudentDetailDialog({
                 <Button variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>
-                <Button onClick={handleSave}>Save Changes</Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={
+                    !isValidBatchYear(normalizeBatchYear(form.batchYear))
+                  }
+                >
+                  Save Changes
+                </Button>
               </>
             ) : (
               <>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete Student"}
+                </Button>
                 <Button size="sm" variant="outline" onClick={onAddActivity}>
                   Add Activity
                 </Button>

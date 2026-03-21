@@ -54,6 +54,11 @@ import { PeerReviewDialog } from "../shared/dialogs/PeerReviewDialog";
 import { AllFacultyFilesView } from "./AllFacultyFilesView";
 import { mockCourseFiles, fileTypes } from "./mockData";
 import { CourseFile } from "./types";
+import {
+  getStandardBatchYearOptions,
+  isValidBatchYear,
+  normalizeBatchYear,
+} from "@/lib/batchYear";
 
 const theoryFileTypes = [
   "CO–PO Mapping (CO–PO Mapping Level)",
@@ -109,6 +114,12 @@ const getFileTypeOptionsForCourse = (code: string) =>
   isTheoryCourseCode(code) ? theoryFileTypes : labFileTypes;
 
 const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+const batchYearOptions = getStandardBatchYearOptions();
+
+function getDefaultBatchYear() {
+  const currentYear = new Date().getFullYear();
+  return `${currentYear}-${currentYear + 4}`;
+}
 
 export function CourseFileManager() {
   const [files, setFiles] = useState<CourseFile[]>(mockCourseFiles);
@@ -122,9 +133,7 @@ export function CourseFileManager() {
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [semester, setSemester] = useState("");
-  const [selectedYear, setSelectedYear] = useState(
-    new Date().getFullYear().toString(),
-  );
+  const [selectedYear, setSelectedYear] = useState(getDefaultBatchYear());
   const [viewMode, setViewMode] = useState<"my-files" | "all-files">(
     "my-files",
   );
@@ -146,6 +155,12 @@ export function CourseFileManager() {
   const handleFileUpload = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const normalizedBatchYear = normalizeBatchYear(selectedYear);
+    if (!isValidBatchYear(normalizedBatchYear)) {
+      toast.error("Batch must be in YYYY-YYYY format (for example 2022-2026)");
+      return;
+    }
+
     const mockFile: CourseFile = {
       id: Date.now().toString(),
       fileName: "NewFile_Example.pdf",
@@ -154,7 +169,7 @@ export function CourseFileManager() {
       fileType: selectedFileType,
       uploadDate: new Date().toISOString().split("T")[0],
       semester: semester,
-      academicYear: selectedYear,
+      academicYear: normalizedBatchYear,
       size: "1.5 MB",
       facultyName: "Dr. Jane Smith",
       department: "Computer Science",
@@ -169,7 +184,7 @@ export function CourseFileManager() {
     setCourseCode("");
     setCourseName("");
     setSemester("");
-    setSelectedYear(new Date().getFullYear().toString());
+    setSelectedYear(getDefaultBatchYear());
   };
 
   const handleDelete = (id: string) => {
@@ -230,7 +245,9 @@ export function CourseFileManager() {
   const statuses = Array.from(
     new Set(files.map((f) => f.status).filter(Boolean)),
   );
-  const years = Array.from(new Set(files.map((f) => f.academicYear)));
+  const years = Array.from(
+    new Set([...files.map((f) => f.academicYear), ...batchYearOptions]),
+  ).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
 
   return (
     <Card>
@@ -297,10 +314,10 @@ export function CourseFileManager() {
               <Select value={filterYear} onValueChange={setFilterYear}>
                 <SelectTrigger className="w-full md:w-48">
                   <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by Year" />
+                  <SelectValue placeholder="Filter by Batch" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
+                  <SelectItem value="all">All Batches</SelectItem>
                   {years.map((year) => (
                     <SelectItem key={year} value={year}>
                       {year}
@@ -410,14 +427,22 @@ export function CourseFileManager() {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="academicYear">Academic Year</Label>
-                        <Input
-                          id="academicYear"
+                        <Label htmlFor="academicYear">Batch</Label>
+                        <Select
                           value={selectedYear}
-                          onChange={(e) => setSelectedYear(e.target.value)}
-                          placeholder="2024-2025"
-                          required
-                        />
+                          onValueChange={(value) => setSelectedYear(value)}
+                        >
+                          <SelectTrigger id="academicYear">
+                            <SelectValue placeholder="Select batch (e.g. 2022-2026)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {batchYearOptions.map((batchOption) => (
+                              <SelectItem key={batchOption} value={batchOption}>
+                                {batchOption}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                     <Button type="submit" className="w-full">
@@ -525,7 +550,7 @@ export function CourseFileManager() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-2xl">{years.length}</div>
-                  <p className="text-sm text-gray-500">Years</p>
+                  <p className="text-sm text-gray-500">Batches</p>
                 </CardContent>
               </Card>
             </div>

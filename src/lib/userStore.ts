@@ -122,6 +122,22 @@ async function getUsersCollection() {
     } catch {
       // ignore index creation conflicts
     }
+    try {
+      await collection.createIndex(
+        { email: 1 },
+        { unique: true, sparse: true },
+      );
+    } catch {
+      // ignore index creation conflicts
+    }
+    try {
+      await collection.createIndex(
+        { firebaseUid: 1 },
+        { unique: true, sparse: true },
+      );
+    } catch {
+      // ignore index creation conflicts
+    }
   }
 
   if (!seedEnsured) {
@@ -154,6 +170,11 @@ async function getUsersCollection() {
   return collection;
 }
 
+async function getUsersCollectionDirect() {
+  const db = await getMongoDb();
+  return db.collection<UserDocument>("users");
+}
+
 export async function getAllUsers() {
   const collection = await getUsersCollection();
   const users = await collection.find({}).toArray();
@@ -162,20 +183,26 @@ export async function getAllUsers() {
 
 export async function findUserByUsername(username: string) {
   const normalizedUsername = normalizeIdentity(username);
-  const users = await getAllUsers();
+  const collection = await getUsersCollectionDirect();
 
-  return (
-    users.find(
-      (user) =>
-        normalizeIdentity(user.username || "") === normalizedUsername ||
-        normalizeIdentity(user.email || "") === normalizedUsername ||
-        normalizeIdentity(user.name || "") === normalizedUsername,
-    ) || null
-  );
+  const directMatch = await collection.findOne({
+    $or: [{ username: normalizedUsername }, { email: normalizedUsername }],
+  });
+
+  if (directMatch) {
+    return mapUserDocument(directMatch);
+  }
+
+  const escaped = normalizedUsername.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const nameMatch = await collection.findOne({
+    name: { $regex: new RegExp(`^${escaped}$`, "i") },
+  });
+
+  return nameMatch ? mapUserDocument(nameMatch) : null;
 }
 
 export async function findUserById(id: string) {
-  const collection = await getUsersCollection();
+  const collection = await getUsersCollectionDirect();
   const user = await collection.findOne({ _id: id });
   return user ? mapUserDocument(user) : null;
 }

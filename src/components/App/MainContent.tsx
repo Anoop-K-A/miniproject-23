@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { LayoutDashboard, FileText, Calendar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FacultyDashboard } from "@/components/FacultyDashboard";
 import { CourseFileManager } from "@/components/CourseFileManager";
 import { EventReportManager } from "@/components/EventReportManager";
@@ -76,6 +77,11 @@ export function MainContent({
     });
   }, [user?.username, userRole]);
 
+  const showDashboardLoading =
+    (userRole === "faculty" && !facultyData) ||
+    (userRole === "auditor" && !auditorData) ||
+    (userRole === "staff-advisor" && !staffData);
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
@@ -101,6 +107,13 @@ export function MainContent({
         )}
 
         <TabsContent value="dashboard" className="space-y-6">
+          {showDashboardLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          ) : null}
           {userRole === "faculty" && facultyData && (
             <FacultyDashboard
               stats={facultyData.stats}

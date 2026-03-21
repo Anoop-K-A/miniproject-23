@@ -27,7 +27,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const normalizedUsername = normalizeUsername(username);
+    const normalizedProvidedUsername = normalizeUsername(username);
+
+    // Reserved read-only user login requested for shared viewing page.
+    if (normalizedProvidedUsername === "user" && password === "User@123") {
+      return NextResponse.json({
+        id: "public-user",
+        username: "User",
+        name: "User",
+        role: "user",
+        roles: ["user"],
+        department: "General",
+      });
+    }
+
+    const normalizedUsername = normalizedProvidedUsername;
     let user = await findUserByUsername(normalizedUsername);
 
     const resolvedLoginEmail = user?.email

@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { findUserById, updateUserById } from "@/lib/userStore";
 import { isPrimaryAdminEmail } from "@/lib/adminConfig";
+import {
+  getCachedProfile,
+  invalidateCachedProfile,
+  setCachedProfile,
+} from "@/lib/profileCache";
+import { buildTimingResponseHeaders } from "@/lib/serverTiming";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -10,6 +16,10 @@ function normalizeEmail(email: string) {
 }
 
 export async function GET(request: NextRequest) {
+  const requestStart = Date.now();
+  let dbDurationMs = 0;
+  let cacheStatus = "MISS";
+
   try {
     const userId = String(
       request.nextUrl.searchParams.get("userId") || "",
@@ -21,13 +31,63 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const cacheKey = `profile:${userId}`;
+    const cachedUser = getCachedProfile<Record<string, unknown>>(cacheKey);
+
+    if (cachedUser) {
+      cacheStatus = "HIT";
+      const totalDurationMs = Date.now() - requestStart;
+      return NextResponse.json(
+        { user: cachedUser },
+        {
+          headers: buildTimingResponseHeaders(
+            [
+              { name: "cache", durationMs: 0.1, description: "profile-cache" },
+              { name: "total", durationMs: totalDurationMs },
+            ],
+            {
+              "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+              "X-Profile-Cache": cacheStatus,
+            },
+          ),
+        },
+      );
+    }
+
+    const dbStart = Date.now();
     const user = await findUserById(userId);
+    dbDurationMs = Date.now() - dbStart;
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const { password, ...safeUser } = user;
-    return NextResponse.json({ user: safeUser });
+    setCachedProfile(cacheKey, safeUser, 60_000);
+
+    const totalDurationMs = Date.now() - requestStart;
+    if (totalDurationMs > 1200) {
+      console.warn("Slow profile GET", {
+        userId,
+        totalDurationMs,
+        dbDurationMs,
+      });
+    }
+
+    return NextResponse.json(
+      { user: safeUser },
+      {
+        headers: buildTimingResponseHeaders(
+          [
+            { name: "db", durationMs: dbDurationMs, description: "find-user" },
+            { name: "total", durationMs: totalDurationMs },
+          ],
+          {
+            "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+            "X-Profile-Cache": cacheStatus,
+          },
+        ),
+      },
+    );
   } catch (error) {
     console.error("Profile fetch error:", error);
     return NextResponse.json(
@@ -38,6 +98,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const requestStart = Date.now();
+  let dbDurationMs = 0;
+
   try {
     const body = (await request.json()) as {
       userId?: string;
@@ -54,7 +117,9 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    let dbStart = Date.now();
     const user = await findUserById(userId);
+    dbDurationMs += Date.now() - dbStart;
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -116,18 +181,44 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    dbStart = Date.now();
     const updatedUser = await updateUserById(userId, {
       email: normalizedEmail,
       phone: String(body.phone || "").trim(),
       experience: String(body.experience || "").trim(),
     });
+    dbDurationMs += Date.now() - dbStart;
 
     if (!updatedUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const { password, ...safeUser } = updatedUser;
-    return NextResponse.json({ user: safeUser });
+    invalidateCachedProfile(`profile:${userId}`);
+    setCachedProfile(`profile:${userId}`, safeUser, 60_000);
+
+    const totalDurationMs = Date.now() - requestStart;
+    if (totalDurationMs > 1200) {
+      console.warn("Slow profile PATCH", {
+        userId,
+        totalDurationMs,
+        dbDurationMs,
+      });
+    }
+
+    return NextResponse.json(
+      { user: safeUser },
+      {
+        headers: buildTimingResponseHeaders([
+          {
+            name: "db",
+            durationMs: dbDurationMs,
+            description: "profile-update",
+          },
+          { name: "total", durationMs: totalDurationMs },
+        ]),
+      },
+    );
   } catch (error) {
     if (error instanceof Error) {
       if (

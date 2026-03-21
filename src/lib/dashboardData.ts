@@ -36,8 +36,8 @@ interface UserRecord {
   id: string;
   username: string;
   name: string;
-  role: "faculty" | "auditor" | "staff-advisor" | "admin";
-  roles?: ("faculty" | "auditor" | "staff-advisor" | "admin")[];
+  role: "faculty" | "auditor" | "staff-advisor" | "admin" | "user";
+  roles?: ("faculty" | "auditor" | "staff-advisor" | "admin" | "user")[];
   department?: string;
   email?: string;
   phone?: string;
@@ -310,26 +310,52 @@ export async function getAuditorDashboardData() {
       (user.roles?.includes("faculty") || user.role === "faculty") &&
       user.role !== "admin",
   );
+
   const totalFiles = courseFiles.length;
   const totalReports = eventReports.length;
-  const approvedFiles = courseFiles.filter(
-    (file) => file.status === "Approved",
-  ).length;
-  const approvedReports = eventReports.filter(
-    (report) => report.status === "Approved",
-  ).length;
-  const pendingFiles = courseFiles.filter(
-    (file) => file.status === "Pending",
-  ).length;
-  const pendingReports = eventReports.filter(
-    (report) => report.status === "Submitted" || report.status === "Draft",
-  ).length;
-  const rejectedFiles = courseFiles.filter(
-    (file) => file.status === "Rejected",
-  ).length;
-  const rejectedReports = eventReports.filter(
-    (report) => report.status === "Rejected",
-  ).length;
+
+  // Single pass through files to count statuses
+  let approvedFiles = 0;
+  let pendingFiles = 0;
+  let rejectedFiles = 0;
+  const filesByFacultyId = new Map<string, CourseFileRecord[]>();
+  const fileStatusMap = new Map<string, number>(); // status:count
+
+  for (const file of courseFiles) {
+    const status = file.status ?? "";
+    if (status === "Approved") approvedFiles++;
+    else if (status === "Pending") pendingFiles++;
+    else if (status === "Rejected") rejectedFiles++;
+
+    if (file.facultyId) {
+      const key = String(file.facultyId);
+      if (!filesByFacultyId.has(key)) {
+        filesByFacultyId.set(key, []);
+      }
+      filesByFacultyId.get(key)?.push(file);
+    }
+  }
+
+  // Single pass through reports
+  let approvedReports = 0;
+  let pendingReports = 0;
+  let rejectedReports = 0;
+  const reportsByFacultyId = new Map<string, EventReportRecord[]>();
+
+  for (const report of eventReports) {
+    const status = report.status ?? "";
+    if (status === "Approved") approvedReports++;
+    else if (status === "Submitted" || status === "Draft") pendingReports++;
+    else if (status === "Rejected") rejectedReports++;
+
+    if (report.facultyId) {
+      const key = String(report.facultyId);
+      if (!reportsByFacultyId.has(key)) {
+        reportsByFacultyId.set(key, []);
+      }
+      reportsByFacultyId.get(key)?.push(report);
+    }
+  }
 
   const reviewedFiles = approvedFiles + rejectedFiles;
   const reviewedReports = approvedReports + rejectedReports;
@@ -355,53 +381,77 @@ export async function getAuditorDashboardData() {
     completionRate,
   };
 
-  const facultyMembers: AuditorFacultyMember[] = facultyUsers.map((user) => {
-    const userIdStr = serializeId(user.id);
-    const facultyFiles = courseFiles.filter(
-      (file) => file.facultyId === userIdStr,
-    );
-    const facultyReports = eventReports.filter(
-      (report) => report.facultyId === userIdStr,
-    );
-    return {
-      id: userIdStr,
-      name: user.name,
-      department: user.department ?? "",
-      totalFiles: facultyFiles.length,
-      totalReports: facultyReports.length,
-      approvedFiles: facultyFiles.filter((file) => file.status === "Approved")
-        .length,
-      approvedReports: facultyReports.filter(
-        (report) => report.status === "Approved",
-      ).length,
-      pendingFiles: facultyFiles.filter((file) => file.status === "Pending")
-        .length,
-      pendingReports: facultyReports.filter(
-        (report) => report.status === "Submitted" || report.status === "Draft",
-      ).length,
-      rejectedFiles: facultyFiles.filter((file) => file.status === "Rejected")
-        .length,
-      rejectedReports: facultyReports.filter(
-        (report) => report.status === "Rejected",
-      ).length,
-      email: user.email ?? user.username,
-      phone: user.phone ?? "",
-      experience: user.experience ?? "",
-      resumeUrl: user.resumeUrl ?? "",
-      resumeFileName: user.resumeFileName ?? "",
-    };
-  });
+  // Build faculty members from pre-computed maps (no more filtering!)
+  const facultyMembers: AuditorFacultyMember[] = facultyUsers
+    .map((user) => {
+      const userIdStr = serializeId(user.id);
+      const facultyFiles = filesByFacultyId.get(userIdStr) ?? [];
+      const facultyReports = reportsByFacultyId.get(userIdStr) ?? [];
+
+      // Count statuses efficiently
+      let userApprovedFiles = 0,
+        userPendingFiles = 0,
+        userRejectedFiles = 0;
+      for (const file of facultyFiles) {
+        if (file.status === "Approved") userApprovedFiles++;
+        else if (file.status === "Pending") userPendingFiles++;
+        else if (file.status === "Rejected") userRejectedFiles++;
+      }
+
+      let userApprovedReports = 0,
+        userPendingReports = 0,
+        userRejectedReports = 0;
+      for (const report of facultyReports) {
+        if (report.status === "Approved") userApprovedReports++;
+        else if (report.status === "Submitted" || report.status === "Draft")
+          userPendingReports++;
+        else if (report.status === "Rejected") userRejectedReports++;
+      }
+
+      return {
+        id: userIdStr,
+        name: user.name,
+        department: user.department ?? "",
+        totalFiles: facultyFiles.length,
+        totalReports: facultyReports.length,
+        approvedFiles: userApprovedFiles,
+        approvedReports: userApprovedReports,
+        pendingFiles: userPendingFiles,
+        pendingReports: userPendingReports,
+        rejectedFiles: userRejectedFiles,
+        rejectedReports: userRejectedReports,
+        email: user.email ?? user.username,
+        phone: user.phone ?? "",
+        experience: user.experience ?? "",
+        resumeUrl: user.resumeUrl ?? "",
+        resumeFileName: user.resumeFileName ?? "",
+      };
+    })
+    .filter((faculty) => faculty.totalFiles > 0 || faculty.totalReports > 0);
+
+  // Build audit index for fast lookup
+  const auditById = new Map<string, AuditRecord>();
+  for (const audit of audits) {
+    auditById.set(audit.entityId, audit);
+  }
+
+  // Build user index for fast lookup
+  const userById = new Map<string, UserRecord>();
+  for (const user of facultyUsers) {
+    userById.set(serializeId(user.id), user);
+  }
 
   const recentReviews: RecentReview[] = audits
+    .slice(0, 20) // Limit to last 20 audits
     .map((audit) => {
       const file = courseFiles.find((item) => item.id === audit.entityId);
       const report = eventReports.find((item) => item.id === audit.entityId);
       const facultyId = file?.facultyId ?? report?.facultyId;
-      const facultyName = facultyUsers.find(
-        (user) => serializeId(user.id) === facultyId,
-      )?.name;
+      const facultyUser = facultyId
+        ? userById.get(String(facultyId))
+        : undefined;
       return {
-        faculty: facultyName ?? "Faculty",
+        faculty: facultyUser?.name ?? "Faculty",
         item: file?.fileName ?? report?.eventName ?? "Review Item",
         action: audit.status === "completed" ? "Approved" : "In Review",
         time: toTimeAgo(audit.updatedAt ?? audit.createdAt),
@@ -549,6 +599,13 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
           name: string;
           department: string;
           role: string;
+          email?: string;
+          phone?: string;
+          specialization?: string;
+          experience?: string;
+          courses?: string[];
+          resumeUrl?: string;
+          resumeFileName?: string;
           filesTotal: number;
           filesApproved: number;
           filesInReview: number;
@@ -569,6 +626,15 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
             name: facultyUser.name,
             department: facultyUser.department ?? "",
             role: facultyUser.facultyRole ?? "Faculty",
+            email: facultyUser.email ?? facultyUser.username,
+            phone: facultyUser.phone ?? "",
+            specialization: facultyUser.specialization ?? "",
+            experience: facultyUser.experience ?? "",
+            courses: Array.isArray(facultyUser.courses)
+              ? facultyUser.courses.filter(Boolean)
+              : [],
+            resumeUrl: facultyUser.resumeUrl ?? "",
+            resumeFileName: facultyUser.resumeFileName ?? "",
             filesTotal: 0,
             filesApproved: 0,
             filesInReview: 0,

@@ -250,7 +250,8 @@ export function FacultyAuditPortfolio({
         }
 
         const scopedFiles: CourseFile[] = (filesData.files ?? []).filter(
-          (file: CourseFile) => file.facultyId === faculty.id,
+          (file: CourseFile) =>
+            file.facultyId === faculty.id && !file.auditChecklistFinalized,
         );
         const scopedReports: EventReport[] = (reportsData.reports ?? []).filter(
           (report: EventReport) => report.facultyId === faculty.id,

@@ -14,6 +14,7 @@ const VALID_ROLES: UserRole[] = [
   "auditor",
   "staff-advisor",
   "admin",
+  "user",
 ];
 
 function sanitizeRoles(

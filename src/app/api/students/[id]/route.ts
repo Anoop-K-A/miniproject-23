@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
+import { isValidBatchYear, normalizeBatchYear } from "@/lib/batchYear";
 
 const VALID_SEMESTERS = new Set([
   "S1",
@@ -59,6 +60,45 @@ export async function PATCH(
         );
       }
       payload.semester = normalizedSemester;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(payload, "batchYear")) {
+      const normalizedBatchYear = normalizeBatchYear(payload.batchYear);
+      if (!isValidBatchYear(normalizedBatchYear)) {
+        return NextResponse.json(
+          {
+            error:
+              "Batch year must follow YYYY-YYYY format (for example 2023-2027)",
+          },
+          { status: 400 },
+        );
+      }
+      payload.batchYear = normalizedBatchYear;
+    }
+
+    const nextRollNumber = String(
+      payload.rollNumber ?? existingStudent.rollNumber,
+    ).trim();
+    const nextBatchYear = normalizeBatchYear(
+      payload.batchYear ?? existingStudent.batchYear,
+    );
+
+    const duplicateInAdvisorScope = students.some(
+      (student) =>
+        student.id !== existingStudent.id &&
+        student.advisorId === advisorScope.advisorId &&
+        String(student.rollNumber ?? "")
+          .trim()
+          .toLowerCase() === nextRollNumber.toLowerCase() &&
+        normalizeBatchYear(student.batchYear).toLowerCase() ===
+          nextBatchYear.toLowerCase(),
+    );
+
+    if (duplicateInAdvisorScope) {
+      return NextResponse.json(
+        { error: "Roll number already exists in this batch" },
+        { status: 409 },
+      );
     }
 
     const nextStudent: Student = {

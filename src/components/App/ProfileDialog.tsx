@@ -1,10 +1,11 @@
 "use client";
 
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ import { toast } from "sonner";
 const MAX_RESUME_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_RESUME_EXTENSIONS = [".pdf", ".doc", ".docx"];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PROFILE_CACHE_TTL_MS = 60_000;
 
 interface ProfileFormState {
   name: string;
@@ -56,6 +58,22 @@ const EMPTY_PASSWORD_FORM: PasswordFormState = {
   confirmPassword: "",
 };
 
+type ProfileApiUser = {
+  name?: string;
+  username?: string;
+  department?: string;
+  email?: string;
+  phone?: string;
+  experience?: string;
+  resumeUrl?: string;
+  resumeFileName?: string;
+};
+
+const profileDialogCache = new Map<
+  string,
+  { user: ProfileApiUser; expiresAt: number }
+>();
+
 function getFileExtension(fileName: string) {
   const index = fileName.lastIndexOf(".");
   if (index < 0) {
@@ -90,62 +108,160 @@ export function ProfileDialog() {
   const [form, setForm] = useState<ProfileFormState>(EMPTY_FORM);
   const [passwordForm, setPasswordForm] =
     useState<PasswordFormState>(EMPTY_PASSWORD_FORM);
+  const profileRequestControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      if (!open || !user?.id || isAdminUser) {
+  const applyProfileData = useCallback((dataUser: ProfileApiUser) => {
+    setForm({
+      name: dataUser.name ?? "",
+      username: dataUser.username ?? "",
+      department: dataUser.department ?? "",
+      email: dataUser.email ?? "",
+      phone: dataUser.phone ?? "",
+      experience: dataUser.experience ?? "",
+      resumeUrl: dataUser.resumeUrl ?? "",
+      resumeFileName:
+        dataUser.resumeFileName ??
+        deriveResumeFileName(dataUser.resumeUrl ?? ""),
+    });
+  }, []);
+
+  const loadProfile = useCallback(async () => {
+    if (!open || !user?.id || isAdminUser) {
+      return;
+    }
+
+    const cacheKey = String(user.id);
+    const cached = profileDialogCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      applyProfileData(cached.user);
+      return;
+    }
+
+    profileRequestControllerRef.current?.abort();
+    const controller = new AbortController();
+    profileRequestControllerRef.current = controller;
+
+    setLoadingProfile(true);
+    try {
+      const startedAt = performance.now();
+      const response = await fetch(
+        `/api/profile?userId=${encodeURIComponent(user.id)}`,
+        {
+          signal: controller.signal,
+        },
+      );
+      const data = (await response.json()) as {
+        error?: string;
+        user?: ProfileApiUser;
+      };
+
+      if (!response.ok || !data.user) {
+        toast.error(data.error || "Failed to load profile");
         return;
       }
 
-      setLoadingProfile(true);
+      profileDialogCache.set(cacheKey, {
+        user: data.user,
+        expiresAt: Date.now() + PROFILE_CACHE_TTL_MS,
+      });
+      applyProfileData(data.user);
+
+      const clientDurationMs =
+        Math.round((performance.now() - startedAt) * 100) / 100;
+      const serverTiming = response.headers.get("Server-Timing") || "";
+      if (clientDurationMs > 900) {
+        console.warn("Slow profile load observed in client", {
+          clientDurationMs,
+          serverTiming,
+          responseTimeHeader: response.headers.get("X-Response-Time-Ms"),
+          cacheHeader: response.headers.get("X-Profile-Cache"),
+        });
+      }
+    } catch (error) {
+      if ((error as Error).name === "AbortError") {
+        return;
+      }
+      console.error("Profile load error:", error);
+      toast.error("Failed to load profile");
+    } finally {
+      setLoadingProfile(false);
+    }
+  }, [applyProfileData, isAdminUser, open, user?.id]);
+
+  useEffect(() => {
+    void loadProfile();
+
+    return () => {
+      profileRequestControllerRef.current?.abort();
+    };
+  }, [loadProfile]);
+
+  useEffect(() => {
+    if (!user?.id || isAdminUser) {
+      return;
+    }
+
+    const cacheKey = String(user.id);
+    const cached = profileDialogCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const prefetchProfile = async () => {
       try {
+        const startedAt = performance.now();
         const response = await fetch(
           `/api/profile?userId=${encodeURIComponent(user.id)}`,
-          {
-            cache: "no-store",
-          },
         );
         const data = (await response.json()) as {
-          error?: string;
-          user?: {
-            name?: string;
-            username?: string;
-            department?: string;
-            email?: string;
-            phone?: string;
-            experience?: string;
-            resumeUrl?: string;
-            resumeFileName?: string;
-          };
+          user?: ProfileApiUser;
         };
 
-        if (!response.ok || !data.user) {
-          toast.error(data.error || "Failed to load profile");
+        if (!response.ok || !data.user || cancelled) {
           return;
         }
 
-        setForm({
-          name: data.user.name ?? "",
-          username: data.user.username ?? "",
-          department: data.user.department ?? "",
-          email: data.user.email ?? "",
-          phone: data.user.phone ?? "",
-          experience: data.user.experience ?? "",
-          resumeUrl: data.user.resumeUrl ?? "",
-          resumeFileName:
-            data.user.resumeFileName ??
-            deriveResumeFileName(data.user.resumeUrl ?? ""),
+        profileDialogCache.set(cacheKey, {
+          user: data.user,
+          expiresAt: Date.now() + PROFILE_CACHE_TTL_MS,
         });
-      } catch (error) {
-        console.error("Profile load error:", error);
-        toast.error("Failed to load profile");
-      } finally {
-        setLoadingProfile(false);
+
+        const clientDurationMs =
+          Math.round((performance.now() - startedAt) * 100) / 100;
+        if (clientDurationMs > 900) {
+          console.warn("Slow profile prefetch observed in client", {
+            clientDurationMs,
+            serverTiming: response.headers.get("Server-Timing"),
+            responseTimeHeader: response.headers.get("X-Response-Time-Ms"),
+          });
+        }
+      } catch {
+        // Ignore prefetch errors; on-demand load handles UX.
       }
     };
 
-    loadProfile();
-  }, [open, user?.id, isAdminUser]);
+    const idleScheduler =
+      typeof window !== "undefined" && "requestIdleCallback" in window
+        ? window.requestIdleCallback(() => {
+            void prefetchProfile();
+          })
+        : window.setTimeout(() => {
+            void prefetchProfile();
+          }, 300);
+
+    return () => {
+      cancelled = true;
+      if (typeof idleScheduler === "number") {
+        window.clearTimeout(idleScheduler);
+        return;
+      }
+      if (typeof window !== "undefined" && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleScheduler);
+      }
+    };
+  }, [isAdminUser, user?.id]);
 
   const handleSaveProfile = async () => {
     if (!user?.id) {
@@ -180,6 +296,7 @@ export function ProfileDialog() {
       }
 
       toast.success("Profile updated successfully");
+      profileDialogCache.delete(String(user.id));
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("dashboard:data-updated"));
       }
@@ -297,6 +414,7 @@ export function ProfileDialog() {
         resumeUrl: data.resumeUrl || "",
         resumeFileName: data.resumeFileName || file.name,
       }));
+      profileDialogCache.delete(String(user.id));
       toast.success("Resume uploaded successfully");
 
       if (typeof window !== "undefined") {
@@ -330,9 +448,29 @@ export function ProfileDialog() {
         </DialogHeader>
 
         {loadingProfile && !isAdminUser ? (
-          <div className="py-10 flex items-center justify-center text-gray-500">
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Loading profile...
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-24 w-full" />
+            </div>
           </div>
         ) : isAdminUser ? (
           <div className="space-y-4">

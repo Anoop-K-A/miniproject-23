@@ -3,6 +3,7 @@ import { existsSync } from "fs";
 import { mkdir, unlink, writeFile } from "fs/promises";
 import { join } from "path";
 import { findUserById, updateUserById } from "@/lib/userStore";
+import { invalidateCachedProfile, setCachedProfile } from "@/lib/profileCache";
 
 export const runtime = "nodejs";
 
@@ -140,11 +141,21 @@ export async function POST(request: NextRequest) {
     }
 
     const { password, ...safeUser } = updatedUser;
-    return NextResponse.json({
-      user: safeUser,
-      resumeUrl,
-      resumeFileName: resume.name,
-    });
+    invalidateCachedProfile(`profile:${userId}`);
+    setCachedProfile(`profile:${userId}`, safeUser, 60_000);
+
+    return NextResponse.json(
+      {
+        user: safeUser,
+        resumeUrl,
+        resumeFileName: resume.name,
+      },
+      {
+        headers: {
+          "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+        },
+      },
+    );
   } catch (error) {
     console.error("Resume upload error:", error);
     return NextResponse.json(

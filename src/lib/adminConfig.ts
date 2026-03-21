@@ -9,6 +9,7 @@ export const NON_ADMIN_ROLES: UserRole[] = [
   "faculty",
   "auditor",
   "staff-advisor",
+  "user",
 ];
 
 export function normalizeEmail(email: string | undefined | null): string {
@@ -56,6 +57,10 @@ export function normalizeRoleInput(
     value === "staffadvisor"
   ) {
     return "staff-advisor";
+  }
+
+  if (value === "user") {
+    return "user";
   }
 
   if (value === "admin") {

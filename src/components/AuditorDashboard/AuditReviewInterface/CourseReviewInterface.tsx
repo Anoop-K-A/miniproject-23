@@ -5,13 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { Textarea } from "../../ui/textarea";
-import {
-  ArrowLeft,
-  Download,
-  FileText,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { toast } from "sonner";
 import { ChecklistSidebar } from "./ChecklistSidebar";
 import { ChecklistItem } from "./types";
@@ -48,7 +42,7 @@ const theoryCourseFileChecklist: ChecklistItem[] = [
   { id: "internal_marks", label: "Internal Marks Display" },
   { id: "course_exit_survey", label: "Course Exit Survey" },
   { id: "attainment_calculation", label: "Attainment Calculation" },
-  { id: "score", label: "Score (Faculty/Auditor)" },
+  { id: "review_completed", label: "Review Completed" },
 ];
 
 const labCourseFileChecklist: ChecklistItem[] = [
@@ -100,23 +94,6 @@ function sortFilesByChecklist(
     const bi = order.indexOf(b.fileType);
     return (ai === -1 ? order.length : ai) - (bi === -1 ? order.length : bi);
   });
-}
-
-function resolvePreviewType(
-  documentUrl?: string,
-  fileName?: string,
-): "pdf" | "image" | "none" {
-  if (!documentUrl || !fileName) return "none";
-  const url = documentUrl.toLowerCase();
-  const name = fileName.toLowerCase();
-  if (url.startsWith("data:application/pdf") || name.endsWith(".pdf"))
-    return "pdf";
-  if (
-    url.startsWith("data:image/") ||
-    /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(name)
-  )
-    return "image";
-  return "none";
 }
 
 // ── Public types ──────────────────────────────────────────────────────────────
@@ -182,26 +159,7 @@ export function CourseReviewInterface({
   const [auditorRemarks, setAuditorRemarks] = useState(
     existingChecklistReport?.remarks ?? sortedFiles[0]?.auditorRemarks ?? "",
   );
-  const [reviewDecision, setReviewDecision] = useState<
-    "approve" | "reject" | null
-  >(() => {
-    if (existingChecklistReport?.decision) {
-      return existingChecklistReport.decision;
-    }
-    if (
-      sortedFiles.length > 0 &&
-      sortedFiles.every((file) => file.status === "Approved")
-    ) {
-      return "approve";
-    }
-    if (
-      sortedFiles.length > 0 &&
-      sortedFiles.every((file) => file.status === "Rejected")
-    ) {
-      return "reject";
-    }
-    return null;
-  });
+  const [showFilePreviews, setShowFilePreviews] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const buildChecklistReport = (
@@ -216,7 +174,6 @@ export function CourseReviewInterface({
       status: checkedItems[item.id] ?? "pending",
     })),
     remarks: auditorRemarks.trim() || undefined,
-    decision: reviewDecision ?? undefined,
     updatedBy: user?.name ?? "Auditor",
     updatedAt: new Date().toISOString(),
     isFinalized,
@@ -235,7 +192,6 @@ export function CourseReviewInterface({
       csv += `"${ci.label}",${checkedItems[ci.id] ?? "pending"}\n`;
     });
     csv += `\nRemarks,"${auditorRemarks}"\n`;
-    csv += `Decision,${reviewDecision ?? "pending"}\n`;
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -298,22 +254,17 @@ export function CourseReviewInterface({
   };
 
   const handleSubmitReview = async () => {
-    if (!reviewDecision) {
-      toast.error("Please select approve or reject");
-      return;
-    }
-    const allChecked = checklist.every((ci) => checkedItems[ci.id]);
+    const allChecked = checklist.every((ci) => {
+      const status = checkedItems[ci.id];
+      return status === "yes" || status === "no";
+    });
     if (!allChecked) {
       toast.error("Please complete all checklist items");
       return;
     }
-    if (!auditorRemarks.trim()) {
-      toast.error("Please provide auditor remarks");
-      return;
-    }
 
     setIsSubmitting(true);
-    const status = reviewDecision === "approve" ? "Approved" : "Rejected";
+    const status = "Approved";
     const reviewedDate = new Date().toISOString().split("T")[0];
     const reviewerName = user?.name ?? "Auditor";
     const checklistReport = buildChecklistReport(true);
@@ -329,8 +280,8 @@ export function CourseReviewInterface({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             status,
-            adminRemarks: auditorRemarks,
-            auditorRemarks,
+            adminRemarks: auditorRemarks.trim() || undefined,
+            auditorRemarks: auditorRemarks.trim() || undefined,
             reviewedBy: reviewerName,
             reviewedDate,
             auditChecklistStatus: statusByLabel.get(file.fileType) ?? "pending",
@@ -358,23 +309,25 @@ export function CourseReviewInterface({
             auditorId: user?.id,
             entityType: "course-file",
             entityId: file.id,
-            status: reviewDecision === "approve" ? "completed" : "rejected",
-            remarks: auditorRemarks,
+            status: "completed",
+            remarks: auditorRemarks.trim() || undefined,
           }),
         });
 
-        // Post remark
-        await fetch("/api/remarks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            authorId: user?.id,
-            entityType: "course-file",
-            entityId: file.id,
-            status: "published",
-            text: auditorRemarks,
-          }),
-        });
+        // Post remark if remarks provided
+        if (auditorRemarks.trim()) {
+          await fetch("/api/remarks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              authorId: user?.id,
+              entityType: "course-file",
+              entityId: file.id,
+              status: "published",
+              text: auditorRemarks,
+            }),
+          });
+        }
       }
 
       // One combined message to faculty about the whole course
@@ -392,16 +345,16 @@ export function CourseReviewInterface({
             senderRole: "auditor",
             senderName: user?.name,
             message:
-              auditorRemarks ||
-              `Course ${group.courseCode} (${group.academicYear}) ${status.toLowerCase()}.`,
-            status: status.toLowerCase(),
+              auditorRemarks.trim() ||
+              `Course ${group.courseCode} (${group.academicYear}) review completed.`,
+            status: "completed",
           }),
         });
       }
 
       onReviewCompleted?.(updatedFiles);
       toast.success(
-        `${group.courseCode} (${group.academicYear}) ${reviewDecision}d successfully`,
+        `${group.courseCode} (${group.academicYear}) review submitted successfully`,
       );
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("dashboard:data-updated"));
@@ -439,16 +392,6 @@ export function CourseReviewInterface({
                 {group.courseCode} — {group.courseName} ({group.academicYear})
               </p>
             </div>
-            <Badge
-              className={
-                reviewDecision === "approve"
-                  ? "bg-green-100 text-green-800"
-                  : ""
-              }
-              variant={reviewDecision === "approve" ? "default" : "outline"}
-            >
-              {reviewDecision === "approve" ? "Approved" : "Not Approved"}
-            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -462,110 +405,123 @@ export function CourseReviewInterface({
           onChecklistChange={handleChecklistChange}
         />
 
-        {/* Right pane: all documents stacked + remarks */}
+        {/* Right pane: files list + optional previews + remarks */}
         <div className="lg:col-span-3 space-y-6">
-          {sortedFiles.map((file, idx) => {
-            const previewType = resolvePreviewType(
-              file.documentUrl,
-              file.fileName,
-            );
-            const checklistPos = checklist.findIndex(
-              (c) => c.label === file.fileType,
-            );
-            const posLabel =
-              checklistPos !== -1 ? `#${checklistPos + 1}` : `Extra`;
-
-            return (
-              <Card key={file.id} className="overflow-hidden">
-                <CardHeader className="pb-3 bg-gray-50 border-b">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold text-white bg-blue-600 px-2 py-0.5 rounded">
-                        {posLabel}
-                      </span>
-                      <div>
-                        <CardTitle className="text-sm font-semibold">
-                          {file.fileType}
-                        </CardTitle>
-                        <p className="text-xs text-gray-500 truncate max-w-xs mt-0.5">
-                          {file.fileName}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge
-                      className={
-                        file.status === "Approved"
-                          ? "bg-green-100 text-green-800"
-                          : file.status === "Rejected"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                      }
-                    >
-                      {file.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="p-0">
-                  {previewType === "pdf" && file.documentUrl ? (
-                    <iframe
-                      src={file.documentUrl}
-                      title={`Preview: ${file.fileName}`}
-                      className="w-full h-125 bg-white"
-                    />
-                  ) : previewType === "image" && file.documentUrl ? (
-                    <div className="flex items-center justify-center bg-gray-50 p-4">
-                      <img
-                        src={file.documentUrl}
-                        alt={`Preview: ${file.fileName}`}
-                        className="max-h-125 object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-24 flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                      <FileText className="h-7 w-7 mb-1" />
-                      <p className="text-sm">No preview available</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-
-          {/* Auditor Remarks & Decision */}
+          {/* Files list with optional previews */}
           <Card>
             <CardHeader>
-              <CardTitle>Auditor Remarks</CardTitle>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <CardTitle>Course Files ({sortedFiles.length})</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => setShowFilePreviews((prev) => !prev)}
+                >
+                  {showFilePreviews ? "Hide Previews" : "Preview All Documents"}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {sortedFiles.map((file, idx) => {
+                  const checklistPos = checklist.findIndex(
+                    (c) => c.label === file.fileType,
+                  );
+                  const posLabel =
+                    checklistPos !== -1 ? `#${checklistPos + 1}` : `Extra`;
+                  const documentUrl =
+                    file.documentUrl ||
+                    (file as { fileUrl?: string }).fileUrl ||
+                    (file as { filePath?: string }).filePath ||
+                    "";
+                  const lowerName = file.fileName.toLowerCase();
+                  const isImage =
+                    lowerName.endsWith(".png") ||
+                    lowerName.endsWith(".jpg") ||
+                    lowerName.endsWith(".jpeg") ||
+                    lowerName.endsWith(".webp") ||
+                    lowerName.endsWith(".gif");
+
+                  return (
+                    <div
+                      key={file.id}
+                      className="p-3 border rounded-lg bg-gray-50 space-y-3"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <span className="text-xs font-bold text-white bg-blue-600 px-2 py-0.5 rounded shrink-0">
+                            {posLabel}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium">
+                              {file.fileType}
+                            </p>
+                            <p className="text-xs text-gray-600 truncate">
+                              {file.fileName}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge
+                          className={
+                            file.status === "Approved"
+                              ? "bg-green-100 text-green-800"
+                              : file.status === "Rejected"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                          }
+                        >
+                          {file.status}
+                        </Badge>
+                      </div>
+
+                      {showFilePreviews && (
+                        <div className="rounded border bg-white p-2">
+                          {documentUrl ? (
+                            isImage ? (
+                              <img
+                                src={documentUrl}
+                                alt={file.fileName}
+                                className="max-h-125 w-full rounded border object-contain bg-white"
+                              />
+                            ) : (
+                              <iframe
+                                src={documentUrl}
+                                title={file.fileName}
+                                className="h-150 w-full rounded border bg-white"
+                              />
+                            )
+                          ) : (
+                            <p className="text-sm text-gray-600">
+                              Preview is not available for this file.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Auditor Remarks & Submit */}
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                Auditor Remarks{" "}
+                <span className="text-xs font-normal text-gray-500">
+                  (Optional)
+                </span>
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
-                placeholder="Provide detailed feedback and remarks for this entire course..."
+                placeholder="Provide detailed feedback and remarks for this review (optional)..."
                 value={auditorRemarks}
                 onChange={(e) => setAuditorRemarks(e.target.value)}
                 rows={6}
               />
-              <div className="flex gap-4">
-                <Button
-                  variant={reviewDecision === "approve" ? "default" : "outline"}
-                  onClick={() => setReviewDecision("approve")}
-                  className="flex-1"
-                  type="button"
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Approve All
-                </Button>
-                <Button
-                  variant={
-                    reviewDecision === "reject" ? "destructive" : "outline"
-                  }
-                  onClick={() => setReviewDecision("reject")}
-                  className="flex-1"
-                  type="button"
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Reject All
-                </Button>
-              </div>
               <Button
                 variant="secondary"
                 onClick={handleSaveDraft}
@@ -583,7 +539,7 @@ export function CourseReviewInterface({
                 disabled={isSubmitting}
                 type="button"
               >
-                {isSubmitting ? "Submitting…" : "Submit Course Review"}
+                {isSubmitting ? "Submitting…" : "Submit Review"}
               </Button>
             </CardContent>
           </Card>

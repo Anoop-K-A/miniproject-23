@@ -42,6 +42,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   auditor: "Auditor",
   "staff-advisor": "Staff Advisor",
   admin: "Admin",
+  user: "User",
 };
 
 const ROLE_VALUES: UserRole[] = [
@@ -157,11 +158,13 @@ export function AdminDashboard() {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20; // Show 20 users per page
 
   const fetchUsers = async () => {
     try {
       const [usersResponse, engagementResponse] = await Promise.all([
-        fetch("/api/users"),
+        fetch("/api/users?limit=500"), // Fetch limited initial set
         fetch("/api/engagements"),
       ]);
 
@@ -185,6 +188,7 @@ export function AdminDashboard() {
         mapApiUserWithEngagement(user, engagementMap),
       );
       setUsers(mappedUsers);
+      setCurrentPage(1); // Reset to first page
     } catch (error) {
       console.error("Load users error:", error);
       toast.error("Failed to load users");
@@ -219,6 +223,14 @@ export function AdminDashboard() {
 
     return next;
   }, [users, searchQuery, filterStatus]);
+
+  // Apply pagination to filtered results
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredUsers.slice(start, start + pageSize);
+  }, [filteredUsers, currentPage]);
+
+  const totalPages = Math.ceil(filteredUsers.length / pageSize);
 
   const pushNotification = (
     message: string,
@@ -388,7 +400,7 @@ export function AdminDashboard() {
       <AdminStats users={users} />
 
       <UsersTable
-        users={filteredUsers}
+        users={paginatedUsers}
         searchQuery={searchQuery}
         filterStatus={filterStatus}
         onSearchChange={setSearchQuery}
@@ -405,6 +417,51 @@ export function AdminDashboard() {
         onApprove={handleApprove}
         onReject={handleReject}
       />
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between gap-4 mt-6">
+          <p className="text-sm text-gray-600">
+            Showing {(currentPage - 1) * pageSize + 1} to{" "}
+            {Math.min(currentPage * pageSize, filteredUsers.length)} of{" "}
+            {filteredUsers.length} users
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-2 border rounded text-sm disabled:opacity-50 hover:bg-gray-50"
+            >
+              Previous
+            </button>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const pageNum =
+                currentPage <= 3 ? i + 1 : Math.max(1, currentPage - 2) + i;
+              if (pageNum > totalPages) return null;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-3 py-2 border rounded text-sm ${
+                    currentPage === pageNum
+                      ? "bg-blue-500 text-white current-page"
+                      : "hover:bg-gray-50"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 border rounded text-sm disabled:opacity-50 hover:bg-gray-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {selectedUser && (
         <EditUserDialog

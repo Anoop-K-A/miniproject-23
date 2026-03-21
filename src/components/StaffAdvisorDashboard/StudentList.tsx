@@ -28,6 +28,11 @@ import {
 import { Search, Plus } from "lucide-react";
 import { Student, DashboardStats } from "./types";
 import { StudentCard } from "./StudentCard";
+import {
+  getStandardBatchYearOptions,
+  isValidBatchYear,
+  normalizeBatchYear,
+} from "@/lib/batchYear";
 
 interface StudentListProps {
   students: Student[];
@@ -58,6 +63,15 @@ const emptyForm: StudentFormState = {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+const batchYearOptions = getStandardBatchYearOptions();
+
+function resolveInitialBatchYear(defaultBatch?: string) {
+  const normalized = normalizeBatchYear(defaultBatch);
+  if (isValidBatchYear(normalized)) {
+    return normalized;
+  }
+  return batchYearOptions[0] ?? "";
+}
 
 export function StudentList({
   students,
@@ -69,7 +83,7 @@ export function StudentList({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [form, setForm] = useState<StudentFormState>({
     ...emptyForm,
-    batchYear: stats.batchYear,
+    batchYear: resolveInitialBatchYear(stats.batchYear),
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof StudentFormState, string>>
@@ -127,14 +141,23 @@ export function StudentList({
     if (!form.semester.trim()) {
       nextErrors.semester = "Semester is required.";
     }
-    if (!form.batchYear.trim()) {
+    const normalizedBatchYear = normalizeBatchYear(form.batchYear);
+
+    if (!normalizedBatchYear) {
       nextErrors.batchYear = "Batch year is required.";
+    } else if (!isValidBatchYear(normalizedBatchYear)) {
+      nextErrors.batchYear =
+        "Batch year must be in YYYY-YYYY format (for example 2023-2027).";
     }
-    if (trimmedRoll && form.batchYear.trim()) {
+    if (
+      trimmedRoll &&
+      normalizedBatchYear &&
+      isValidBatchYear(normalizedBatchYear)
+    ) {
       const existsInBatch = students.some(
         (student) =>
-          student.batchYear?.toLowerCase() ===
-            form.batchYear.trim().toLowerCase() &&
+          normalizeBatchYear(student.batchYear).toLowerCase() ===
+            normalizedBatchYear.toLowerCase() &&
           student.rollNumber.toLowerCase() === trimmedRoll.toLowerCase(),
       );
       if (existsInBatch) {
@@ -160,7 +183,7 @@ export function StudentList({
       return;
     }
 
-    const batchKey = form.batchYear.trim();
+    const batchKey = normalizeBatchYear(form.batchYear);
     const rollKey = form.rollNumber.trim();
     const newStudent: Student = {
       id: `${batchKey}-${rollKey}`,
@@ -181,7 +204,10 @@ export function StudentList({
     };
 
     onAddStudent(newStudent);
-    setForm({ ...emptyForm, batchYear: stats.batchYear });
+    setForm({
+      ...emptyForm,
+      batchYear: resolveInitialBatchYear(stats.batchYear),
+    });
     setErrors({});
     setIsDialogOpen(false);
   };
@@ -306,13 +332,21 @@ export function StudentList({
                 </div>
                 <div>
                   <Label>Batch Year</Label>
-                  <Input
+                  <Select
                     value={form.batchYear}
-                    onChange={(event) =>
-                      handleChange("batchYear", event.target.value)
-                    }
-                    placeholder="2024"
-                  />
+                    onValueChange={(value) => handleChange("batchYear", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select batch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {batchYearOptions.map((batchOption) => (
+                        <SelectItem key={batchOption} value={batchOption}>
+                          {batchOption}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {errors.batchYear && (
                     <p className="text-xs text-red-600">{errors.batchYear}</p>
                   )}

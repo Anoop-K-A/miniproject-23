@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
+import { isValidBatchYear, normalizeBatchYear } from "@/lib/batchYear";
 
 const VALID_SEMESTERS = new Set([
   "S1",
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     const email = String(payload.email ?? "")
       .trim()
       .toLowerCase();
-    const batchYear = String(payload.batchYear ?? "").trim();
+    const batchYear = normalizeBatchYear(payload.batchYear);
     const normalizedSemester = normalizeSemesterInput(payload.semester);
 
     if (!payload.name || !rollNumber || !email || !batchYear) {
@@ -77,6 +78,16 @@ export async function POST(request: NextRequest) {
     if (!VALID_SEMESTERS.has(normalizedSemester)) {
       return NextResponse.json(
         { error: "Semester must be one of S1 to S8" },
+        { status: 400 },
+      );
+    }
+
+    if (!isValidBatchYear(batchYear)) {
+      return NextResponse.json(
+        {
+          error:
+            "Batch year must follow YYYY-YYYY format (for example 2023-2027)",
+        },
         { status: 400 },
       );
     }
