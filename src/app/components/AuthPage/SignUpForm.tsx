@@ -89,7 +89,7 @@ export function SignUpForm({
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 id="fullName"
-                placeholder="Dr. John Doe"
+                placeholder="john doe"
                 value={formData.fullName}
                 onChange={(e) =>
                   setFormData({ ...formData, fullName: e.target.value })
@@ -106,7 +106,7 @@ export function SignUpForm({
               <Input
                 id="email"
                 type="email"
-                placeholder="your.email@college.edu"
+                placeholder="email"
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
