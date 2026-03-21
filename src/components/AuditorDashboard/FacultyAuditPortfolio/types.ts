@@ -4,6 +4,11 @@ export interface FacultyMember {
   department: string;
   totalFiles: number;
   totalReports: number;
+  email?: string;
+  phone?: string;
+  experience?: string;
+  resumeUrl?: string;
+  resumeFileName?: string;
 }
 
 export type AuditChecklistStatus = "yes" | "no" | "pending";

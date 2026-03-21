@@ -2,6 +2,19 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const { verifyToken, requireRole } = require("../middleware/auth.middleware");
+const { isPrimaryAdminEmail } = require("../config/admin.config");
+
+function normalizeRole(role) {
+  const value = String(role || "")
+    .trim()
+    .toLowerCase();
+
+  if (value === "staff advisor" || value === "staffadvisor") {
+    return "staff-advisor";
+  }
+
+  return value;
+}
 
 /**
  * GET /api/users
@@ -166,19 +179,57 @@ router.patch(
       const { id } = req.params;
       const { role, roles } = req.body;
 
-      const updates = {};
-      if (role) updates.role = role;
-      if (roles && Array.isArray(roles)) updates.roles = roles;
-
-      const user = await User.findByIdAndUpdate(id, updates, {
-        new: true,
-      }).select("-password");
+      const user = await User.findById(id);
 
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      res.json({ message: "User roles updated", user });
+      if (isPrimaryAdminEmail(user.email)) {
+        return res.status(403).json({
+          error: "Primary admin role cannot be modified",
+        });
+      }
+
+      const normalizedRoles = Array.from(
+        new Set(
+          (Array.isArray(roles) ? roles : role ? [role] : [])
+            .map(normalizeRole)
+            .filter(Boolean),
+        ),
+      );
+
+      if (normalizedRoles.length === 0) {
+        return res.status(400).json({ error: "At least one role is required" });
+      }
+
+      if (normalizedRoles.includes("admin")) {
+        return res.status(403).json({
+          error: "Assigning admin role is disabled",
+        });
+      }
+
+      const validRoles = ["faculty", "auditor", "staff-advisor"];
+      const invalidRoles = normalizedRoles.filter(
+        (item) => !validRoles.includes(item),
+      );
+
+      if (invalidRoles.length > 0) {
+        return res.status(400).json({
+          error: "Invalid roles",
+          invalidRoles,
+        });
+      }
+
+      const updates = {};
+      updates.roles = normalizedRoles;
+      updates.role = normalizedRoles[0];
+
+      const updatedUser = await User.findByIdAndUpdate(id, updates, {
+        new: true,
+      }).select("-password");
+
+      res.json({ message: "User roles updated", user: updatedUser });
     } catch (error) {
       console.error("Error updating roles:", error);
       res.status(500).json({ error: "Failed to update roles" });

@@ -18,6 +18,13 @@ import {
   DialogFooter,
 } from "../ui/dialog";
 import { Label } from "../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Search, Plus } from "lucide-react";
 import { Student, DashboardStats } from "./types";
 import { StudentCard } from "./StudentCard";
@@ -50,6 +57,7 @@ const emptyForm: StudentFormState = {
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
 
 export function StudentList({
   students,
@@ -273,13 +281,24 @@ export function StudentList({
                   </div>
                   <div>
                     <Label>Semester</Label>
-                    <Input
+                    <Select
                       value={form.semester}
-                      onChange={(event) =>
-                        handleChange("semester", event.target.value)
-                      }
-                      placeholder="6"
-                    />
+                      onValueChange={(value) => handleChange("semester", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select semester" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {semesterOptions.map((semesterOption) => (
+                          <SelectItem
+                            key={semesterOption}
+                            value={semesterOption}
+                          >
+                            {semesterOption}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {errors.semester && (
                       <p className="text-xs text-red-600">{errors.semester}</p>
                     )}

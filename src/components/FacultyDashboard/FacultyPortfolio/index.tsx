@@ -7,6 +7,7 @@ import { ReportViewDialog } from "./ReportViewDialog";
 import {
   CourseFile,
   EventReport,
+  FacultyMember,
   FacultyPortfolioProps,
   Student,
 } from "./types";
@@ -14,9 +15,63 @@ import { Card, CardContent } from "../../ui/card";
 import { Badge } from "../../ui/badge";
 import { useAuth } from "@/context/AuthContext";
 
+function normalizeSemesterLabel(semester?: string) {
+  const raw = String(semester ?? "").trim();
+  if (!raw) return "";
+
+  const compact = raw.toLowerCase().replace(/[\s-]+/g, "");
+  const numericMatch = compact.match(/^(?:semester|sem|s)?([1-8])$/);
+  if (numericMatch) {
+    return `S${numericMatch[1]}`;
+  }
+
+  if (compact === "odd") return "Odd";
+  if (compact === "even") return "Even";
+
+  return raw.toUpperCase();
+}
+
+function buildCourseTeachingEntries(files: CourseFile[]) {
+  const uniqueCourses = new Map<string, string>();
+
+  files.forEach((file) => {
+    const courseCode = String(file.courseCode ?? "").trim();
+    const courseName = String(file.courseName ?? "").trim();
+    const batch = String(file.academicYear ?? "").trim();
+    const semester = normalizeSemesterLabel(file.semester);
+    const title = [courseCode, courseName].filter(Boolean).join(" - ");
+
+    if (!title) {
+      return;
+    }
+
+    const details: string[] = [];
+    if (batch) {
+      details.push(`Batch ${batch}`);
+    }
+    if (semester) {
+      details.push(`Sem ${semester}`);
+    }
+
+    const label =
+      details.length > 0 ? `${title} (${details.join(", ")})` : title;
+    const key = [
+      courseCode.toLowerCase(),
+      courseName.toLowerCase(),
+      batch.toLowerCase(),
+      semester.toLowerCase(),
+    ].join("|");
+
+    uniqueCourses.set(key, label);
+  });
+
+  return Array.from(uniqueCourses.values()).sort((a, b) => a.localeCompare(b));
+}
+
 export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const { user, userRole } = useAuth();
   const showStudents = faculty.isStaffAdvisor === true;
+  const [profileFaculty, setProfileFaculty] = useState<FacultyMember>(faculty);
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
   const [selectedReport, setSelectedReport] = useState<EventReport | null>(
     null,
@@ -41,6 +96,47 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const canViewMessages = userRole !== "faculty";
 
   useEffect(() => {
+    setProfileFaculty(faculty);
+
+    const loadFacultyProfile = async () => {
+      try {
+        const response = await fetch(
+          `/api/profile?userId=${encodeURIComponent(faculty.id)}`,
+          {
+            cache: "no-store",
+          },
+        );
+        const data = (await response.json()) as {
+          user?: {
+            name?: string;
+            department?: string;
+            email?: string;
+            phone?: string;
+            experience?: string;
+            resumeUrl?: string;
+            resumeFileName?: string;
+          };
+        };
+
+        if (!response.ok || !data.user) {
+          return;
+        }
+
+        setProfileFaculty((previous) => ({
+          ...previous,
+          name: data.user?.name ?? previous.name,
+          department: data.user?.department ?? previous.department,
+          email: data.user?.email ?? previous.email,
+          phone: data.user?.phone ?? previous.phone,
+          experience: data.user?.experience ?? previous.experience,
+          resumeUrl: data.user?.resumeUrl ?? "",
+          resumeFileName: data.user?.resumeFileName ?? "",
+        }));
+      } catch (error) {
+        console.error("Load faculty profile error:", error);
+      }
+    };
+
     const loadPortfolioData = async () => {
       try {
         const requests = [
@@ -72,9 +168,14 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
         const scopedReports: EventReport[] = (reportsData.reports ?? []).filter(
           (report: EventReport) => report.facultyId === faculty.id,
         );
+        const autoCourses = buildCourseTeachingEntries(scopedFiles);
 
         setCourseFiles(scopedFiles);
         setEventReports(scopedReports);
+        setProfileFaculty((previous) => ({
+          ...previous,
+          courses: autoCourses,
+        }));
 
         if (showStudents && studentsResponse?.ok) {
           const allStudents: Student[] = studentsData?.students ?? [];
@@ -113,17 +214,19 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
     };
 
     loadPortfolioData();
+    loadFacultyProfile();
 
     if (typeof window !== "undefined") {
       const handler = () => {
         loadPortfolioData();
+        loadFacultyProfile();
       };
       window.addEventListener("dashboard:data-updated", handler);
       return () => {
         window.removeEventListener("dashboard:data-updated", handler);
       };
     }
-  }, [faculty.id, faculty.department, showStudents, canViewMessages]);
+  }, [faculty, faculty.id, faculty.department, showStudents, canViewMessages]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -155,7 +258,7 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   return (
     <div className="space-y-6">
       <BackButton onBack={onBack} />
-      <ProfileHeader faculty={faculty} />
+      <ProfileHeader faculty={profileFaculty} />
       {canViewMessages && (
         <Card>
           <CardContent className="pt-6 space-y-4">

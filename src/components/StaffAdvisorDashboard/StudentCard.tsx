@@ -12,23 +12,30 @@ interface StudentCardProps {
 export function StudentCard({ student, onViewDetails }: StudentCardProps) {
   const getPlacementColor = (status: string) => {
     switch (status) {
-      case "Placed": return "bg-green-100 text-green-800";
-      case "In Process": return "bg-blue-100 text-blue-800";
-      case "Not Started": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Placed":
+        return "bg-green-100 text-green-800";
+      case "In Process":
+        return "bg-blue-100 text-blue-800";
+      case "Not Started":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   return (
-    <Card 
-      className="hover:shadow-md transition-shadow cursor-pointer" 
+    <Card
+      className="hover:shadow-md transition-shadow cursor-pointer"
       onClick={() => onViewDetails(student)}
     >
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
             <div className="h-12 w-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
-              {student.name.split(' ').map(n => n[0]).join('')}
+              {student.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -39,6 +46,9 @@ export function StudentCard({ student, onViewDetails }: StudentCardProps) {
               </div>
               <p className="text-sm text-gray-500">
                 {student.rollNumber} • {student.semester} Semester
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Batch {student.batchYear || "Not set"}
               </p>
               {student.companyName && (
                 <p className="text-xs text-green-600 mt-1">

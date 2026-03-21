@@ -68,7 +68,6 @@ export function EditUserDialog({
     { value: "faculty", label: "Faculty" },
     { value: "auditor", label: "Auditor" },
     { value: "staff-advisor", label: "Staff Advisor" },
-    { value: "admin", label: "Admin" },
   ];
 
   const selectedRoleLabels = roleOptions

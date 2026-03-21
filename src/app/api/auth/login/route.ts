@@ -4,45 +4,60 @@ import {
   findUserByUsername,
   updateUserLastActive,
 } from "@/lib/userStore";
-
-const DEFAULT_ADMIN_EMAIL = "admin@college.com";
-const DEFAULT_ADMIN_NAME = "Admin User";
+import {
+  PRIMARY_ADMIN_EMAIL,
+  PRIMARY_ADMIN_NAME,
+  PRIMARY_ADMIN_PASSWORD,
+  PRIMARY_ADMIN_USERNAME,
+  includesAdminRole,
+  sanitizeNonAdminRoles,
+  isPrimaryAdminUsername,
+  normalizeUsername,
+} from "@/lib/adminConfig";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
     // Validate inputs
-    if (!email || !password) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Username and password are required" },
         { status: 400 },
       );
     }
 
-    const normalizedEmail = String(email).trim().toLowerCase();
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "Firebase API key not configured" },
-        { status: 500 },
-      );
+    const normalizedProvidedUsername = normalizeUsername(username);
+
+    // Reserved read-only user login requested for shared viewing page.
+    if (normalizedProvidedUsername === "user" && password === "User@123") {
+      return NextResponse.json({
+        id: "public-user",
+        username: "User",
+        name: "User",
+        role: "user",
+        roles: ["user"],
+        department: "General",
+      });
     }
 
-    const firebaseResponse = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: normalizedEmail,
-          password,
-          returnSecureToken: true,
-        }),
-      },
-    );
+    const normalizedUsername = normalizedProvidedUsername;
+    let user = await findUserByUsername(normalizedUsername);
+
+    const resolvedLoginEmail = user?.email
+      ? String(user.email).trim().toLowerCase()
+      : user?.username && String(user.username).includes("@")
+        ? String(user.username).trim().toLowerCase()
+        : isPrimaryAdminUsername(normalizedUsername)
+          ? PRIMARY_ADMIN_EMAIL
+          : null;
+
+    if (!resolvedLoginEmail) {
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 },
+      );
+    }
 
     type FirebaseLoginSuccess = {
       localId: string;
@@ -50,58 +65,23 @@ export async function POST(request: NextRequest) {
     };
 
     let firebaseData: FirebaseLoginSuccess | null = null;
+    let firebaseUnavailable = false;
 
-    if (!firebaseResponse.ok) {
-      const firebaseError = (await firebaseResponse.json()) as {
-        error?: { message?: string };
-      };
-      const errorCode = firebaseError.error?.message;
-
-      if (
-        errorCode === "EMAIL_NOT_FOUND" ||
-        errorCode === "INVALID_PASSWORD" ||
-        errorCode === "INVALID_LOGIN_CREDENTIALS"
-      ) {
-        return NextResponse.json(
-          { error: "Invalid credentials" },
-          { status: 401 },
-        );
+    const ensurePrimaryAdminProfile = async (firebaseUid?: string) => {
+      if (user || !isPrimaryAdminUsername(normalizedUsername)) {
+        return;
       }
 
-      if (errorCode === "USER_DISABLED") {
-        return NextResponse.json(
-          { error: "Account is disabled" },
-          { status: 403 },
-        );
-      }
-
-      console.error("Firebase sign-in error:", firebaseError);
-      return NextResponse.json(
-        { error: "Authentication failed" },
-        { status: 401 },
-      );
-    }
-
-    firebaseData = (await firebaseResponse.json()) as FirebaseLoginSuccess;
-
-    let user = await findUserByUsername(normalizedEmail);
-
-    // Keep the default admin account usable even when only Firebase Auth exists.
-    if (
-      !user &&
-      normalizedEmail === DEFAULT_ADMIN_EMAIL &&
-      firebaseData?.localId
-    ) {
       try {
         user = await createUser({
-          username: normalizedEmail,
-          email: normalizedEmail,
-          name: DEFAULT_ADMIN_NAME,
+          username: PRIMARY_ADMIN_USERNAME,
+          email: PRIMARY_ADMIN_EMAIL,
+          name: PRIMARY_ADMIN_NAME,
           role: "admin",
           roles: ["admin"],
           department: "Administration",
           status: "active",
-          firebaseUid: firebaseData.localId,
+          ...(firebaseUid ? { firebaseUid } : {}),
         });
       } catch (createError) {
         if (
@@ -109,11 +89,117 @@ export async function POST(request: NextRequest) {
           createError.message !== "DUPLICATE_USER"
         ) {
           console.error(
-            "Failed to auto-provision admin profile after Firebase login:",
+            "Failed to auto-provision admin profile after login:",
             createError,
           );
         }
-        user = await findUserByUsername(normalizedEmail);
+        user = await findUserByUsername(PRIMARY_ADMIN_USERNAME);
+      }
+    };
+
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    if (apiKey) {
+      try {
+        const firebaseResponse = await fetch(
+          `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: resolvedLoginEmail,
+              password,
+              returnSecureToken: true,
+            }),
+            signal: AbortSignal.timeout(7000),
+          },
+        );
+
+        if (!firebaseResponse.ok) {
+          let errorCode: string | undefined;
+          try {
+            const firebaseError = (await firebaseResponse.json()) as {
+              error?: { message?: string };
+            };
+            errorCode = firebaseError.error?.message;
+          } catch {
+            // Ignore parse errors and continue with generic handling.
+          }
+
+          if (
+            errorCode === "EMAIL_NOT_FOUND" ||
+            errorCode === "INVALID_PASSWORD" ||
+            errorCode === "INVALID_LOGIN_CREDENTIALS"
+          ) {
+            return NextResponse.json(
+              { error: "Invalid credentials" },
+              { status: 401 },
+            );
+          }
+
+          if (errorCode === "USER_DISABLED") {
+            return NextResponse.json(
+              { error: "Account is disabled" },
+              { status: 403 },
+            );
+          }
+
+          firebaseUnavailable = true;
+          console.error("Firebase sign-in error code:", errorCode || "unknown");
+        } else {
+          firebaseData =
+            (await firebaseResponse.json()) as FirebaseLoginSuccess;
+        }
+      } catch (firebaseNetworkError) {
+        firebaseUnavailable = true;
+        console.error("Firebase sign-in request failed:", firebaseNetworkError);
+      }
+    } else {
+      firebaseUnavailable = true;
+    }
+
+    if (firebaseData?.localId) {
+      await ensurePrimaryAdminProfile(firebaseData.localId);
+    }
+
+    if (!firebaseData) {
+      const isAdminAttempt = isPrimaryAdminUsername(normalizedUsername);
+      const hasStoredPassword =
+        typeof user?.password === "string" && user.password.length > 0;
+      const passwordMatchesStored =
+        hasStoredPassword && user?.password === password;
+      const adminPasswordMatches =
+        isAdminAttempt &&
+        !hasStoredPassword &&
+        password === PRIMARY_ADMIN_PASSWORD;
+
+      if (!passwordMatchesStored && !adminPasswordMatches) {
+        if (hasStoredPassword || isAdminAttempt) {
+          return NextResponse.json(
+            { error: "Invalid credentials" },
+            { status: 401 },
+          );
+        }
+
+        if (firebaseUnavailable) {
+          return NextResponse.json(
+            {
+              error:
+                "Authentication service is temporarily unavailable. Please try again shortly.",
+            },
+            { status: 503 },
+          );
+        }
+
+        return NextResponse.json(
+          { error: "Invalid credentials" },
+          { status: 401 },
+        );
+      }
+
+      if (adminPasswordMatches) {
+        await ensurePrimaryAdminProfile();
       }
     }
 
@@ -149,12 +235,21 @@ export async function POST(request: NextRequest) {
       // Continue with response even if this fails
     }
 
+    const sourceRoles =
+      Array.isArray(user.roles) && user.roles.length > 0
+        ? user.roles
+        : [user.role];
+    const normalizedRoles = includesAdminRole(sourceRoles)
+      ? ["admin"]
+      : sanitizeNonAdminRoles(sourceRoles);
+    const normalizedRole = normalizedRoles[0];
+
     return NextResponse.json({
       id: user.id,
-      username: user.username,
+      username: user.username || user.name,
       name: user.name,
-      role: user.role,
-      roles: user.roles || [user.role],
+      role: normalizedRole,
+      roles: normalizedRoles,
       department: user.department,
     });
   } catch (error) {

@@ -22,6 +22,8 @@ export interface AdminUser {
   email: string;
   phone?: string;
   department?: string;
+  resumeUrl?: string;
+  resumeFileName?: string;
   designation?: string;
   role: UserRole;
   roles?: UserRole[];

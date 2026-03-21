@@ -50,6 +50,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PeerReviewDialog } from "@/components/shared/dialogs/PeerReviewDialog";
 import { CourseFile } from "./types";
 import { useAuth } from "@/context/AuthContext";
@@ -59,6 +60,11 @@ import {
   downloadTextFile,
   sanitizeFileName,
 } from "@/lib/download";
+import {
+  getStandardBatchYearOptions,
+  isValidBatchYear,
+  normalizeBatchYear,
+} from "@/lib/batchYear";
 
 const theoryFileTypes = [
   "CO\u2013PO Mapping (CO\u2013PO Mapping Level)",
@@ -105,6 +111,8 @@ const labFileTypes = [
   "Mark Calculation",
 ];
 
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+
 const isTheoryCourseCode = (code: string) => {
   const lastLetter = (code.match(/[a-zA-Z](?!.*[a-zA-Z])/g) ?? [""])[0];
   return lastLetter.toLowerCase() === "t";
@@ -141,6 +149,29 @@ const fileToDataUrl = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
+function useDebouncedValue<T>(value: T, delayMs: number) {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebounced(value);
+    }, delayMs);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [delayMs, value]);
+
+  return debounced;
+}
+
+const batchYearOptions = getStandardBatchYearOptions();
+
+function getDefaultBatchYear() {
+  const currentYear = new Date().getFullYear();
+  return `${currentYear}-${currentYear + 4}`;
+}
+
 export function CourseFileManager({
   initialFiles = [],
   fileCategories = [],
@@ -150,6 +181,7 @@ export function CourseFileManager({
   const [categoryOptions, setCategoryOptions] =
     useState<string[]>(fileCategories);
   const [typeOptions, setTypeOptions] = useState<string[]>(fileTypes);
+  const [loadingFiles, setLoadingFiles] = useState(initialFiles.length === 0);
   const { user, userRole } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -166,9 +198,7 @@ export function CourseFileManager({
   const [selectedUploadFile, setSelectedUploadFile] = useState<File | null>(
     null,
   );
-  const [selectedYear, setSelectedYear] = useState(
-    new Date().getFullYear().toString(),
-  );
+  const [selectedYear, setSelectedYear] = useState(getDefaultBatchYear());
   const [viewMode, setViewMode] = useState<"my-files" | "all-files">(
     "my-files",
   );
@@ -182,6 +212,7 @@ export function CourseFileManager({
   const [expandedFolders, setExpandedFolders] = useState<
     Record<string, boolean>
   >({});
+  const debouncedSearchTerm = useDebouncedValue(searchTerm, 250);
 
   const uploadTypeOptions = useMemo(
     () => (isTheoryCourseCode(courseCode) ? theoryFileTypes : labFileTypes),
@@ -218,9 +249,34 @@ export function CourseFileManager({
   };
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchFiles = async () => {
+      if (
+        initialFiles.length > 0 &&
+        fileCategories.length > 0 &&
+        fileTypes.length > 0
+      ) {
+        setLoadingFiles(false);
+        return;
+      }
+
+      setLoadingFiles(true);
+
       try {
-        const response = await fetch("/api/course-files");
+        const searchParams = new URLSearchParams({
+          includeMeta: "1",
+          includeFaculty: "1",
+          limit: "500",
+        });
+
+        if (userRole === "faculty" && user?.id) {
+          searchParams.set("facultyId", user.id);
+        }
+
+        const response = await fetch(`/api/course-files?${searchParams}`, {
+          signal: controller.signal,
+        });
         const data = await response.json();
         if (!response.ok) {
           toast.error(data.error || "Failed to load files");
@@ -230,13 +286,28 @@ export function CourseFileManager({
         setCategoryOptions(data.fileCategories ?? []);
         setTypeOptions(data.fileTypes ?? []);
       } catch (error) {
+        if ((error as Error).name === "AbortError") {
+          return;
+        }
         console.error("Load files error:", error);
         toast.error("Failed to load files");
+      } finally {
+        setLoadingFiles(false);
       }
     };
 
-    fetchFiles();
-  }, []);
+    void fetchFiles();
+
+    return () => {
+      controller.abort();
+    };
+  }, [
+    fileCategories.length,
+    fileTypes.length,
+    initialFiles.length,
+    user?.id,
+    userRole,
+  ]);
 
   useEffect(() => {
     const loadMessageNotifications = async () => {
@@ -323,9 +394,17 @@ export function CourseFileManager({
       !fileName ||
       !courseCode ||
       !courseName ||
-      !selectedFileType
+      !selectedFileType ||
+      !semester ||
+      !selectedYear.trim()
     ) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    const normalizedBatchYear = normalizeBatchYear(selectedYear);
+    if (!isValidBatchYear(normalizedBatchYear)) {
+      toast.error("Batch must be in YYYY-YYYY format (for example 2022-2026)");
       return;
     }
 
@@ -349,7 +428,7 @@ export function CourseFileManager({
           fileType: selectedFileType,
           uploadDate: new Date().toISOString().split("T")[0],
           semester,
-          academicYear: selectedYear,
+          academicYear: normalizedBatchYear,
           size: `${fileSizeMb} MB`,
           status: "Pending",
         }),
@@ -374,7 +453,7 @@ export function CourseFileManager({
       setSemester("");
       setFileName("");
       setSelectedUploadFile(null);
-      setSelectedYear(new Date().getFullYear().toString());
+      setSelectedYear(getDefaultBatchYear());
     } catch (error) {
       console.error("File upload error:", error);
       toast.error("An error occurred during upload");
@@ -428,7 +507,7 @@ export function CourseFileManager({
       `Course: ${file.courseCode} - ${file.courseName}`,
       `Type: ${file.fileType}`,
       `Semester: ${file.semester}`,
-      `Academic Year: ${file.academicYear}`,
+      `Batch: ${file.academicYear}`,
       `Uploaded: ${file.uploadDate}`,
       `Faculty: ${file.facultyName || "Unknown"}`,
       `Department: ${file.department || "Unknown"}`,
@@ -450,24 +529,39 @@ export function CourseFileManager({
     return files;
   }, [files, user?.id, userRole]);
 
-  const resolvedFiles = facultyFiles.filter((file) => {
-    const matchesSearch =
-      file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      file.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      file.courseName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === "all" || file.fileType === filterType;
-    const matchesStatus =
-      filterStatus === "all" || file.status === filterStatus;
-    const matchesYear =
-      filterYear === "all" || file.academicYear === filterYear;
+  const resolvedFiles = useMemo(() => {
+    const normalizedSearch = debouncedSearchTerm.trim().toLowerCase();
 
-    return matchesSearch && matchesType && matchesStatus && matchesYear;
-  });
+    return facultyFiles.filter((file) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        file.fileName.toLowerCase().includes(normalizedSearch) ||
+        file.courseCode.toLowerCase().includes(normalizedSearch) ||
+        file.courseName.toLowerCase().includes(normalizedSearch);
+      const matchesType = filterType === "all" || file.fileType === filterType;
+      const matchesStatus =
+        filterStatus === "all" || file.status === filterStatus;
+      const matchesYear =
+        filterYear === "all" || file.academicYear === filterYear;
 
-  const statuses = Array.from(
-    new Set(facultyFiles.map((f) => f.status).filter(Boolean)),
+      return matchesSearch && matchesType && matchesStatus && matchesYear;
+    });
+  }, [debouncedSearchTerm, facultyFiles, filterStatus, filterType, filterYear]);
+
+  const statuses = useMemo(
+    () =>
+      Array.from(new Set(facultyFiles.map((f) => f.status).filter(Boolean))),
+    [facultyFiles],
   );
-  const years = Array.from(new Set(facultyFiles.map((f) => f.academicYear)));
+  const years = useMemo(() => {
+    const fromFiles = facultyFiles
+      .map((file) => normalizeBatchYear(file.academicYear))
+      .filter((value): value is string => Boolean(value));
+
+    return Array.from(new Set([...fromFiles, ...batchYearOptions])).sort(
+      (a, b) => b.localeCompare(a, undefined, { numeric: true }),
+    );
+  }, [facultyFiles]);
 
   // Group files by course code and academic year
   const groupedFiles = useMemo(() => {
@@ -549,10 +643,10 @@ export function CourseFileManager({
             <Select value={filterYear} onValueChange={setFilterYear}>
               <SelectTrigger className="w-full md:w-48">
                 <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by Year" />
+                <SelectValue placeholder="Filter by Batch" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Years</SelectItem>
+                <SelectItem value="all">All Batches</SelectItem>
                 {years.map((year) => (
                   <SelectItem key={year} value={year}>
                     {year}
@@ -652,20 +746,34 @@ export function CourseFileManager({
                           <SelectValue placeholder="Select semester" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Even">Even</SelectItem>
-                          <SelectItem value="Odd">Odd</SelectItem>
+                          {semesterOptions.map((semesterOption) => (
+                            <SelectItem
+                              key={semesterOption}
+                              value={semesterOption}
+                            >
+                              {semesterOption}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="academicYear">Academic Year</Label>
-                      <Input
-                        id="academicYear"
+                      <Label htmlFor="academicYear">Batch</Label>
+                      <Select
                         value={selectedYear}
-                        onChange={(e) => setSelectedYear(e.target.value)}
-                        placeholder="2024-2025"
-                        required
-                      />
+                        onValueChange={(value) => setSelectedYear(value)}
+                      >
+                        <SelectTrigger id="academicYear">
+                          <SelectValue placeholder="Select batch (e.g. 2022-2026)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {batchYearOptions.map((batchOption) => (
+                            <SelectItem key={batchOption} value={batchOption}>
+                              {batchOption}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <Button type="submit" className="w-full">
@@ -675,6 +783,14 @@ export function CourseFileManager({
               </DialogContent>
             </Dialog>
           </div>
+
+          {loadingFiles ? (
+            <div className="rounded-lg border p-4 space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : null}
 
           {/* Files Folder View */}
           <div className="border rounded-lg divide-y border-l-4 border-l-blue-500">
@@ -914,7 +1030,7 @@ export function CourseFileManager({
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl">{years.length}</div>
-                <p className="text-sm text-gray-500">Years</p>
+                <p className="text-sm text-gray-500">Batches</p>
               </CardContent>
             </Card>
           </div>
@@ -944,9 +1060,7 @@ export function CourseFileManager({
                       <p>{selectedFile.courseCode}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">
-                        Batch / Academic Year
-                      </p>
+                      <p className="text-sm text-gray-500">Batch</p>
                       <p>{selectedFile.academicYear}</p>
                     </div>
                   </div>

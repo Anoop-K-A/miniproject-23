@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
-import { deleteUserById, getAllUsers, updateUserById } from "@/lib/userStore";
+import {
+  deleteUserById,
+  findUserById,
+  getAllUsers,
+  updateUserById,
+} from "@/lib/userStore";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
+import {
+  includesAdminRole,
+  isPrimaryAdminEmail,
+  normalizeRoleInput,
+  sanitizeNonAdminRoles,
+} from "@/lib/adminConfig";
 
 interface CourseFileRecord {
   id: string;
@@ -34,6 +45,29 @@ interface EngagementRecord {
   [key: string]: any;
 }
 
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+    const user = await findUserById(id);
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const { password, ...safeUser } = user;
+    return NextResponse.json({ user: safeUser });
+  } catch (error) {
+    console.error("User fetch error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch user" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -41,11 +75,112 @@ export async function PATCH(
   try {
     const { id } = await params;
     const payload = await request.json();
+    const usersBeforeUpdate = await getAllUsers();
+    const existingUser = usersBeforeUpdate.find((user) => user.id === id);
+
+    if (!existingUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const hasRoleField = Object.prototype.hasOwnProperty.call(payload, "role");
+    const hasRolesField = Object.prototype.hasOwnProperty.call(
+      payload,
+      "roles",
+    );
+
+    if (
+      hasRolesField &&
+      (!Array.isArray(payload.roles) || payload.roles.length === 0)
+    ) {
+      return NextResponse.json(
+        { error: "Roles must be a non-empty array" },
+        { status: 400 },
+      );
+    }
+
+    const requestedRole = hasRoleField
+      ? normalizeRoleInput(payload.role)
+      : null;
+    if (hasRoleField && payload.role && !requestedRole) {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+    }
+
+    const requestedRoles = hasRolesField ? payload.roles : [];
+
+    if (isPrimaryAdminEmail(existingUser.email || existingUser.username)) {
+      if (
+        (hasRoleField && requestedRole !== "admin") ||
+        (hasRolesField && !includesAdminRole(requestedRoles))
+      ) {
+        return NextResponse.json(
+          { error: "Primary admin role cannot be modified" },
+          { status: 403 },
+        );
+      }
+
+      if (hasRoleField || hasRolesField) {
+        payload.role = "admin";
+        payload.roles = ["admin"];
+      }
+    } else if (
+      (hasRoleField && requestedRole === "admin") ||
+      (hasRolesField && includesAdminRole(requestedRoles))
+    ) {
+      return NextResponse.json(
+        { error: "Assigning admin role is disabled" },
+        { status: 403 },
+      );
+    } else if (hasRoleField || hasRolesField) {
+      const sanitizedRoles = sanitizeNonAdminRoles(
+        hasRolesField
+          ? requestedRoles
+          : [requestedRole || existingUser.role || "faculty"],
+      );
+      payload.role = sanitizedRoles[0];
+      payload.roles = sanitizedRoles;
+    }
+
     await updateUserById(id, payload);
     const users = await getAllUsers();
 
     return NextResponse.json({ users });
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "ADMIN_ROLE_ASSIGNMENT_DISABLED") {
+        return NextResponse.json(
+          { error: "Assigning admin role is disabled" },
+          { status: 403 },
+        );
+      }
+
+      if (error.message === "PRIMARY_ADMIN_LOCKED") {
+        return NextResponse.json(
+          { error: "Primary admin role cannot be modified" },
+          { status: 403 },
+        );
+      }
+
+      if (
+        error.message === "PRIMARY_ADMIN_EMAIL_RESERVED" ||
+        error.message === "PRIMARY_ADMIN_IDENTITY_RESERVED"
+      ) {
+        return NextResponse.json(
+          { error: "Primary admin identity is reserved" },
+          { status: 403 },
+        );
+      }
+
+      if (
+        error.message === "INVALID_ROLE" ||
+        error.message === "INVALID_ROLES"
+      ) {
+        return NextResponse.json(
+          { error: "Invalid role payload" },
+          { status: 400 },
+        );
+      }
+    }
+
     console.error("User update error:", error);
     return NextResponse.json(
       { error: "Failed to update user" },

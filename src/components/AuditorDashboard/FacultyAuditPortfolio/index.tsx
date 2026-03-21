@@ -3,7 +3,12 @@ import { AuditReviewInterface } from "@/components/AuditorDashboard/AuditReviewI
 import { BackButton } from "./BackButton";
 import { FacultyHeader } from "./FacultyHeader";
 import { PortfolioTabs } from "./PortfolioTabs";
-import { CourseFile, EventReport, FacultyAuditPortfolioProps } from "./types";
+import {
+  CourseFile,
+  EventReport,
+  FacultyAuditPortfolioProps,
+  FacultyMember,
+} from "./types";
 import {
   CourseReviewInterface,
   CourseReviewGroup,
@@ -30,6 +35,7 @@ export function FacultyAuditPortfolio({
   onBack,
 }: FacultyAuditPortfolioProps) {
   const { user } = useAuth();
+  const [profileFaculty, setProfileFaculty] = useState<FacultyMember>(faculty);
   const [isReplyOpen, setIsReplyOpen] = useState(false);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
@@ -185,6 +191,47 @@ export function FacultyAuditPortfolio({
   });
 
   useEffect(() => {
+    setProfileFaculty(faculty);
+
+    const loadFacultyProfile = async () => {
+      try {
+        const response = await fetch(
+          `/api/profile?userId=${encodeURIComponent(faculty.id)}`,
+          {
+            cache: "no-store",
+          },
+        );
+        const data = (await response.json()) as {
+          user?: {
+            name?: string;
+            department?: string;
+            email?: string;
+            phone?: string;
+            experience?: string;
+            resumeUrl?: string;
+            resumeFileName?: string;
+          };
+        };
+
+        if (!response.ok || !data.user) {
+          return;
+        }
+
+        setProfileFaculty((previous) => ({
+          ...previous,
+          name: data.user?.name ?? previous.name,
+          department: data.user?.department ?? previous.department,
+          email: data.user?.email ?? previous.email,
+          phone: data.user?.phone ?? previous.phone,
+          experience: data.user?.experience ?? previous.experience,
+          resumeUrl: data.user?.resumeUrl ?? "",
+          resumeFileName: data.user?.resumeFileName ?? "",
+        }));
+      } catch (error) {
+        console.error("Load auditor faculty profile error:", error);
+      }
+    };
+
     const loadPortfolioData = async () => {
       try {
         const [filesResponse, reportsResponse, messagesResponse] =
@@ -203,7 +250,8 @@ export function FacultyAuditPortfolio({
         }
 
         const scopedFiles: CourseFile[] = (filesData.files ?? []).filter(
-          (file: CourseFile) => file.facultyId === faculty.id,
+          (file: CourseFile) =>
+            file.facultyId === faculty.id && !file.auditChecklistFinalized,
         );
         const scopedReports: EventReport[] = (reportsData.reports ?? []).filter(
           (report: EventReport) => report.facultyId === faculty.id,
@@ -218,17 +266,19 @@ export function FacultyAuditPortfolio({
     };
 
     loadPortfolioData();
+    loadFacultyProfile();
 
     if (typeof window !== "undefined") {
       const handler = () => {
         loadPortfolioData();
+        loadFacultyProfile();
       };
       window.addEventListener("dashboard:data-updated", handler);
       return () => {
         window.removeEventListener("dashboard:data-updated", handler);
       };
     }
-  }, [faculty.id]);
+  }, [faculty, faculty.id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -316,7 +366,7 @@ export function FacultyAuditPortfolio({
       <AuditReviewInterface
         type={reviewType}
         item={reviewType === "file" ? selectedFile! : selectedReport!}
-        facultyName={faculty.name}
+        facultyName={profileFaculty.name}
         facultyId={faculty.id}
         onBack={() => setIsReviewOpen(false)}
         onReviewCompleted={handleReviewCompleted}
@@ -328,7 +378,7 @@ export function FacultyAuditPortfolio({
     return (
       <CourseReviewInterface
         group={selectedCourseGroup}
-        facultyName={faculty.name}
+        facultyName={profileFaculty.name}
         facultyId={faculty.id}
         onBack={() => setSelectedCourseGroup(null)}
         onReviewCompleted={(updatedFiles) => {
@@ -343,7 +393,7 @@ export function FacultyAuditPortfolio({
   return (
     <div className="space-y-6">
       <BackButton onBack={onBack} />
-      <FacultyHeader faculty={faculty} />
+      <FacultyHeader faculty={profileFaculty} />
       <Card>
         <CardContent className="pt-6 space-y-4">
           <div className="flex items-center justify-between">

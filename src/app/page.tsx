@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getDashboardPath } from "@/lib/roles";
+import { safelyNavigate } from "@/lib/safeNavigation";
 
 export default function Home() {
   const router = useRouter();
@@ -12,9 +13,9 @@ export default function Home() {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.push(getDashboardPath(userRole));
+        safelyNavigate(() => router.push(getDashboardPath(userRole)));
       } else {
-        router.push("/login");
+        safelyNavigate(() => router.push("/login"));
       }
     }
   }, [isAuthenticated, userRole, isLoading, router]);

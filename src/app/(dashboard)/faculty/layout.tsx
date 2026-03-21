@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { RoleSwitcher } from "@/components/App/RoleSwitcher";
 import { useRouter } from "next/navigation";
 import { getDashboardPath } from "@/lib/roles";
+import { safelyNavigate } from "@/lib/safeNavigation";
 
 export default function FacultyLayout({
   children,
@@ -17,18 +18,18 @@ export default function FacultyLayout({
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && !assignedRoles.includes("faculty")) {
-      router.replace(getDashboardPath(userRole));
+      safelyNavigate(() => router.replace(getDashboardPath(userRole)));
     }
   }, [isAuthenticated, isLoading, router, userRole, assignedRoles]);
 
   const handleRoleChange = (role: typeof userRole) => {
     switchRole(role);
     document.cookie = `auth_role=${role}; path=/`;
-    router.push(getDashboardPath(role));
+    safelyNavigate(() => router.push(getDashboardPath(role)));
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <RoleSwitcher
         currentRole={userRole}
         assignedRoles={assignedRoles}

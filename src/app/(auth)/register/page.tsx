@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { SignUpForm } from "@/components/AuthPage/SignUpForm";
 import type { SignUpFormData } from "@/components/AuthPage/types";
+import { safelyNavigate } from "@/lib/safeNavigation";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,13 +30,13 @@ export default function RegisterPage() {
     }
 
     // Redirect to login after success
-    router.push("/login");
+    safelyNavigate(() => router.push("/login"));
   };
 
   return (
     <SignUpForm
       onSignUpSuccess={handleSubmit}
-      onSwitchToSignIn={() => router.push("/login")}
+      onSwitchToSignIn={() => safelyNavigate(() => router.push("/login"))}
     />
   );
 }

@@ -1,8 +1,14 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Mail, Lock, GraduationCap } from "lucide-react";
+import { User, Lock, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { SignInFormData } from "./types";
@@ -12,17 +18,20 @@ interface SignInFormProps {
   onSwitchToSignUp: () => void;
 }
 
-export function SignInForm({ onSignInSuccess, onSwitchToSignUp }: SignInFormProps) {
+export function SignInForm({
+  onSignInSuccess,
+  onSwitchToSignUp,
+}: SignInFormProps) {
   const [formData, setFormData] = useState<SignInFormData>({
-    email: "",
+    username: "",
     password: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      toast.error("Please enter email and password");
+    if (!formData.username || !formData.password) {
+      toast.error("Please enter username and password");
       return;
     }
 
@@ -51,16 +60,16 @@ export function SignInForm({ onSignInSuccess, onSwitchToSignUp }: SignInFormProp
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                id="email"
-                type="email"
-                placeholder="your.email@college.edu"
-                value={formData.email}
+                id="username"
+                type="text"
+                placeholder="Enter official username"
+                value={formData.username}
                 onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
+                  setFormData({ ...formData, username: e.target.value })
                 }
                 className="pl-10"
               />

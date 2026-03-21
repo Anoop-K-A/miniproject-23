@@ -6,14 +6,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User } from "lucide-react";
-import type { BatchCourseGroup, BatchCourseProgress } from "./types";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import type {
+  BatchCourseGroup,
+  BatchCourseProgress,
+  BatchFacultySummary,
+} from "./types";
 
 interface BatchCourseProgressProps {
   groups: BatchCourseGroup[];
 }
 
 export function BatchCourseProgress({ groups }: BatchCourseProgressProps) {
+  const [selectedFaculty, setSelectedFaculty] =
+    useState<BatchFacultySummary | null>(null);
+
   return (
     <Card>
       <CardHeader>
@@ -84,13 +99,15 @@ export function BatchCourseProgress({ groups }: BatchCourseProgressProps) {
                       No faculty assigned
                     </p>
                   ) : (
-                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    <div className="space-y-2 max-h-50 overflow-y-auto">
                       {group.faculty.map((member) => (
-                        <div
+                        <button
                           key={member.id}
-                          className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-50 transition-colors"
+                          className="flex w-full items-start gap-2 rounded-md p-2 text-left transition-colors hover:bg-gray-50"
+                          type="button"
+                          onClick={() => setSelectedFaculty(member)}
                         >
-                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                          <div className="h-8 w-8 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">
                             {member.name
                               .split(" ")
                               .map((n) => n[0])
@@ -112,9 +129,15 @@ export function BatchCourseProgress({ groups }: BatchCourseProgressProps) {
                               >
                                 {member.filesTotal} files
                               </Badge>
+                              <Badge
+                                variant="outline"
+                                className="text-xs px-1 py-0 h-4"
+                              >
+                                View profile
+                              </Badge>
                             </div>
                           </div>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   )}
@@ -124,6 +147,113 @@ export function BatchCourseProgress({ groups }: BatchCourseProgressProps) {
           </div>
         )}
       </CardContent>
+
+      <Dialog
+        open={Boolean(selectedFaculty)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedFaculty(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          {selectedFaculty && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedFaculty.name}</DialogTitle>
+                <DialogDescription>
+                  Faculty profile for this batch
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 text-sm">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500">Department</p>
+                    <p className="font-medium text-gray-800">
+                      {selectedFaculty.department || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Role</p>
+                    <p className="font-medium text-gray-800">
+                      {selectedFaculty.role || "Faculty"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="font-medium text-gray-800 break-all">
+                      {selectedFaculty.email || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Phone</p>
+                    <p className="font-medium text-gray-800">
+                      {selectedFaculty.phone || "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">Specialization</p>
+                  <p className="font-medium text-gray-800">
+                    {selectedFaculty.specialization || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">Experience</p>
+                  <p className="font-medium text-gray-800">
+                    {selectedFaculty.experience || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">Courses</p>
+                  <p className="font-medium text-gray-800">
+                    {selectedFaculty.courses &&
+                    selectedFaculty.courses.length > 0
+                      ? selectedFaculty.courses.join(", ")
+                      : "N/A"}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <Badge variant="outline">
+                    Total files: {selectedFaculty.filesTotal}
+                  </Badge>
+                  <Badge className="bg-green-100 text-green-800">
+                    Approved: {selectedFaculty.filesApproved}
+                  </Badge>
+                  <Badge className="bg-yellow-100 text-yellow-800">
+                    In review: {selectedFaculty.filesInReview}
+                  </Badge>
+                  <Badge className="bg-red-100 text-red-800">
+                    Rejected: {selectedFaculty.filesRejected}
+                  </Badge>
+                </div>
+
+                {selectedFaculty.resumeUrl ? (
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <a
+                      href={selectedFaculty.resumeUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      View Resume
+                    </a>
+                  </Button>
+                ) : null}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

@@ -1,4 +1,4 @@
-import { Activity, Edit, Search, Trash2 } from "lucide-react";
+import { Edit, FileText, Search, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +9,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -111,8 +110,8 @@ export function UsersTable({
                 <TableHead>User</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Engagement</TableHead>
                 <TableHead>Last Active</TableHead>
+                <TableHead>Resume</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -131,7 +130,7 @@ export function UsersTable({
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                        <div className="h-10 w-10 bg-linear-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm shrink-0">
                           {user.name
                             .split(" ")
                             .map((part) => part[0])
@@ -157,7 +156,7 @@ export function UsersTable({
                           onStatusChange(user.id, value as AdminUserStatus)
                         }
                       >
-                        <SelectTrigger className="w-[130px]">
+                        <SelectTrigger className="w-32.5">
                           <Badge
                             variant="secondary"
                             className={getStatusColor(user.status)}
@@ -175,29 +174,24 @@ export function UsersTable({
                       </Select>
                     </TableCell>
                     <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Activity className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-500">
-                            {user.courseFilesCount} files,{" "}
-                            {user.eventReportsCount} reports
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Progress
-                            value={user.completionRate}
-                            className="h-1.5 w-20"
-                          />
-                          <span className="text-xs font-medium">
-                            {user.completionRate}%
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
                       <span className="text-sm text-gray-600">
                         {user.lastActive || "-"}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      {user.resumeUrl ? (
+                        <a
+                          href={user.resumeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:underline text-sm"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          {user.resumeFileName || "View"}
+                        </a>
+                      ) : (
+                        <span className="text-sm text-gray-500">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end items-center gap-2">

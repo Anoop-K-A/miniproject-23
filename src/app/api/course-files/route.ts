@@ -7,13 +7,34 @@ import { getAllUsers } from "@/lib/userStore";
 import { unlink } from "fs/promises";
 import { existsSync } from "fs";
 import { join } from "path";
+import { buildTimingResponseHeaders } from "@/lib/serverTiming";
+import { isValidBatchYear, normalizeBatchYear } from "@/lib/batchYear";
 
 // Force Node.js runtime for file system operations
 export const runtime = "nodejs";
 
+function parsePositiveInt(value: string | null, fallback: number) {
+  if (!value) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+  return parsed;
+}
+
+function toBooleanFlag(value: string | null, fallback: boolean) {
+  if (value === null) {
+    return fallback;
+  }
+  return value !== "0" && value.toLowerCase() !== "false";
+}
+
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.json();
+    const academicYear = normalizeBatchYear(payload.academicYear);
 
     // Validate required fields
     if (!payload.courseCode) {
@@ -26,6 +47,13 @@ export async function POST(request: NextRequest) {
     if (!payload.fileName) {
       return NextResponse.json(
         { error: "File name is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!isValidBatchYear(academicYear)) {
+      return NextResponse.json(
+        { error: "Batch must be in YYYY-YYYY format (for example 2022-2026)" },
         { status: 400 },
       );
     }
@@ -66,7 +94,7 @@ export async function POST(request: NextRequest) {
       fileType: payload.fileType,
       uploadDate: payload.uploadDate,
       semester: payload.semester,
-      academicYear: payload.academicYear,
+      academicYear,
       size: payload.size,
       status: payload.status ?? "Pending",
       facultyName: facultyUser?.name ?? payload.facultyName,
@@ -81,7 +109,7 @@ export async function POST(request: NextRequest) {
         f.facultyId === payload.facultyId &&
         f.courseCode === payload.courseCode &&
         f.fileType === payload.fileType &&
-        f.academicYear === payload.academicYear,
+        normalizeBatchYear(f.academicYear) === academicYear,
     );
 
     let updatedFiles: CourseFile[];
@@ -154,28 +182,175 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const requestStart = Date.now();
+  let readDurationMs = 0;
+  let filterDurationMs = 0;
+  let joinDurationMs = 0;
+
   try {
+    const searchParams = request.nextUrl.searchParams;
+    const facultyId = String(searchParams.get("facultyId") || "").trim();
+    const status = String(searchParams.get("status") || "").trim();
+    const academicYear = normalizeBatchYear(
+      String(searchParams.get("academicYear") || "").trim(),
+    );
+    const search = String(searchParams.get("search") || "")
+      .trim()
+      .toLowerCase();
+    const limit = parsePositiveInt(searchParams.get("limit"), 0);
+    const offset = parsePositiveInt(searchParams.get("offset"), 0);
+    const includeMeta = toBooleanFlag(searchParams.get("includeMeta"), true);
+    const includeFaculty = toBooleanFlag(
+      searchParams.get("includeFaculty"),
+      true,
+    );
+    const requestedFields = String(searchParams.get("fields") || "")
+      .split(",")
+      .map((field) => field.trim())
+      .filter(Boolean);
+
+    const readStart = Date.now();
     const files = await readJsonFile<CourseFile[]>("courseFiles.json");
-    const users = await getAllUsers();
-    const fileCategories = await readJsonFile<string[]>(
-      "files/course-file-categories.json",
-    );
-    const fileTypes = await readJsonFile<string[]>(
-      "files/course-file-types.json",
-    );
-    const filesWithFaculty = files.map((file) => {
-      const facultyUser = users.find((user) => user.id === file.facultyId);
-      return {
-        ...file,
-        facultyName: facultyUser?.name ?? file.facultyName,
-        department: facultyUser?.department ?? file.department,
-      };
+    readDurationMs += Date.now() - readStart;
+
+    const filterStart = Date.now();
+    const filteredFiles = files.filter((file) => {
+      if (facultyId && file.facultyId !== facultyId) {
+        return false;
+      }
+
+      if (status && String(file.status || "") !== status) {
+        return false;
+      }
+
+      if (
+        academicYear &&
+        normalizeBatchYear(String(file.academicYear || "")) !== academicYear
+      ) {
+        return false;
+      }
+
+      if (!search) {
+        return true;
+      }
+
+      const haystack = [
+        file.fileName,
+        file.courseCode,
+        file.courseName,
+        file.facultyName,
+        file.department,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(search);
     });
-    return NextResponse.json({
+    filterDurationMs = Date.now() - filterStart;
+
+    const hasFieldProjection = requestedFields.length > 0;
+    const projectionFields = hasFieldProjection
+      ? new Set(["id", ...requestedFields])
+      : null;
+
+    const projectedFiles = hasFieldProjection
+      ? filteredFiles.map((file) => {
+          const projected: Record<string, unknown> = {};
+          projectionFields?.forEach((field) => {
+            const key = field as keyof CourseFile;
+            if (key in file) {
+              projected[key] = file[key];
+            }
+          });
+          return projected as unknown as CourseFile;
+        })
+      : filteredFiles;
+
+    const pagedFiles =
+      limit > 0
+        ? projectedFiles.slice(offset, offset + limit)
+        : projectedFiles.slice(offset);
+
+    let filesWithFaculty = pagedFiles;
+    if (includeFaculty) {
+      const joinStart = Date.now();
+      const users = await getAllUsers();
+      const userById = new Map(users.map((user) => [user.id, user]));
+
+      filesWithFaculty = pagedFiles.map((file) => {
+        const facultyUser = file.facultyId
+          ? userById.get(String(file.facultyId))
+          : null;
+        return {
+          ...file,
+          facultyName: facultyUser?.name ?? file.facultyName,
+          department: facultyUser?.department ?? file.department,
+        };
+      });
+      joinDurationMs = Date.now() - joinStart;
+    }
+
+    const responsePayload: {
+      files: CourseFile[];
+      total: number;
+      offset: number;
+      limit: number;
+      fileCategories?: string[];
+      fileTypes?: string[];
+    } = {
       files: filesWithFaculty,
-      fileCategories,
-      fileTypes,
+      total: filteredFiles.length,
+      offset,
+      limit,
+    };
+
+    if (includeMeta) {
+      const [fileCategories, fileTypes] = await Promise.all([
+        readJsonFile<string[]>("files/course-file-categories.json"),
+        readJsonFile<string[]>("files/course-file-types.json"),
+      ]);
+      responsePayload.fileCategories = fileCategories;
+      responsePayload.fileTypes = fileTypes;
+    }
+
+    const totalDurationMs = Date.now() - requestStart;
+    if (totalDurationMs > 1500) {
+      console.warn("Slow course-files GET", {
+        totalDurationMs,
+        readDurationMs,
+        filterDurationMs,
+        joinDurationMs,
+        limit,
+        offset,
+      });
+    }
+
+    return NextResponse.json(responsePayload, {
+      headers: buildTimingResponseHeaders(
+        [
+          {
+            name: "read",
+            durationMs: readDurationMs,
+            description: "read-json",
+          },
+          {
+            name: "filter",
+            durationMs: filterDurationMs,
+            description: "filter-search",
+          },
+          {
+            name: "join",
+            durationMs: joinDurationMs,
+            description: "user-lookup",
+          },
+          { name: "total", durationMs: totalDurationMs },
+        ],
+        {
+          "Cache-Control": "private, max-age=20, stale-while-revalidate=60",
+        },
+      ),
     });
   } catch (error) {
     console.error("Course file load error:", error);

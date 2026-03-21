@@ -11,6 +11,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
+import {
+  isPrimaryAdminEmail,
+  PRIMARY_ADMIN_EMAIL,
+  PRIMARY_ADMIN_PASSWORD,
+} from "@/lib/adminConfig";
 
 export async function POST(request: NextRequest) {
   // Only allow in development
@@ -26,10 +31,30 @@ export async function POST(request: NextRequest) {
     const { email, password, name, role, department } = body;
 
     // Use defaults if not provided
-    const testEmail = email || "admin@college.com";
-    const testPassword = password || "Admin@123";
+    const testEmail = email || PRIMARY_ADMIN_EMAIL;
+    const testPassword = password || PRIMARY_ADMIN_PASSWORD;
     const testName = name || "Admin User";
-    const testRole = role || "admin";
+    const requestedRole = String(role || "")
+      .trim()
+      .toLowerCase();
+    const isPrimaryAdminTarget = isPrimaryAdminEmail(testEmail);
+
+    if (requestedRole === "admin" && !isPrimaryAdminTarget) {
+      return NextResponse.json(
+        { error: "Assigning admin role is disabled" },
+        { status: 403 },
+      );
+    }
+
+    const testRole = isPrimaryAdminTarget
+      ? "admin"
+      : requestedRole === "auditor"
+        ? "auditor"
+        : requestedRole === "staff-advisor" ||
+            requestedRole === "staff advisor" ||
+            requestedRole === "staffadvisor"
+          ? "staff-advisor"
+          : "faculty";
     const testDepartment = department || "Administration";
 
     // Check if user already exists
@@ -108,8 +133,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const testEmail = "admin@college.com";
-    const testPassword = "Admin@123";
+    const testEmail = PRIMARY_ADMIN_EMAIL;
+    const testPassword = PRIMARY_ADMIN_PASSWORD;
 
     // Check if user already exists
     try {
