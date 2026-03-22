@@ -29,8 +29,8 @@ export default function RegisterPage() {
       throw new Error(data.error || "Registration failed");
     }
 
-    // Redirect to login after success
-    safelyNavigate(() => router.push("/login"));
+    // Redirect with a query flag so login page can show a reliable success toast.
+    safelyNavigate(() => router.push("/login?registered=1"));
   };
 
   return (
