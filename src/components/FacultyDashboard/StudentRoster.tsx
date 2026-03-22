@@ -14,6 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 interface FacultyStudent {
@@ -21,6 +28,7 @@ interface FacultyStudent {
   name: string;
   email: string;
   department: string;
+  semester: string;
   year: string;
 }
 
@@ -29,10 +37,12 @@ const emptyForm: FacultyStudent = {
   name: "",
   email: "",
   department: "",
+  semester: "",
   year: "",
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
 
 export function StudentRoster() {
   const { user } = useAuth();
@@ -64,6 +74,7 @@ export function StudentRoster() {
               name: student.name,
               email: student.email,
               department: student.department,
+              semester: student.semester || "",
               year: student.batchYear,
             }));
             setStudents(mappedStudents);
@@ -104,6 +115,9 @@ export function StudentRoster() {
     if (!form.department.trim()) {
       nextErrors.department = "Department is required.";
     }
+    if (!form.semester.trim()) {
+      nextErrors.semester = "Semester is required.";
+    }
     if (!form.year.trim()) {
       nextErrors.year = "Year is required.";
     }
@@ -131,6 +145,7 @@ export function StudentRoster() {
       name: form.name.trim(),
       email: form.email.trim(),
       department: form.department.trim(),
+      semester: form.semester.trim(),
       year: form.year.trim(),
     };
 
@@ -149,7 +164,7 @@ export function StudentRoster() {
           email: newStudent.email,
           phone: "",
           department: newStudent.department,
-          semester: "1",
+          semester: newStudent.semester,
           batchYear: newStudent.year,
           cgpa: 0,
           attendance: 0,
@@ -241,6 +256,27 @@ export function StudentRoster() {
               )}
             </div>
             <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="student-semester">Semester</Label>
+              <Select
+                value={form.semester}
+                onValueChange={(value) => handleChange("semester", value)}
+              >
+                <SelectTrigger id="student-semester">
+                  <SelectValue placeholder="Select semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  {semesterOptions.map((semesterOption) => (
+                    <SelectItem key={semesterOption} value={semesterOption}>
+                      {semesterOption}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.semester && (
+                <p className="text-xs text-red-600">{errors.semester}</p>
+              )}
+            </div>
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="student-year">Year</Label>
               <Input
                 id="student-year"
@@ -276,7 +312,8 @@ export function StudentRoster() {
                 <div>
                   <p className="text-sm font-medium">{student.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {student.id} · {student.department} · {student.year}
+                    {student.id} · {student.department} · {student.semester} ·{" "}
+                    {student.year}
                   </p>
                 </div>
                 <div className="text-xs text-muted-foreground">

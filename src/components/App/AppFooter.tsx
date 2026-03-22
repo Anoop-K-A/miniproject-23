@@ -1,9 +1,9 @@
 export function AppFooter() {
   return (
-    <footer className="bg-white border-t mt-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <footer className="mt-12 border-t border-border/70 bg-white/70 backdrop-blur-sm">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center">
-          <p className="text-sm text-gray-500 text-center">
+          <p className="text-center text-sm text-muted-foreground">
             Copyright © 2026 Government Engineering College Idukki
           </p>
         </div>

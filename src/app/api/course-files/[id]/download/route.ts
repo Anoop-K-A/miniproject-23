@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
+import { createReadStream } from "fs";
 import path from "path";
+import { Readable } from "stream";
 import { readJsonFile } from "@/lib/jsonDb";
 import type { CourseFile } from "@/components/CourseFileManager/types";
 
@@ -39,7 +41,18 @@ function buildDownloadHeaders(fileName: string, contentType: string) {
   return {
     "Content-Type": contentType,
     "Content-Disposition": `attachment; filename="${safeFileName}"; filename*=UTF-8''${encodedFileName}`,
-    "Cache-Control": "no-store",
+    "Cache-Control": "private, max-age=300, stale-while-revalidate=600",
+  };
+}
+
+function buildStreamHeaders(
+  fileName: string,
+  contentType: string,
+  contentLength: number,
+) {
+  return {
+    ...buildDownloadHeaders(fileName, contentType),
+    "Content-Length": String(contentLength),
   };
 }
 
@@ -118,9 +131,9 @@ export async function GET(
       return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
     }
 
-    let fileBuffer: Buffer;
+    let stats;
     try {
-      fileBuffer = await fs.readFile(resolvedPath);
+      stats = await fs.stat(resolvedPath);
     } catch {
       return NextResponse.json(
         { error: "File content not found on server" },
@@ -128,11 +141,16 @@ export async function GET(
       );
     }
 
-    return new NextResponse(new Uint8Array(fileBuffer), {
-      headers: buildDownloadHeaders(
+    const stream = createReadStream(resolvedPath);
+    const webStream = Readable.toWeb(stream) as ReadableStream;
+
+    return new NextResponse(webStream, {
+      headers: buildStreamHeaders(
         file.fileName,
         getContentType(file.fileName),
+        stats.size,
       ),
+      status: 200,
     });
   } catch (error) {
     console.error("Course file download error:", error);

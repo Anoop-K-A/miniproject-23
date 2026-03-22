@@ -1,4 +1,9 @@
-export type UserRole = "faculty" | "auditor" | "staff-advisor" | "admin";
+export type UserRole =
+  | "faculty"
+  | "auditor"
+  | "staff-advisor"
+  | "admin"
+  | "user";
 
 export type UserStatus =
   | "pending"

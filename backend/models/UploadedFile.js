@@ -72,6 +72,10 @@ const uploadedFileSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+uploadedFileSchema.index({ facultyId: 1, uploadedAt: -1 });
+uploadedFileSchema.index({ status: 1, uploadedAt: -1 });
+uploadedFileSchema.index({ courseCode: 1, academicYear: 1, uploadedAt: -1 });
+
 const UploadedFile = mongoose.model("UploadedFile", uploadedFileSchema);
 
 module.exports = UploadedFile;

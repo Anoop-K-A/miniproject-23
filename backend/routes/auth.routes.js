@@ -4,6 +4,11 @@ const { admin } = require("../config/firebase.config");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
+const { isPrimaryAdminUsername } = require("../config/admin.config");
+
+function escapeRegex(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 /**
  * POST /api/auth/register
@@ -15,9 +20,7 @@ router.post(
     body("email").isEmail().normalizeEmail(),
     body("password").isLength({ min: 6 }),
     body("name").trim().notEmpty(),
-    body("role")
-      .optional()
-      .isIn(["admin", "faculty", "auditor", "staff-advisor"]),
+    body("role").optional().isIn(["faculty", "auditor", "staff-advisor"]),
     body("department").trim().optional(),
   ],
   async (req, res) => {
@@ -35,10 +38,36 @@ router.post(
         department = "",
       } = req.body;
 
+      const requestedRole = String(role).trim().toLowerCase();
+      if (requestedRole === "admin") {
+        return res.status(403).json({
+          error: "Creating admin users is disabled",
+        });
+      }
+
+      const normalizedRole =
+        requestedRole === "auditor"
+          ? "auditor"
+          : requestedRole === "staff advisor" ||
+              requestedRole === "staff-advisor"
+            ? "staff-advisor"
+            : "faculty";
+      const normalizedUsername = String(name).trim().toLowerCase();
+
+      if (isPrimaryAdminUsername(normalizedUsername)) {
+        return res.status(403).json({
+          error: "This username is reserved",
+        });
+      }
+
       // Check if user already exists in MongoDB
-      const existingUser = await User.findOne({ email });
+      const existingUser = await User.findOne({
+        $or: [{ email }, { username: normalizedUsername }],
+      });
       if (existingUser) {
-        return res.status(400).json({ error: "Email already registered" });
+        return res
+          .status(400)
+          .json({ error: "Username or email already registered" });
       }
 
       // Create Firebase Auth user
@@ -54,13 +83,14 @@ router.post(
       const newUser = await User.create({
         firebaseUid: userRecord.uid,
         email,
+        username: normalizedUsername,
         name,
-        role,
-        roles: [role],
+        role: normalizedRole,
+        roles: [normalizedRole],
         department,
         password: hashedPassword,
-        status: role === "faculty" ? "pending" : "active",
-        verified: role === "faculty" ? false : true,
+        status: normalizedRole === "faculty" ? "pending" : "active",
+        verified: normalizedRole === "faculty" ? false : true,
       });
 
       res.status(201).json({
@@ -78,7 +108,9 @@ router.post(
       console.error("Registration error:", error);
 
       if (error.code === "auth/email-already-exists") {
-        return res.status(400).json({ error: "Email already registered" });
+        return res
+          .status(400)
+          .json({ error: "Username or email already registered" });
       }
 
       res.status(500).json({
@@ -95,7 +127,7 @@ router.post(
  */
 router.post(
   "/create-custom-token",
-  [body("email").isEmail().normalizeEmail(), body("password").notEmpty()],
+  [body("username").trim().notEmpty(), body("password").notEmpty()],
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -103,19 +135,30 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { email, password } = req.body;
+      const { username, password } = req.body;
+      const normalizedUsername = String(username).trim().toLowerCase();
 
       // Find user in MongoDB
-      const user = await User.findOne({ email });
+      const user = await User.findOne({
+        $or: [
+          { username: normalizedUsername },
+          { email: normalizedUsername },
+          {
+            name: {
+              $regex: new RegExp(`^${escapeRegex(username)}$`, "i"),
+            },
+          },
+        ],
+      });
 
       if (!user) {
-        return res.status(401).json({ error: "Invalid email or password" });
+        return res.status(401).json({ error: "Invalid username or password" });
       }
 
       // Verify password
       const passwordMatch = await user.comparePassword(password);
       if (!passwordMatch) {
-        return res.status(401).json({ error: "Invalid email or password" });
+        return res.status(401).json({ error: "Invalid username or password" });
       }
 
       // Check status

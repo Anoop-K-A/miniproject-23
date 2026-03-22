@@ -3,13 +3,13 @@ import type { UserRecord } from "@/lib/userStore";
 export const userSeedData: UserRecord[] = [
   {
     id: "admin-1",
-    username: "admin@college.com",
+    username: "Admin",
     password: "Admin@123",
     name: "Admin User",
     role: "admin",
     roles: ["admin"],
     department: "Administration",
-    email: "admin@college.com",
+    email: "admin@collage.com",
     status: "active",
     createdAt: "2026-02-13T00:00:00.000Z",
     updatedAt: "2026-02-18T10:24:05.555Z",
@@ -17,7 +17,7 @@ export const userSeedData: UserRecord[] = [
   },
   {
     id: "f1",
-    username: "faculty@test.com",
+    username: "Dr. John Doe",
     password: "password123",
     name: "Dr. John Doe",
     role: "faculty",
@@ -40,7 +40,7 @@ export const userSeedData: UserRecord[] = [
   },
   {
     id: "1770985873707",
-    username: "anoopka6.7.2004@gmail.com",
+    username: "anoop",
     password: "password123",
     name: "anoop",
     role: "faculty",
@@ -53,11 +53,11 @@ export const userSeedData: UserRecord[] = [
   },
   {
     id: "1771405829166",
-    username: "aaa@gmail.com",
+    username: "anoop ka",
     password: "123456",
     name: "anoop ka",
     role: "faculty",
-    roles: ["faculty", "auditor", "staff-advisor", "admin"],
+    roles: ["faculty", "auditor", "staff-advisor"],
     department: "computer science and engineering",
     status: "active",
     createdAt: "2026-02-18T09:10:29.166Z",

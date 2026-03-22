@@ -18,9 +18,21 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search, Plus } from "lucide-react";
 import { Student, DashboardStats } from "./types";
 import { StudentCard } from "./StudentCard";
+import {
+  getStandardBatchYearOptions,
+  isValidBatchYear,
+  normalizeBatchYear,
+} from "@/lib/batchYear";
 
 interface StudentListProps {
   students: Student[];
@@ -35,7 +47,6 @@ interface StudentFormState {
   email: string;
   phone: string;
   department: string;
-  semester: string;
   batchYear: string;
 }
 
@@ -45,11 +56,20 @@ const emptyForm: StudentFormState = {
   email: "",
   phone: "",
   department: "",
-  semester: "",
   batchYear: "",
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+const batchYearOptions = getStandardBatchYearOptions();
+
+function resolveInitialBatchYear(defaultBatch?: string) {
+  const normalized = normalizeBatchYear(defaultBatch);
+  if (isValidBatchYear(normalized)) {
+    return normalized;
+  }
+  return batchYearOptions[0] ?? "";
+}
 
 export function StudentList({
   students,
@@ -61,7 +81,7 @@ export function StudentList({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [form, setForm] = useState<StudentFormState>({
     ...emptyForm,
-    batchYear: stats.batchYear,
+    batchYear: resolveInitialBatchYear(stats.batchYear),
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof StudentFormState, string>>
@@ -82,6 +102,7 @@ export function StudentList({
 
   const groupedStudents = useMemo(() => {
     const groups = new Map<string, Student[]>();
+
     filteredStudents.forEach((student) => {
       const key = student.batchYear?.trim() || "Unknown";
       if (!groups.has(key)) {
@@ -89,7 +110,44 @@ export function StudentList({
       }
       groups.get(key)?.push(student);
     });
-    return Array.from(groups.entries()).sort(([a], [b]) => b.localeCompare(a));
+
+    const sortedGroupEntries = Array.from(groups.entries()).map(
+      ([batch, studentsInBatch]) => [
+        batch,
+        [...studentsInBatch].sort((a, b) => {
+          const rollA = a.rollNumber?.trim() || "";
+          const rollB = b.rollNumber?.trim() || "";
+
+          const extractNumber = (roll: string) => {
+            const digits = roll.match(/\d+/g)?.join("");
+            return digits ? Number(digits) : NaN;
+          };
+
+          const numericA = extractNumber(rollA);
+          const numericB = extractNumber(rollB);
+
+          if (!Number.isNaN(numericA) && !Number.isNaN(numericB)) {
+            if (numericA !== numericB) return numericA - numericB;
+          }
+
+          return rollA.localeCompare(rollB, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        }),
+      ] as [string, Student[]],
+    );
+
+    const sortBatchKey = (a: string, b: string) => {
+      const parseStart = (batch: string) => {
+        const parts = batch.split("-").map((p) => Number(p));
+        return Number.isNaN(parts[0]) ? 0 : parts[0];
+      };
+
+      return parseStart(b) - parseStart(a);
+    };
+
+    return sortedGroupEntries.sort(([batchA], [batchB]) => sortBatchKey(batchA, batchB));
   }, [filteredStudents]);
 
   const handleChange = (field: keyof StudentFormState, value: string) => {
@@ -116,17 +174,23 @@ export function StudentList({
     if (!form.department.trim()) {
       nextErrors.department = "Department is required.";
     }
-    if (!form.semester.trim()) {
-      nextErrors.semester = "Semester is required.";
-    }
-    if (!form.batchYear.trim()) {
+    const normalizedBatchYear = normalizeBatchYear(form.batchYear);
+
+    if (!normalizedBatchYear) {
       nextErrors.batchYear = "Batch year is required.";
+    } else if (!isValidBatchYear(normalizedBatchYear)) {
+      nextErrors.batchYear =
+        "Batch year must be in YYYY-YYYY format (for example 2023-2027).";
     }
-    if (trimmedRoll && form.batchYear.trim()) {
+    if (
+      trimmedRoll &&
+      normalizedBatchYear &&
+      isValidBatchYear(normalizedBatchYear)
+    ) {
       const existsInBatch = students.some(
         (student) =>
-          student.batchYear?.toLowerCase() ===
-            form.batchYear.trim().toLowerCase() &&
+          normalizeBatchYear(student.batchYear).toLowerCase() ===
+            normalizedBatchYear.toLowerCase() &&
           student.rollNumber.toLowerCase() === trimmedRoll.toLowerCase(),
       );
       if (existsInBatch) {
@@ -152,7 +216,7 @@ export function StudentList({
       return;
     }
 
-    const batchKey = form.batchYear.trim();
+    const batchKey = normalizeBatchYear(form.batchYear);
     const rollKey = form.rollNumber.trim();
     const newStudent: Student = {
       id: `${batchKey}-${rollKey}`,
@@ -161,7 +225,7 @@ export function StudentList({
       email: form.email.trim(),
       phone: form.phone.trim() || "",
       department: form.department.trim(),
-      semester: form.semester.trim(),
+      semester: "",
       batchYear: batchKey,
       cgpa: 0,
       attendance: 0,
@@ -173,7 +237,10 @@ export function StudentList({
     };
 
     onAddStudent(newStudent);
-    setForm({ ...emptyForm, batchYear: stats.batchYear });
+    setForm({
+      ...emptyForm,
+      batchYear: resolveInitialBatchYear(stats.batchYear),
+    });
     setErrors({});
     setIsDialogOpen(false);
   };
@@ -271,29 +338,24 @@ export function StudentList({
                       </p>
                     )}
                   </div>
-                  <div>
-                    <Label>Semester</Label>
-                    <Input
-                      value={form.semester}
-                      onChange={(event) =>
-                        handleChange("semester", event.target.value)
-                      }
-                      placeholder="6"
-                    />
-                    {errors.semester && (
-                      <p className="text-xs text-red-600">{errors.semester}</p>
-                    )}
-                  </div>
                 </div>
                 <div>
                   <Label>Batch Year</Label>
-                  <Input
+                  <Select
                     value={form.batchYear}
-                    onChange={(event) =>
-                      handleChange("batchYear", event.target.value)
-                    }
-                    placeholder="2024"
-                  />
+                    onValueChange={(value) => handleChange("batchYear", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select batch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {batchYearOptions.map((batchOption) => (
+                        <SelectItem key={batchOption} value={batchOption}>
+                          {batchOption}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {errors.batchYear && (
                     <p className="text-xs text-red-600">{errors.batchYear}</p>
                   )}
@@ -330,23 +392,65 @@ export function StudentList({
             </p>
           ) : (
             groupedStudents.map(([batch, batchStudents]) => (
-              <div key={batch} className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold">Batch {batch}</p>
-                  <span className="text-xs text-muted-foreground">
-                    {batchStudents.length} students
+              <details
+                key={batch}
+                className="group overflow-hidden rounded-xl border border-slate-200 bg-white"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-100">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="font-mono text-xs text-slate-500 group-open:hidden">
+                      [+]
+                    </span>
+                    <span className="font-mono text-xs text-slate-500 hidden group-open:inline">
+                      [-]
+                    </span>
+                    <span>Batch {batch}</span>
                   </span>
+                  <span className="text-xs text-muted-foreground">
+                    {batchStudents.length} student{batchStudents.length === 1 ? "" : "s"}
+                  </span>
+                </summary>
+
+                <div className="bg-white px-4 py-3">
+                  {/* Batch Statistics */}
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-xs text-gray-500">Total Students</p>
+                        <p className="text-lg font-semibold text-blue-600">{batchStudents.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Avg CGPA</p>
+                        <p className="text-lg font-semibold text-purple-600">
+                          {batchStudents.length > 0
+                            ? (batchStudents.reduce((sum, student) => sum + student.cgpa, 0) / batchStudents.length).toFixed(1)
+                            : "0.0"
+                          }
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Avg Attendance</p>
+                        <p className="text-lg font-semibold text-green-600">
+                          {batchStudents.length > 0
+                            ? Math.round(batchStudents.reduce((sum, student) => sum + student.attendance, 0) / batchStudents.length)
+                            : 0
+                          }%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {batchStudents.map((student) => (
+                      <StudentCard
+                        key={student.id}
+                        student={student}
+                        onViewDetails={onSelectStudent}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  {batchStudents.map((student) => (
-                    <StudentCard
-                      key={student.id}
-                      student={student}
-                      onViewDetails={onSelectStudent}
-                    />
-                  ))}
-                </div>
-              </div>
+              </details>
             ))
           )}
         </div>

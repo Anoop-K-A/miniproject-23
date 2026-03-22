@@ -2,6 +2,19 @@ const express = require("express");
 const router = express.Router();
 const { auth, db } = require("../config/firebase.config");
 const { verifyToken, requireAdmin } = require("../middleware/auth.middleware");
+const { isPrimaryAdminEmail } = require("../config/admin.config");
+
+function normalizeRole(role) {
+  const value = String(role || "")
+    .trim()
+    .toLowerCase();
+
+  if (value === "staff advisor" || value === "staffadvisor") {
+    return "staff-advisor";
+  }
+
+  return value;
+}
 
 /**
  * GET /api/admin/users/pending
@@ -106,8 +119,32 @@ router.patch(
         return res.status(400).json({ error: "Invalid roles array" });
       }
 
-      const validRoles = ["admin", "faculty", "auditor", "staff-advisor"];
-      const invalidRoles = roles.filter((role) => !validRoles.includes(role));
+      const normalizedRoles = Array.from(
+        new Set(roles.map((role) => normalizeRole(role)).filter(Boolean)),
+      );
+
+      if (normalizedRoles.includes("admin")) {
+        return res.status(403).json({
+          error: "Assigning admin role is disabled",
+        });
+      }
+
+      const targetDoc = await db.collection("users").doc(id).get();
+      if (!targetDoc.exists) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const targetUser = targetDoc.data() || {};
+      if (isPrimaryAdminEmail(targetUser.email)) {
+        return res.status(403).json({
+          error: "Primary admin role cannot be modified",
+        });
+      }
+
+      const validRoles = ["faculty", "auditor", "staff-advisor"];
+      const invalidRoles = normalizedRoles.filter(
+        (role) => !validRoles.includes(role),
+      );
 
       if (invalidRoles.length > 0) {
         return res.status(400).json({
@@ -117,15 +154,15 @@ router.patch(
       }
 
       await db.collection("users").doc(id).update({
-        roles,
-        role: roles[0], // Primary role
+        roles: normalizedRoles,
+        role: normalizedRoles[0], // Primary role
         updatedAt: new Date().toISOString(),
       });
 
       // Update custom claims
       await auth.setCustomUserClaims(id, {
-        role: roles[0],
-        roles,
+        role: normalizedRoles[0],
+        roles: normalizedRoles,
       });
 
       const updatedDoc = await db.collection("users").doc(id).get();

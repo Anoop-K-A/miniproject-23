@@ -3,6 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Student } from "./types";
 import { Briefcase } from "lucide-react";
 
@@ -14,10 +21,14 @@ interface AddActivityDialogProps {
   onActivityNameChange: (value: string) => void;
   community: string;
   onCommunityChange: (value: string) => void;
+  semester: string;
+  onSemesterChange: (value: string) => void;
   activityPoints: string;
   onActivityPointsChange: (value: string) => void;
   onAddActivity: () => void;
 }
+
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
 
 export function AddActivityDialog({
   isOpen,
@@ -27,6 +38,8 @@ export function AddActivityDialog({
   onActivityNameChange,
   community,
   onCommunityChange,
+  semester,
+  onSemesterChange,
   activityPoints,
   onActivityPointsChange,
   onAddActivity
@@ -91,6 +104,24 @@ export function AddActivityDialog({
                   value={community}
                   onChange={(e) => onCommunityChange(e.target.value)}
                 />
+              </div>
+              <div>
+                <Label>Semester</Label>
+                <Select
+                  value={semester}
+                  onValueChange={(value) => onSemesterChange(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select semester" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {semesterOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Points</Label>

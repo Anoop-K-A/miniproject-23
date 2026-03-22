@@ -13,7 +13,7 @@ export function DashboardHeader({ stats }: DashboardHeaderProps) {
       </div>
       <div>
         <h2>Staff Advisor Dashboard</h2>
-        <p className="text-gray-600">Batch {stats.batchYear} - Student Management & Career Development</p>
+        <p className="text-gray-600">Student Management & Career Development</p>
       </div>
     </div>
   );

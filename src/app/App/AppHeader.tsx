@@ -4,6 +4,7 @@ import { UserRole, getRoleInfo } from "./config";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { safelyNavigate } from "@/lib/safeNavigation";
 
 interface AppHeaderProps {
   userRole: UserRole;
@@ -30,7 +31,7 @@ export function AppHeader({ userRole }: AppHeaderProps) {
     document.cookie = "auth_authenticated=; path=/; max-age=0";
     document.cookie = "auth_role=; path=/; max-age=0";
     document.cookie = "auth_user=; path=/; max-age=0";
-    router.replace("/login");
+    safelyNavigate(() => router.replace("/login"));
   };
 
   return (

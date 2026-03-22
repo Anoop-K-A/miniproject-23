@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { userDb } from "@/lib/firestoreDb";
+import {
+  includesAdminRole,
+  isPrimaryAdminEmail,
+  sanitizeNonAdminRoles,
+} from "@/lib/adminConfig";
 
 // PATCH /api/admin/users/{id}/approve - Approve a user
 export async function PATCH(request: NextRequest, context: any) {
@@ -43,24 +48,47 @@ export async function PUT(request: NextRequest, context: any) {
       );
     }
 
-    // Validate that faculty role is always present
-    if (!roles.includes("faculty")) {
-      return NextResponse.json(
-        { error: "Faculty role must always be assigned" },
-        { status: 400 },
-      );
-    }
-
     const user = await userDb.getById(id);
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const isPrimaryAdmin = isPrimaryAdminEmail(user.email);
+
+    if (isPrimaryAdmin) {
+      if (!includesAdminRole(roles)) {
+        return NextResponse.json(
+          { error: "Primary admin role cannot be modified" },
+          { status: 403 },
+        );
+      }
+
+      const updatedPrimaryAdmin = await userDb.update(id, {
+        roles: ["admin"],
+        role: "admin",
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Primary admin role is fixed",
+        data: updatedPrimaryAdmin,
+      });
+    }
+
+    if (includesAdminRole(roles) || currentRole === "admin") {
+      return NextResponse.json(
+        { error: "Assigning admin role is disabled" },
+        { status: 403 },
+      );
+    }
+
+    const normalizedRoles = sanitizeNonAdminRoles(roles);
+
     // Update user with new roles
     const updatedUser = await userDb.update(id, {
-      roles: roles,
-      role: currentRole || "faculty",
+      roles: normalizedRoles,
+      role: normalizedRoles[0],
     });
 
     return NextResponse.json({

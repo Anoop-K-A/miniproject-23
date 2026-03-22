@@ -42,7 +42,7 @@ const theoryCourseFileChecklist: ChecklistItem[] = [
   { id: "internal_marks", label: "Internal Marks Display" },
   { id: "course_exit_survey", label: "Course Exit Survey" },
   { id: "attainment_calculation", label: "Attainment Calculation" },
-  { id: "score", label: "Score (Faculty/Auditor)" },
+  { id: "review_completed", label: "Review Completed" },
 ];
 
 const labCourseFileChecklist: ChecklistItem[] = [

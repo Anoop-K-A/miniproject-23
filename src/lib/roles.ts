@@ -1,10 +1,16 @@
-export type UserRole = "faculty" | "auditor" | "staff-advisor" | "admin";
+export type UserRole =
+  | "faculty"
+  | "auditor"
+  | "staff-advisor"
+  | "admin"
+  | "user";
 
 export const ROLE_PATHS: Record<UserRole, string> = {
   faculty: "/faculty",
   auditor: "/auditor",
   "staff-advisor": "/staff-advisor",
   admin: "/admin",
+  user: "/user",
 };
 
 export const VALID_ROLES: UserRole[] = [
@@ -12,6 +18,7 @@ export const VALID_ROLES: UserRole[] = [
   "auditor",
   "staff-advisor",
   "admin",
+  "user",
 ];
 
 export function getDashboardPath(role: UserRole) {
@@ -36,6 +43,9 @@ export function getRoleFromPath(pathname: string): UserRole | null {
   }
   if (pathname.startsWith(ROLE_PATHS.admin)) {
     return "admin";
+  }
+  if (pathname.startsWith(ROLE_PATHS.user)) {
+    return "user";
   }
   return null;
 }

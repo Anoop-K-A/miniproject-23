@@ -29,7 +29,7 @@ export function PortfolioTabs({
   const tabCount = showStudents ? 3 : 2;
   const tabsClassName =
     tabCount === 3 ? "grid w-full grid-cols-3" : "grid w-full grid-cols-2";
-  const defaultTabValue = showStudents ? "students" : "course-files";
+  const defaultTabValue = "course-files";
 
   return (
     <Tabs defaultValue={defaultTabValue} className="w-full">

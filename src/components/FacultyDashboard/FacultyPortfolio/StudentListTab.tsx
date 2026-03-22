@@ -32,8 +32,11 @@ export function StudentListTab({ students }: StudentListTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const initialExpandedBatches = students
+    .map((student) => String(student.batchYear || "").trim())
+    .filter((batch): batch is string => Boolean(batch));
   const [expandedBatches, setExpandedBatches] = useState<Set<string>>(
-    new Set(students.map((s) => s.batchYear).filter(Boolean)),
+    new Set(initialExpandedBatches),
   );
 
   const filteredStudents = useMemo(

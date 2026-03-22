@@ -24,27 +24,33 @@ export function RoleSwitcher({
     { role: "admin", label: "Admin Portal", icon: ShieldCheck },
   ];
 
-  // Always show faculty role (everyone can upload as faculty)
-  // Plus show any other assigned roles
-  const visibleRoles = allRoles.filter(
-    ({ role }) => role === "faculty" || assignedRoles.includes(role),
-  );
+  // Admin is an exclusive portal role in UI.
+  const visibleRoles = assignedRoles.includes("admin")
+    ? allRoles.filter(({ role }) => role === "admin")
+    : allRoles.filter(
+        ({ role }) => role === "faculty" || assignedRoles.includes(role),
+      );
 
   return (
-    <div className="mb-6 flex flex-wrap gap-3">
-      {visibleRoles.map(({ role, label, icon: Icon }) => (
-        <Button
-          key={role}
-          variant={currentRole === role ? "default" : "outline"}
-          onClick={() => {
-            onRoleChange(role);
-          }}
-          className="flex items-center gap-2"
-        >
-          <Icon className="h-4 w-4" />
-          {label}
-        </Button>
-      ))}
+    <div className="mb-8 rounded-2xl border border-border/60 bg-card/80 p-3 shadow-[0_10px_24px_rgba(15,38,65,0.08)] backdrop-blur-sm">
+      <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        Switch Portal Role
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {visibleRoles.map(({ role, label, icon: Icon }) => (
+          <Button
+            key={role}
+            variant={currentRole === role ? "default" : "outline"}
+            onClick={() => {
+              onRoleChange(role);
+            }}
+            className="h-10 gap-2 rounded-lg"
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }
