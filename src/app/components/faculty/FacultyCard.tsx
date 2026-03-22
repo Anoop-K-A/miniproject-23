@@ -36,7 +36,7 @@ export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
     faculty.isStaffAdvisor ? "staff-advisor" : null,
   ].filter(
     (role): role is string =>
-      Boolean(role) && role.trim().toLowerCase() !== "admin",
+      typeof role === "string" && role.trim().toLowerCase() !== "admin",
   );
 
   const rolesToDisplay = Array.from(

@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,23 +30,43 @@ function formatRoleLabel(role: string) {
   }
 }
 
-export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
-  const roleCandidates = [
-    ...(faculty.roles ?? []),
-    faculty.role,
-    faculty.isStaffAdvisor ? "staff-advisor" : null,
-  ].filter(
-    (role): role is string =>
-      Boolean(role) && role.trim().toLowerCase() !== "admin",
+export const FacultyCard = memo(function FacultyCard({
+  faculty,
+  onSelect,
+}: FacultyCardProps) {
+  const roleCandidates = useMemo(
+    () =>
+      [
+        ...(faculty.roles ?? []),
+        faculty.role,
+        faculty.isStaffAdvisor ? "staff-advisor" : null,
+      ].filter(
+        (role): role is string =>
+          Boolean(role) && role.trim().toLowerCase() !== "admin",
+      ),
+    [faculty.isStaffAdvisor, faculty.role, faculty.roles],
   );
 
-  const rolesToDisplay = Array.from(
-    new Map(
-      roleCandidates.map((role) => {
-        const label = formatRoleLabel(role);
-        return [label.toLowerCase(), label] as const;
-      }),
-    ).values(),
+  const rolesToDisplay = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          roleCandidates.map((role) => {
+            const label = formatRoleLabel(role);
+            return [label.toLowerCase(), label] as const;
+          }),
+        ).values(),
+      ),
+    [roleCandidates],
+  );
+
+  const initials = useMemo(
+    () =>
+      faculty.name
+        .split(" ")
+        .map((n) => n[0])
+        .join(""),
+    [faculty.name],
   );
 
   return (
@@ -56,10 +77,7 @@ export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
       <CardContent className="pt-6 flex flex-col h-full">
         <div className="flex items-start gap-3 mb-4">
           <div className="h-12 w-12 bg-linear-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white shrink-0">
-            {faculty.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{faculty.name}</p>
@@ -116,4 +134,4 @@ export function FacultyCard({ faculty, onSelect }: FacultyCardProps) {
       </CardContent>
     </Card>
   );
-}
+});

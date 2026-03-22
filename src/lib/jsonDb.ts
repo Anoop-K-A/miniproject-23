@@ -10,9 +10,11 @@ interface JsonStoreDocument {
 }
 
 const dataRoot = path.join(process.cwd(), "src", "data");
+const JSON_READ_CACHE_TTL_MS = 4000;
 
 // Simple lock mechanism to prevent concurrent writes
 const locks = new Map<string, Promise<void>>();
+const readCache = new Map<string, { expiresAt: number; data: unknown }>();
 
 const mongoBackedFiles = new Set<string>([
   "courseFiles.json",
@@ -36,6 +38,31 @@ function normalizeFileName(fileName: string) {
 
 function isMongoBackedFile(fileName: string) {
   return mongoBackedFiles.has(normalizeFileName(fileName));
+}
+
+function getCachedData<T>(fileName: string): T | null {
+  const cacheEntry = readCache.get(fileName);
+  if (!cacheEntry) {
+    return null;
+  }
+
+  if (cacheEntry.expiresAt <= Date.now()) {
+    readCache.delete(fileName);
+    return null;
+  }
+
+  return cacheEntry.data as T;
+}
+
+function setCachedData(fileName: string, data: unknown) {
+  readCache.set(fileName, {
+    data,
+    expiresAt: Date.now() + JSON_READ_CACHE_TTL_MS,
+  });
+}
+
+function invalidateCachedData(fileName: string) {
+  readCache.delete(fileName);
 }
 
 async function getJsonStoreCollection() {
@@ -94,6 +121,7 @@ function validateSerializableJson(data: unknown) {
 
 async function writeMongoBackedData(fileName: string, data: unknown) {
   const normalizedFileName = normalizeFileName(fileName);
+  invalidateCachedData(normalizedFileName);
 
   while (locks.has(normalizedFileName)) {
     await locks.get(normalizedFileName);
@@ -134,8 +162,15 @@ export function getDataFilePath(fileName: string) {
 export async function readJsonFile<T>(fileName: string): Promise<T> {
   const normalizedFileName = normalizeFileName(fileName);
 
+  const cached = getCachedData<T>(normalizedFileName);
+  if (cached !== null) {
+    return cached;
+  }
+
   if (!isMongoBackedFile(normalizedFileName)) {
-    return readFileFromDisk<T>(normalizedFileName);
+    const data = await readFileFromDisk<T>(normalizedFileName);
+    setCachedData(normalizedFileName, data);
+    return data;
   }
 
   await seedMongoFileFromDisk(normalizedFileName);
@@ -143,14 +178,19 @@ export async function readJsonFile<T>(fileName: string): Promise<T> {
   const document = await collection.findOne({ _id: normalizedFileName });
 
   if (!document) {
-    return readFileFromDisk<T>(normalizedFileName);
+    const fallbackData = await readFileFromDisk<T>(normalizedFileName);
+    setCachedData(normalizedFileName, fallbackData);
+    return fallbackData;
   }
 
-  return document.data as T;
+  const data = document.data as T;
+  setCachedData(normalizedFileName, data);
+  return data;
 }
 
 export async function writeJsonFile<T>(fileName: string, data: T) {
   const normalizedFileName = normalizeFileName(fileName);
+  invalidateCachedData(normalizedFileName);
 
   if (isMongoBackedFile(normalizedFileName)) {
     await writeMongoBackedData(normalizedFileName, data);

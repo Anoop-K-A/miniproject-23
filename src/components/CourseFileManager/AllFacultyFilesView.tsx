@@ -120,8 +120,9 @@ export function AllFacultyFilesView({
         return;
       }
       onFilesChange?.(data.files);
-      const refreshed = data.files
-        .filter((file: CourseFile) => file.id === selectedFile.id)
+      const files: CourseFile[] = data.files;
+      const refreshed = files
+        .filter((file) => file.id === selectedFile.id)
         .reduce<CourseFile | undefined>((acc, file) => acc ?? file, undefined);
       setSelectedFile(refreshed ?? updatedFile);
       setIsPeerReviewOpen(false);
@@ -161,8 +162,9 @@ export function AllFacultyFilesView({
         return;
       }
       onFilesChange?.(data.files);
-      const refreshed = data.files
-        .filter((file: CourseFile) => file.id === selectedFile.id)
+      const files: CourseFile[] = data.files;
+      const refreshed = files
+        .filter((file) => file.id === selectedFile.id)
         .reduce<CourseFile | undefined>((acc, file) => acc ?? file, undefined);
       setSelectedFile(refreshed ?? updatedFile);
       setSelectedReview(null);

@@ -1,5 +1,7 @@
 "use client";
 
+import { memo, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { FacultyCard } from "@/components/faculty/FacultyCard";
 import type { FacultyMember } from "@/types/faculty";
 
@@ -7,9 +9,21 @@ interface UserFacultyProfilesProps {
   facultyMembers: FacultyMember[];
 }
 
-export function UserFacultyProfiles({
+const INITIAL_VISIBLE = 9;
+const LOAD_MORE_STEP = 12;
+
+export const UserFacultyProfiles = memo(function UserFacultyProfiles({
   facultyMembers,
 }: UserFacultyProfilesProps) {
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+
+  const visibleFaculty = useMemo(
+    () => facultyMembers.slice(0, visibleCount),
+    [facultyMembers, visibleCount],
+  );
+
+  const remaining = facultyMembers.length - visibleCount;
+
   if (facultyMembers.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
@@ -24,10 +38,26 @@ export function UserFacultyProfiles({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-      {facultyMembers.map((faculty) => (
-        <FacultyCard key={faculty.id} faculty={faculty} onSelect={() => {}} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {visibleFaculty.map((faculty) => (
+          <FacultyCard key={faculty.id} faculty={faculty} onSelect={() => {}} />
+        ))}
+      </div>
+      {remaining > 0 ? (
+        <div className="mt-4 flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() =>
+              setVisibleCount((current) =>
+                Math.min(current + LOAD_MORE_STEP, facultyMembers.length),
+              )
+            }
+          >
+            Show more ({remaining} remaining)
+          </Button>
+        </div>
+      ) : null}
+    </>
   );
-}
+});

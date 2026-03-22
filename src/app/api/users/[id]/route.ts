@@ -3,6 +3,7 @@ import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import {
   deleteUserById,
   findUserById,
+  findUserByUsername,
   getAllUsers,
   updateUserById,
 } from "@/lib/userStore";
@@ -46,12 +47,17 @@ interface EngagementRecord {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    const user = await findUserById(id);
+    const userById = await findUserById(id);
+    const cookieUsername = request.cookies.get("auth_user")?.value ?? "";
+    const userByCookie = cookieUsername
+      ? await findUserByUsername(cookieUsername)
+      : null;
+    const user = userById ?? userByCookie;
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -82,6 +88,20 @@ export async function PATCH(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    if (Object.prototype.hasOwnProperty.call(payload, "password")) {
+      const nextPassword = String(payload.password || "").trim();
+      if (!nextPassword) {
+        delete payload.password;
+      } else if (nextPassword.length < 6) {
+        return NextResponse.json(
+          { error: "Password must be at least 6 characters" },
+          { status: 400 },
+        );
+      } else {
+        payload.password = nextPassword;
+      }
+    }
+
     const hasRoleField = Object.prototype.hasOwnProperty.call(payload, "role");
     const hasRolesField = Object.prototype.hasOwnProperty.call(
       payload,
@@ -106,6 +126,9 @@ export async function PATCH(
     }
 
     const requestedRoles = hasRolesField ? payload.roles : [];
+    const existingIsAdmin =
+      normalizeRoleInput(existingUser.role) === "admin" ||
+      includesAdminRole(existingUser.roles || []);
 
     if (isPrimaryAdminEmail(existingUser.email || existingUser.username)) {
       if (
@@ -123,13 +146,19 @@ export async function PATCH(
         payload.roles = ["admin"];
       }
     } else if (
-      (hasRoleField && requestedRole === "admin") ||
-      (hasRolesField && includesAdminRole(requestedRoles))
+      ((hasRoleField && requestedRole === "admin") ||
+        (hasRolesField && includesAdminRole(requestedRoles))) &&
+      !existingIsAdmin
     ) {
       return NextResponse.json(
         { error: "Assigning admin role is disabled" },
         { status: 403 },
       );
+    } else if (existingIsAdmin && (hasRoleField || hasRolesField)) {
+      // Existing admin accounts can still be edited (for example password updates),
+      // but their admin role remains fixed.
+      payload.role = "admin";
+      payload.roles = ["admin"];
     } else if (hasRoleField || hasRolesField) {
       const sanitizedRoles = sanitizeNonAdminRoles(
         hasRolesField

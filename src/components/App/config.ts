@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import type { UserRole } from "@/lib/roles";
 
+export type { UserRole };
+
 export interface RoleInfo {
   name: string;
   icon: typeof GraduationCap;

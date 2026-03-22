@@ -9,12 +9,14 @@ import type {
   RecentReview,
 } from "@/components/AuditorDashboard/types";
 import type {
+  BatchCourseOverview,
   CareerStats,
   DashboardStats as StaffStats,
   Student,
 } from "@/components/StaffAdvisorDashboard/types";
 import { readJsonFile } from "@/lib/jsonDb";
 import { getAllUsers } from "@/lib/userStore";
+import { normalizeRoleInput } from "@/lib/adminConfig";
 
 // Helper to serialize objects with MongoDB ObjectIds for client components
 function serializeId(id: unknown): string {
@@ -88,6 +90,19 @@ interface CareerActivityRecord {
   type: "internship" | "project" | "workshop" | "interview" | string;
   status: string;
 }
+
+interface StaffAdvisorDashboardData {
+  stats: StaffStats;
+  careerStats: CareerStats;
+  students: Student[];
+  batchCourseOverview: BatchCourseOverview;
+}
+
+const STAFF_ADVISOR_DASHBOARD_CACHE_TTL_MS = 5000;
+const staffAdvisorDashboardCache = new Map<
+  string,
+  { expiresAt: number; data: StaffAdvisorDashboardData }
+>();
 
 export interface FacultyDashboardData {
   stats: DashboardStats;
@@ -470,6 +485,14 @@ export async function getAuditorDashboardData() {
 }
 
 export async function getStaffAdvisorDashboardData(username?: string | null) {
+  const normalizedUsername = normalizeIdentity(username);
+  const cacheKey = normalizedUsername || "__anonymous__";
+  const cachedEntry = staffAdvisorDashboardCache.get(cacheKey);
+
+  if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
+    return cachedEntry.data;
+  }
+
   const users = await getAllUsers();
   const students = await readJsonFile<Student[]>("students.json");
   const courseFiles =
@@ -480,12 +503,15 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
     "careerActivities.json",
   );
 
-  const normalizedUsername = normalizeIdentity(username);
   const staffAdvisor = normalizedUsername
     ? users.find((user) => {
         const userRoles = user.roles?.length ? user.roles : [user.role];
+        const normalizedRoles = userRoles
+          .map((role) => normalizeRoleInput(role))
+          .filter((role): role is "staff-advisor" => role === "staff-advisor");
         const isStaffAdvisor =
-          userRoles.includes("staff-advisor") || user.role === "staff-advisor";
+          normalizedRoles.includes("staff-advisor") ||
+          user.isStaffAdvisor === true;
         return (
           isStaffAdvisor &&
           normalizeIdentity(user.username) === normalizedUsername
@@ -493,106 +519,71 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
       })
     : undefined;
   const staffAdvisorId = staffAdvisor ? serializeId(staffAdvisor.id) : "";
-  const scopedStudents = staffAdvisorId
-    ? students.filter(
-        (student) => serializeId(student.advisorId) === staffAdvisorId,
-      )
-    : [];
-  const scopedStudentIds = new Set(
-    scopedStudents.map((student) => serializeId(student.id)),
-  );
-  const scopedCareerActivities = careerActivities.filter((activity) =>
-    scopedStudentIds.has(serializeId(activity.studentId)),
-  );
-
-  const totalStudents = scopedStudents.length;
-  const batchYear =
-    scopedStudents.find((student) => student.batchYear)?.batchYear ?? "";
-  const placedStudents = scopedStudents.filter(
-    (student) => student.placementStatus === "Placed",
-  ).length;
-  const inProcess = scopedStudents.filter(
-    (student) => student.placementStatus === "In Process",
-  ).length;
-  const averageCGPA =
-    totalStudents > 0
-      ? Math.round(
-          (scopedStudents.reduce((sum, student) => sum + student.cgpa, 0) /
-            totalStudents) *
-            10,
-        ) / 10
-      : 0;
-  const averageAttendance =
-    totalStudents > 0
-      ? Math.round(
-          scopedStudents.reduce((sum, student) => sum + student.attendance, 0) /
-            totalStudents,
-        )
-      : 0;
 
   const facultyUsers = users.filter(
     (user) =>
       (user.roles?.includes("faculty") || user.role === "faculty") &&
       user.role !== "admin",
   );
-  const approvedFiles = courseFiles.filter(
-    (file) => file.status === "Approved",
-  ).length;
-  const approvedReports = eventReports.filter(
-    (report) => report.status === "Approved",
-  ).length;
-  const batchYears = Array.from(
-    new Set(scopedStudents.map((student) => student.batchYear).filter(Boolean)),
-  ) as string[];
+  const facultyById = new Map(
+    facultyUsers.map((user) => [serializeId(user.id), user]),
+  );
 
-  const overallCourseFiles =
-    batchYears.length > 0
-      ? courseFiles.filter(
-          (file) => file.academicYear && batchYears.includes(file.academicYear),
-        )
-      : [];
-  const overallApproved = overallCourseFiles.filter(
-    (file) => file.status === "Approved",
-  ).length;
-  const overallInReview = overallCourseFiles.filter(
-    (file) => file.status === "Pending" || file.status === "Submitted",
-  ).length;
-  const overallRejected = overallCourseFiles.filter(
-    (file) => file.status === "Rejected",
-  ).length;
-  const overallCompletionRate =
-    overallCourseFiles.length > 0
-      ? Math.round((overallApproved / overallCourseFiles.length) * 100)
-      : 0;
+  const scopedStudents = staffAdvisorId
+    ? students.filter(
+        (student) => serializeId(student.advisorId) === staffAdvisorId,
+      )
+    : [];
 
-  const batchCourseOverview = {
-    overall: {
-      batchYear: "All",
-      totalFiles: overallCourseFiles.length,
-      approvedFiles: overallApproved,
-      inReviewFiles: overallInReview,
-      rejectedFiles: overallRejected,
-      completionRate: overallCompletionRate,
-    },
-    groups: batchYears.map((year) => {
-      const batchCourseFiles = courseFiles.filter(
-        (file) => file.academicYear === year,
-      );
-      const approvedBatchFiles = batchCourseFiles.filter(
-        (file) => file.status === "Approved",
-      ).length;
-      const inReviewBatchFiles = batchCourseFiles.filter(
-        (file) => file.status === "Pending" || file.status === "Submitted",
-      ).length;
-      const rejectedBatchFiles = batchCourseFiles.filter(
-        (file) => file.status === "Rejected",
-      ).length;
-      const completionRate =
-        batchCourseFiles.length > 0
-          ? Math.round((approvedBatchFiles / batchCourseFiles.length) * 100)
-          : 0;
+  let placedStudents = 0;
+  let inProcess = 0;
+  let cgpaTotal = 0;
+  let attendanceTotal = 0;
+  const batchYearSet = new Set<string>();
 
-      const batchFacultyMap = new Map<
+  for (const student of scopedStudents) {
+    if (student.placementStatus === "Placed") {
+      placedStudents += 1;
+    } else if (student.placementStatus === "In Process") {
+      inProcess += 1;
+    }
+
+    cgpaTotal += student.cgpa;
+    attendanceTotal += student.attendance;
+
+    const year = String(student.batchYear ?? "").trim();
+    if (year) {
+      batchYearSet.add(year);
+    }
+  }
+
+  const scopedStudentIds = new Set(
+    scopedStudents.map((student) => serializeId(student.id)),
+  );
+
+  const totalStudents = scopedStudents.length;
+  const batchYear =
+    scopedStudents.find((student) => student.batchYear)?.batchYear ?? "";
+  const averageCGPA =
+    totalStudents > 0 ? Math.round((cgpaTotal / totalStudents) * 10) / 10 : 0;
+  const averageAttendance =
+    totalStudents > 0 ? Math.round(attendanceTotal / totalStudents) : 0;
+
+  let approvedFiles = 0;
+  let approvedReports = 0;
+  let overallTotalFiles = 0;
+  let overallApproved = 0;
+  let overallInReview = 0;
+  let overallRejected = 0;
+
+  const batchGroups = new Map<
+    string,
+    {
+      totalFiles: number;
+      approvedFiles: number;
+      inReviewFiles: number;
+      rejectedFiles: number;
+      faculty: Map<
         string,
         {
           id: string;
@@ -611,62 +602,140 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
           filesInReview: number;
           filesRejected: number;
         }
-      >();
+      >;
+    }
+  >();
 
-      batchCourseFiles.forEach((file) => {
-        if (!file.facultyId) return;
-        const userId = serializeId(file.facultyId);
-        const facultyUser = facultyUsers.find(
-          (user) => serializeId(user.id) === userId,
-        );
-        if (!facultyUser) return;
-        if (!batchFacultyMap.has(userId)) {
-          batchFacultyMap.set(userId, {
-            id: serializeId(facultyUser.id),
-            name: facultyUser.name,
-            department: facultyUser.department ?? "",
-            role: facultyUser.facultyRole ?? "Faculty",
-            email: facultyUser.email ?? facultyUser.username,
-            phone: facultyUser.phone ?? "",
-            specialization: facultyUser.specialization ?? "",
-            experience: facultyUser.experience ?? "",
-            courses: Array.isArray(facultyUser.courses)
-              ? facultyUser.courses.filter(Boolean)
-              : [],
-            resumeUrl: facultyUser.resumeUrl ?? "",
-            resumeFileName: facultyUser.resumeFileName ?? "",
-            filesTotal: 0,
-            filesApproved: 0,
-            filesInReview: 0,
-            filesRejected: 0,
-          });
-        }
-        const entry = batchFacultyMap.get(userId);
-        if (!entry) return;
-        entry.filesTotal += 1;
-        if (file.status === "Approved") {
-          entry.filesApproved += 1;
-        } else if (file.status === "Rejected") {
-          entry.filesRejected += 1;
-        } else {
-          entry.filesInReview += 1;
-        }
+  for (const file of courseFiles) {
+    if (file.status === "Approved") {
+      approvedFiles += 1;
+    }
+
+    const academicYear = String(file.academicYear ?? "").trim();
+    if (!academicYear || !batchYearSet.has(academicYear)) {
+      continue;
+    }
+
+    overallTotalFiles += 1;
+    const isApproved = file.status === "Approved";
+    const isRejected = file.status === "Rejected";
+    if (isApproved) {
+      overallApproved += 1;
+    } else if (isRejected) {
+      overallRejected += 1;
+    } else {
+      overallInReview += 1;
+    }
+
+    if (!batchGroups.has(academicYear)) {
+      batchGroups.set(academicYear, {
+        totalFiles: 0,
+        approvedFiles: 0,
+        inReviewFiles: 0,
+        rejectedFiles: 0,
+        faculty: new Map(),
       });
+    }
 
-      return {
+    const batchEntry = batchGroups.get(academicYear);
+    if (!batchEntry) {
+      continue;
+    }
+
+    batchEntry.totalFiles += 1;
+    if (isApproved) {
+      batchEntry.approvedFiles += 1;
+    } else if (isRejected) {
+      batchEntry.rejectedFiles += 1;
+    } else {
+      batchEntry.inReviewFiles += 1;
+    }
+
+    if (!file.facultyId) {
+      continue;
+    }
+
+    const userId = serializeId(file.facultyId);
+    const facultyUser = facultyById.get(userId);
+    if (!facultyUser) {
+      continue;
+    }
+
+    if (!batchEntry.faculty.has(userId)) {
+      batchEntry.faculty.set(userId, {
+        id: serializeId(facultyUser.id),
+        name: facultyUser.name,
+        department: facultyUser.department ?? "",
+        role: facultyUser.facultyRole ?? "Faculty",
+        email: facultyUser.email ?? facultyUser.username,
+        phone: facultyUser.phone ?? "",
+        specialization: facultyUser.specialization ?? "",
+        experience: facultyUser.experience ?? "",
+        courses: Array.isArray(facultyUser.courses)
+          ? facultyUser.courses.filter(Boolean)
+          : [],
+        resumeUrl: facultyUser.resumeUrl ?? "",
+        resumeFileName: facultyUser.resumeFileName ?? "",
+        filesTotal: 0,
+        filesApproved: 0,
+        filesInReview: 0,
+        filesRejected: 0,
+      });
+    }
+
+    const facultySummary = batchEntry.faculty.get(userId);
+    if (!facultySummary) {
+      continue;
+    }
+
+    facultySummary.filesTotal += 1;
+    if (isApproved) {
+      facultySummary.filesApproved += 1;
+    } else if (isRejected) {
+      facultySummary.filesRejected += 1;
+    } else {
+      facultySummary.filesInReview += 1;
+    }
+  }
+
+  for (const report of eventReports) {
+    if (report.status === "Approved") {
+      approvedReports += 1;
+    }
+  }
+
+  const batchCourseOverview: BatchCourseOverview = {
+    overall: {
+      batchYear: "All",
+      totalFiles: overallTotalFiles,
+      approvedFiles: overallApproved,
+      inReviewFiles: overallInReview,
+      rejectedFiles: overallRejected,
+      completionRate:
+        overallTotalFiles > 0
+          ? Math.round((overallApproved / overallTotalFiles) * 100)
+          : 0,
+    },
+    groups: Array.from(batchGroups.entries())
+      .sort(([a], [b]) => b.localeCompare(a, undefined, { numeric: true }))
+      .map(([year, batchEntry]) => ({
         progress: {
           batchYear: year,
-          totalFiles: batchCourseFiles.length,
-          approvedFiles: approvedBatchFiles,
-          inReviewFiles: inReviewBatchFiles,
-          rejectedFiles: rejectedBatchFiles,
-          completionRate,
+          totalFiles: batchEntry.totalFiles,
+          approvedFiles: batchEntry.approvedFiles,
+          inReviewFiles: batchEntry.inReviewFiles,
+          rejectedFiles: batchEntry.rejectedFiles,
+          completionRate:
+            batchEntry.totalFiles > 0
+              ? Math.round(
+                  (batchEntry.approvedFiles / batchEntry.totalFiles) * 100,
+                )
+              : 0,
         },
-        faculty: Array.from(batchFacultyMap.values()).sort((a, b) =>
+        faculty: Array.from(batchEntry.faculty.values()).sort((a, b) =>
           a.name.localeCompare(b.name),
         ),
-      };
-    }),
+      })),
   };
 
   const stats: StaffStats = {
@@ -681,30 +750,50 @@ export async function getStaffAdvisorDashboardData(username?: string | null) {
     approvedReports,
   };
 
+  let totalInternships = 0;
+  let activeInternships = 0;
+  let completedProjects = 0;
+  let skillWorkshops = 0;
+  let campusInterviews = 0;
+
+  for (const activity of careerActivities) {
+    if (!scopedStudentIds.has(serializeId(activity.studentId))) {
+      continue;
+    }
+
+    if (activity.type === "internship") {
+      totalInternships += 1;
+      if (activity.status === "active") {
+        activeInternships += 1;
+      }
+    } else if (activity.type === "project" && activity.status === "completed") {
+      completedProjects += 1;
+    } else if (activity.type === "workshop") {
+      skillWorkshops += 1;
+    } else if (activity.type === "interview") {
+      campusInterviews += 1;
+    }
+  }
+
   const careerStats: CareerStats = {
-    totalInternships: scopedCareerActivities.filter(
-      (activity) => activity.type === "internship",
-    ).length,
-    activeInternships: scopedCareerActivities.filter(
-      (activity) =>
-        activity.type === "internship" && activity.status === "active",
-    ).length,
-    completedProjects: scopedCareerActivities.filter(
-      (activity) =>
-        activity.type === "project" && activity.status === "completed",
-    ).length,
-    skillWorkshops: scopedCareerActivities.filter(
-      (activity) => activity.type === "workshop",
-    ).length,
-    campusInterviews: scopedCareerActivities.filter(
-      (activity) => activity.type === "interview",
-    ).length,
+    totalInternships,
+    activeInternships,
+    completedProjects,
+    skillWorkshops,
+    campusInterviews,
   };
 
-  return {
+  const data: StaffAdvisorDashboardData = {
     stats,
     careerStats,
     students: scopedStudents,
     batchCourseOverview,
   };
+
+  staffAdvisorDashboardCache.set(cacheKey, {
+    data,
+    expiresAt: Date.now() + STAFF_ADVISOR_DASHBOARD_CACHE_TTL_MS,
+  });
+
+  return data;
 }

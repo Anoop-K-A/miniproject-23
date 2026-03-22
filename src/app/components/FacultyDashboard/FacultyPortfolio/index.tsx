@@ -8,7 +8,9 @@ import { CourseFile, EventReport, FacultyPortfolioProps } from "./types";
 
 export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
-  const [selectedReport, setSelectedReport] = useState<EventReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<EventReport | null>(
+    null,
+  );
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
   const [isReportViewOpen, setIsReportViewOpen] = useState(false);
 
@@ -20,6 +22,7 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
       fileType: "Syllabus",
       uploadDate: "2024-11-15",
       courseName: "CS101 - Introduction to Programming",
+      courseCode: "CS101",
       semester: "Fall 2024",
       status: "Approved",
     },

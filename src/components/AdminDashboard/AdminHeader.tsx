@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import type { NotificationData } from "./types";
 import { AddUserDialog } from "./AddUserDialog";
+import type { UserRole } from "@/lib/roles";
 
 interface AdminHeaderProps {
   unreadCount: number;
@@ -26,7 +27,8 @@ interface AdminHeaderProps {
     phone?: string;
     department?: string;
     designation?: string;
-    role: "faculty" | "auditor" | "staff-advisor" | "admin";
+    role: UserRole;
+    roles?: UserRole[];
   }) => void;
 }
 

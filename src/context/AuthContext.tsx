@@ -230,6 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     let isDisposed = false;
+    const hasAdminRole = assignedRoles.includes("admin");
 
     const syncCurrentUser = async () => {
       try {
@@ -273,7 +274,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             : normalizedRoles[0];
 
         const nextUser: AuthUser = {
-          id: user.id,
+          id: data.user.id || user.id,
           username: data.user.username || user.username,
           name: data.user.name || user.name,
           role: activeRole,
@@ -302,7 +303,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const intervalId = window.setInterval(syncCurrentUser, 10000);
     const onFocus = () => {
       syncCurrentUser();
     };
@@ -316,9 +316,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibilityChange);
 
+    const intervalId = hasAdminRole
+      ? window.setInterval(syncCurrentUser, 300000) // 5 minutes instead of 30s - reduces API calls by 10x
+      : null;
+
     return () => {
       isDisposed = true;
-      window.clearInterval(intervalId);
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };

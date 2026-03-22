@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, memo } from "react";
+import dynamic from "next/dynamic";
 import { UserRole, getRoleInfo } from "@/components/App/config";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,13 @@ import {
 import { Bell } from "lucide-react";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ProfileDialog } from "@/components/App/ProfileDialog";
 import { safelyNavigate } from "@/lib/safeNavigation";
+
+const ProfileDialog = dynamic(
+  () =>
+    import("@/components/App/ProfileDialog").then((mod) => mod.ProfileDialog),
+  { ssr: false },
+);
 
 interface AppHeaderProps {
   userRole: UserRole;
@@ -83,7 +89,7 @@ function getUnreadThreadSummaries(
     });
 }
 
-export function AppHeader({ userRole }: AppHeaderProps) {
+function AppHeaderComponent({ userRole }: AppHeaderProps) {
   const roleInfo = getRoleInfo(userRole);
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -95,6 +101,7 @@ export function AppHeader({ userRole }: AppHeaderProps) {
     () => userRole === "faculty" || userRole === "auditor",
     [userRole],
   );
+  const showProfileDialog = useMemo(() => userRole !== "user", [userRole]);
 
   const unreadCount = unreadThreads.length;
 
@@ -124,7 +131,8 @@ export function AppHeader({ userRole }: AppHeaderProps) {
       const response = await fetch(
         queryString ? `/api/messages?${queryString}` : "/api/messages",
         {
-          cache: "no-store",
+          cache: "default", // Allow browser caching + 30s CDN cache
+          next: { revalidate: 30 }, // Revalidate cached data every 30s
         },
       );
       const data = await response.json();
@@ -156,8 +164,10 @@ export function AppHeader({ userRole }: AppHeaderProps) {
     };
 
     const intervalId = window.setInterval(() => {
-      void loadMessageNotifications();
-    }, 30000);
+      if (!document.hidden) {
+        void loadMessageNotifications();
+      }
+    }, 300000); // 5 minutes instead of 1 minute - reduces API calls by 5x
 
     window.addEventListener("dashboard:data-updated", onDataUpdated);
 
@@ -184,7 +194,7 @@ export function AppHeader({ userRole }: AppHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -274,7 +284,7 @@ export function AppHeader({ userRole }: AppHeaderProps) {
               </Dialog>
             )}
 
-            <ProfileDialog />
+            {showProfileDialog ? <ProfileDialog /> : null}
 
             <Button
               variant="outline"
@@ -291,3 +301,6 @@ export function AppHeader({ userRole }: AppHeaderProps) {
     </header>
   );
 }
+
+// Memoize to prevent re-renders when parent updates
+export const AppHeader = memo(AppHeaderComponent);

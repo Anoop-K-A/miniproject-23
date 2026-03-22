@@ -50,6 +50,7 @@ const ROLE_VALUES: UserRole[] = [
   "auditor",
   "staff-advisor",
   "admin",
+  "user",
 ];
 
 const STATUS_VALUES: AdminUserStatus[] = [
@@ -62,13 +63,19 @@ const STATUS_VALUES: AdminUserStatus[] = [
 
 function normalizeRole(role?: string): UserRole {
   if (!role) return "faculty";
-  if (ROLE_VALUES.includes(role as UserRole)) {
-    return role as UserRole;
+  const normalized = role.trim().toLowerCase();
+
+  if (ROLE_VALUES.includes(normalized as UserRole)) {
+    return normalized as UserRole;
   }
-  if (role === "StaffAdvisor" || role === "Staff Advisor") {
+  if (
+    normalized === "staffadvisor" ||
+    normalized === "staff advisor" ||
+    normalized === "staff-advisor"
+  ) {
     return "staff-advisor";
   }
-  if (role === "Auditor") {
+  if (normalized === "auditor") {
     return "auditor";
   }
   return "faculty";
@@ -161,21 +168,10 @@ export function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20; // Show 20 users per page
 
-  const fetchUsers = async () => {
+  const applyEngagementData = async (baseUsers: AdminUser[]) => {
     try {
-      const [usersResponse, engagementResponse] = await Promise.all([
-        fetch("/api/users?limit=500"), // Fetch limited initial set
-        fetch("/api/engagements"),
-      ]);
-
-      const usersData = await usersResponse.json();
+      const engagementResponse = await fetch("/api/engagements");
       const engagementData = await engagementResponse.json();
-
-      if (!usersResponse.ok) {
-        toast.error(usersData.error || "Failed to load users");
-        return;
-      }
-
       const engagementMap = (engagementData.engagements ?? []).reduce(
         (acc: Record<string, any>, eng: any) => {
           acc[eng.facultyId] = eng;
@@ -184,11 +180,53 @@ export function AdminDashboard() {
         {},
       );
 
+      setUsers((prevUsers) => {
+        const source = prevUsers.length > 0 ? prevUsers : baseUsers;
+        return source.map((user) => {
+          const engagement = engagementMap[user.id] ?? {};
+          return {
+            ...user,
+            courseFilesCount: engagement.uploadsCount ?? user.courseFilesCount,
+            eventReportsCount:
+              engagement.activityParticipationCount ?? user.eventReportsCount,
+            completionRate: engagement.score ?? user.completionRate,
+          };
+        });
+      });
+    } catch (error) {
+      console.error("Load engagement error:", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const usersResponse = await fetch("/api/users?limit=500");
+      const usersData = await usersResponse.json();
+
+      if (!usersResponse.ok) {
+        toast.error(usersData.error || "Failed to load users");
+        return;
+      }
+
       const mappedUsers = (usersData.users as ApiUser[]).map((user) =>
-        mapApiUserWithEngagement(user, engagementMap),
+        mapApiUserWithEngagement(user),
       );
       setUsers(mappedUsers);
       setCurrentPage(1); // Reset to first page
+
+      if (typeof window !== "undefined") {
+        if ("requestIdleCallback" in window) {
+          window.requestIdleCallback(() => {
+            void applyEngagementData(mappedUsers);
+          });
+        } else {
+          setTimeout(() => {
+            void applyEngagementData(mappedUsers);
+          }, 0);
+        }
+      } else {
+        void applyEngagementData(mappedUsers);
+      }
     } catch (error) {
       console.error("Load users error:", error);
       toast.error("Failed to load users");
@@ -316,6 +354,7 @@ export function AdminDashboard() {
     role: AdminUser["role"];
     roles?: UserRole[];
     status: AdminUserStatus;
+    password?: string;
   }) => {
     const updated = await updateUser(payload.id, {
       username: payload.name,
@@ -326,6 +365,7 @@ export function AdminDashboard() {
       role: payload.role,
       roles: payload.roles || [payload.role],
       status: payload.status,
+      ...(payload.password ? { password: payload.password } : {}),
     });
 
     if (updated) {

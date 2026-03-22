@@ -8,7 +8,12 @@ import { ChecklistSidebar } from "./ChecklistSidebar";
 import { DocumentViewer } from "./DocumentViewer";
 import { DocumentDetails } from "./DocumentDetails";
 import { AuditorRemarks } from "./AuditorRemarks";
-import { AuditReviewInterfaceProps, ChecklistItem } from "./types";
+import {
+  AuditReviewInterfaceProps,
+  ChecklistItem,
+  CourseFile,
+  EventReport,
+} from "./types";
 import { useAuth } from "@/context/AuthContext";
 import {
   downloadFromServer,
@@ -166,14 +171,13 @@ export function AuditReviewInterface({
         return;
       }
 
-      const updatedItem = (
-        type === "file" ? reviewData.files : reviewData.reports
-      )
-        .filter((entry: typeof item) => entry.id === item.id)
-        .reduce<typeof item | undefined>(
-          (acc, entry) => acc ?? entry,
-          undefined,
-        );
+      const entries: Array<CourseFile | EventReport> =
+        type === "file" ? reviewData.files : reviewData.reports;
+      const updatedItem = entries
+        .filter((entry) => entry.id === item.id)
+        .reduce<
+          CourseFile | EventReport | undefined
+        >((acc, entry) => (acc === undefined ? entry : acc), undefined);
 
       if (updatedItem) {
         onReviewCompleted?.(updatedItem);

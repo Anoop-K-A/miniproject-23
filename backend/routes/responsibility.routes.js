@@ -21,11 +21,28 @@ router.get("/", verifyToken, async (req, res) => {
       filters.type = type;
     }
 
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 20);
+    const skip = (page - 1) * limit;
+
     const responsibilities = await Responsibility.find(filters)
       .populate("facultyId", "name email department")
-      .populate("assignedBy", "name email");
+      .populate("assignedBy", "name email")
+      .limit(limit)
+      .skip(skip)
+      .lean();
 
-    res.json(responsibilities);
+    const total = await Responsibility.countDocuments(filters);
+
+    res.json({
+      data: responsibilities,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching responsibilities:", error);
     res.status(500).json({ error: "Failed to fetch responsibilities" });

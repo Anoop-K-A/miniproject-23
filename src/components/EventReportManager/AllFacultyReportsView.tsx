@@ -687,7 +687,7 @@ export function AllFacultyReportsView({
               onOpenChange={setIsPeerReviewOpen}
               onSubmit={handlePeerReview}
               itemType="report"
-              itemName={selectedReport?.eventName || ""}
+              itemName={(selectedReport as EventReport | null)?.eventName || ""}
             />
 
             <ResponseDialog

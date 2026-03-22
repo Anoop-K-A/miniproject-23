@@ -89,13 +89,13 @@ export function CourseCodeCards({
           (f) => f.status === "Approved",
         ).length;
         const pendingCount = files.filter(
-          (f) => f.status === "Pending" || f.status === "Submitted",
+          (f) => f.status === "Submitted",
         ).length;
         const rejectedCount = files.filter(
           (f) => f.status === "Rejected",
         ).length;
         const needsReviewCount = files.filter(
-          (f) => f.status === "Submitted" || f.status === "Pending",
+          (f) => f.status === "Submitted",
         ).length;
 
         // Get course name from first file
@@ -201,19 +201,13 @@ export function CourseCodeCards({
                         <Button
                           size="sm"
                           variant={
-                            file.status === "Submitted" ||
-                            file.status === "Pending"
-                              ? "default"
-                              : "outline"
+                            file.status === "Submitted" ? "default" : "outline"
                           }
                           onClick={() => onReviewFile(file)}
                           className="h-8 px-3"
                         >
                           <Eye className="h-4 w-4 mr-1" />
-                          {file.status === "Submitted" ||
-                          file.status === "Pending"
-                            ? "Review"
-                            : "View"}
+                          {file.status === "Submitted" ? "Review" : "View"}
                         </Button>
                       </div>
                     </div>

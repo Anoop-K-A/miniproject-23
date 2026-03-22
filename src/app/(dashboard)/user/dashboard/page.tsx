@@ -4,70 +4,18 @@ import { UserFacultyProfiles } from "@/components/user/UserFacultyProfiles";
 import { UserSectionNav } from "@/components/user/UserSectionNav";
 import { readJsonFile } from "@/lib/jsonDb";
 import { getAllUsers } from "@/lib/userStore";
+import { getUserSectionCounts } from "@/lib/userSectionCounts";
 import { CalendarDays, FileText, Users } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
-function normalizeCourseCode(courseCode?: string) {
-  return String(courseCode || "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "");
-}
-
-function getSemesterRank(semester?: string) {
-  const normalized = String(semester || "")
-    .toLowerCase()
-    .replace(/\s+/g, "");
-  const numeric = normalized.match(/(\d+)/);
-  if (numeric) return Number(numeric[1]);
-  return -1;
-}
+export const revalidate = 30;
 
 export default async function UserDashboardPage() {
-  const [users, files, reports] = await Promise.all([
+  const [users, sectionCounts] = await Promise.all([
     getAllUsers(),
-    readJsonFile<
-      Array<{
-        status?: string;
-        courseCode?: string;
-        academicYear?: string;
-        semester?: string;
-      }>
-    >("courseFiles.json"),
-    readJsonFile<unknown[]>("eventReports.json"),
+    getUserSectionCounts(),
   ]);
-
-  const approvedFiles = files.filter(
-    (file) => String(file.status || "") === "Approved",
-  );
-  const latestBatch = approvedFiles
-    .map((file) => String(file.academicYear || "").trim())
-    .filter((batch) => Boolean(batch))
-    .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0];
-
-  const batchScopedFiles = latestBatch
-    ? approvedFiles.filter(
-        (file) => String(file.academicYear || "").trim() === latestBatch,
-      )
-    : approvedFiles;
-
-  const latestSemester = [...batchScopedFiles]
-    .map((file) => String(file.semester || "").trim())
-    .filter((semester) => Boolean(semester))
-    .sort((a, b) => getSemesterRank(b) - getSemesterRank(a))[0];
-
-  const semesterScopedFiles = latestSemester
-    ? batchScopedFiles.filter(
-        (file) => String(file.semester || "").trim() === latestSemester,
-      )
-    : batchScopedFiles;
-
-  const approvedCourseCodesCount = new Set(
-    semesterScopedFiles
-      .map((file) => normalizeCourseCode(file.courseCode))
-      .filter((courseCode) => Boolean(courseCode)),
-  ).size;
+  const { approvedCourseCodesCount, eventReportsCount, studentsCount } =
+    sectionCounts;
 
   const facultyUsers: FacultyMember[] = users
     .filter(
@@ -95,8 +43,8 @@ export default async function UserDashboardPage() {
     <main className="space-y-6">
       <UserSectionNav
         courseFilesCount={approvedCourseCodesCount}
-        eventReportsCount={reports.length}
-        studentsCount={0}
+        eventReportsCount={eventReportsCount}
+        studentsCount={studentsCount}
       />
 
       <Card className="border-slate-200 bg-white/95 shadow-sm">
@@ -134,7 +82,7 @@ export default async function UserDashboardPage() {
               <CalendarDays className="h-4 w-4 text-slate-500" />
             </div>
             <p className="mt-2 text-2xl font-semibold text-slate-900">
-              {reports.length}
+              {eventReportsCount}
             </p>
           </div>
         </CardContent>

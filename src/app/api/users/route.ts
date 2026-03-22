@@ -34,7 +34,9 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedRole: UserRole =
-      requestedRole === "auditor" || requestedRole === "staff-advisor"
+      requestedRole === "auditor" ||
+      requestedRole === "staff-advisor" ||
+      requestedRole === "user"
         ? requestedRole
         : "faculty";
     const normalizedRoles = sanitizeNonAdminRoles(

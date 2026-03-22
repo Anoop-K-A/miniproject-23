@@ -107,11 +107,28 @@ router.get("/", verifyToken, async (req, res) => {
       filters.academicYear = academicYear;
     }
 
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 20);
+    const skip = (page - 1) * limit;
+
     const uploadedFiles = await UploadedFile.find(filters)
       .populate("facultyId", "name email department")
-      .sort({ uploadedAt: -1 });
+      .sort({ uploadedAt: -1 })
+      .limit(limit)
+      .skip(skip)
+      .lean();
 
-    res.json(uploadedFiles);
+    const total = await UploadedFile.countDocuments(filters);
+
+    res.json({
+      data: uploadedFiles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching course files:", error);
     res.status(500).json({ error: "Failed to fetch course files" });

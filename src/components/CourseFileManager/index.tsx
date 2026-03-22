@@ -332,7 +332,8 @@ export function CourseFileManager({
           return;
         }
 
-        const groupedThreads = (data.messages ?? []).reduce<
+        const messages: AuditorMessage[] = data.messages ?? [];
+        const groupedThreads = messages.reduce<
           Record<string, AuditorMessage[]>
         >(
           (
@@ -350,21 +351,23 @@ export function CourseFileManager({
           {},
         );
 
-        const pendingByEntity = Object.values(groupedThreads).reduce<
-          Record<string, number>
-        >((accumulator, threadMessages) => {
-          const latestMessage = [...threadMessages].sort((a, b) => {
-            const aTime = new Date(a.createdAt ?? 0).getTime();
-            const bTime = new Date(b.createdAt ?? 0).getTime();
-            return aTime - bTime;
-          })[threadMessages.length - 1];
+        const threadValues: AuditorMessage[][] = Object.values(groupedThreads);
+        const pendingByEntity = threadValues.reduce<Record<string, number>>(
+          (accumulator, threadMessages) => {
+            const latestMessage = [...threadMessages].sort((a, b) => {
+              const aTime = new Date(a.createdAt ?? 0).getTime();
+              const bTime = new Date(b.createdAt ?? 0).getTime();
+              return aTime - bTime;
+            })[threadMessages.length - 1];
 
-          if (latestMessage?.senderRole === "auditor") {
-            accumulator[latestMessage.entityId] =
-              (accumulator[latestMessage.entityId] ?? 0) + 1;
-          }
-          return accumulator;
-        }, {});
+            if (latestMessage?.senderRole === "auditor") {
+              accumulator[latestMessage.entityId] =
+                (accumulator[latestMessage.entityId] ?? 0) + 1;
+            }
+            return accumulator;
+          },
+          {},
+        );
 
         setPendingAuditorMessagesByFile(pendingByEntity);
       } catch (error) {

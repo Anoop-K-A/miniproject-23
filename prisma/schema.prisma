@@ -32,6 +32,11 @@ model User {
   banExpires       DateTime?
 
   @@map("user")
+  @@index([email])
+  @@index([role])
+  @@index([department])
+  @@index([createdAt])
+  @@index([banned])
 }
 
 model Session {
@@ -46,6 +51,9 @@ model Session {
   impersonatedBy String?
 
   @@map("session")
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([createdAt])
 }
 
 model Account {
@@ -70,6 +78,8 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("account")
+  @@index([userId])
+  @@index([provider])
 }
 
 model Verification {
@@ -93,6 +103,7 @@ model TwoFactor {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("twoFactor")
+  @@index([userId])
 }
 model user_roles{
   userroleid        String   @id @default(cuid())

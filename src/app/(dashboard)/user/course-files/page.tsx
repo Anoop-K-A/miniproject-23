@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSectionNav } from "@/components/user/UserSectionNav";
 import { UserCourseFilesExplorer } from "@/components/user/UserCourseFilesExplorer";
 import { readJsonFile } from "@/lib/jsonDb";
+import { getUserSectionCounts } from "@/lib/userSectionCounts";
 
 interface CourseFileRecord {
   id: string;
@@ -77,7 +78,10 @@ function getSemesterOrder(semester: string) {
 }
 
 export default async function UserCourseFilesPage() {
-  const files = await readJsonFile<CourseFileRecord[]>("courseFiles.json");
+  const [files, sectionCounts] = await Promise.all([
+    readJsonFile<CourseFileRecord[]>("courseFiles.json"),
+    getUserSectionCounts(),
+  ]);
 
   const approvedFiles = files
     .filter((file) => String(file.status || "") === "Approved")
@@ -164,11 +168,16 @@ export default async function UserCourseFilesPage() {
     batchGroups,
   };
 
-  const { approvedCourseCodesCount } = pageData;
+  const { approvedCourseCodesCount, eventReportsCount, studentsCount } =
+    sectionCounts;
 
   return (
     <main className="space-y-6">
-      <UserSectionNav courseFilesCount={approvedCourseCodesCount} />
+      <UserSectionNav
+        courseFilesCount={approvedCourseCodesCount}
+        eventReportsCount={eventReportsCount}
+        studentsCount={studentsCount}
+      />
 
       <Card>
         <CardHeader>

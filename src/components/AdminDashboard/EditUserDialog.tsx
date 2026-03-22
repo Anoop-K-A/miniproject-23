@@ -40,12 +40,29 @@ interface EditUserDialogProps {
     role: AdminUser["role"];
     roles?: UserRole[];
     status: AdminUserStatus;
+    password?: string;
   }) => void;
 }
 
 interface FormData extends Omit<AdminUser, "role"> {
   role: AdminUser["role"];
   roles?: UserRole[];
+  adminPassword?: string;
+  userPassword?: string;
+}
+
+function hasRole(user: AdminUser, targetRole: UserRole) {
+  const normalizedTarget = targetRole.toLowerCase();
+  const primaryRole = String(user.role || "")
+    .trim()
+    .toLowerCase();
+  const roles = (user.roles || []).map((role) =>
+    String(role || "")
+      .trim()
+      .toLowerCase(),
+  );
+
+  return primaryRole === normalizedTarget || roles.includes(normalizedTarget);
 }
 
 export function EditUserDialog({
@@ -60,7 +77,11 @@ export function EditUserDialog({
   );
 
   useEffect(() => {
-    setFormData(user as FormData);
+    setFormData({
+      ...(user as FormData),
+      adminPassword: "",
+      userPassword: "",
+    });
     setSelectedRoles(new Set(user.roles || [user.role]));
   }, [user]);
 
@@ -68,7 +89,13 @@ export function EditUserDialog({
     { value: "faculty", label: "Faculty" },
     { value: "auditor", label: "Auditor" },
     { value: "staff-advisor", label: "Staff Advisor" },
+    { value: "user", label: "User" },
+    { value: "admin", label: "Admin" },
   ];
+
+  const canEditAdminRole = hasRole(user, "admin") || false;
+  const isAdminAccount = hasRole(user, "admin") || false;
+  const isUserAccount = hasRole(user, "user") || false;
 
   const selectedRoleLabels = roleOptions
     .filter((option) => selectedRoles.has(option.value))
@@ -98,13 +125,26 @@ export function EditUserDialog({
       role: primaryRole,
       roles: rolesArray,
       status: formData.status,
+      password: (isAdminAccount
+        ? formData.adminPassword
+        : isUserAccount
+          ? formData.userPassword
+          : ""
+      )?.trim()
+        ? (isAdminAccount
+            ? formData.adminPassword
+            : isUserAccount
+              ? formData.userPassword
+              : ""
+          )?.trim()
+        : undefined,
     });
     onOpenChange(false);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit User: {user.name}</DialogTitle>
           <DialogDescription>
@@ -177,6 +217,9 @@ export function EditUserDialog({
                         <Checkbox
                           id={`role-${option.value}`}
                           checked={selectedRoles.has(option.value)}
+                          disabled={
+                            option.value === "admin" && !canEditAdminRole
+                          }
                           onCheckedChange={() => toggleRole(option.value)}
                         />
                         <label
@@ -213,6 +256,44 @@ export function EditUserDialog({
                   <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="edit-admin-password">
+                Reset Admin Password (Optional)
+              </Label>
+              <Input
+                id="edit-admin-password"
+                type="password"
+                disabled={!isAdminAccount}
+                value={formData.adminPassword ?? ""}
+                placeholder={
+                  isAdminAccount
+                    ? "Leave blank to keep current password"
+                    : "Only enabled when editing an admin account"
+                }
+                onChange={(e) =>
+                  setFormData({ ...formData, adminPassword: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="edit-user-password">
+                Reset User Password (Optional)
+              </Label>
+              <Input
+                id="edit-user-password"
+                type="password"
+                disabled={!isUserAccount}
+                value={formData.userPassword ?? ""}
+                placeholder={
+                  isUserAccount
+                    ? "Leave blank to keep current password"
+                    : "Only enabled when editing a user account"
+                }
+                onChange={(e) =>
+                  setFormData({ ...formData, userPassword: e.target.value })
+                }
+              />
             </div>
           </div>
           <DialogFooter>

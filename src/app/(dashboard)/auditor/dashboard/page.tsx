@@ -1,7 +1,7 @@
 import { AuditorDashboard } from "@/components/AuditorDashboard";
 import { getAuditorDashboardData } from "@/lib/dashboardData";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export default async function AuditorDashboardPage() {
   const { stats, facultyMembers, recentReviews } =

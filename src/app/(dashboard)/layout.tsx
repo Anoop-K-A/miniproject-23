@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { AppHeader } from "@/components/App/AppHeader";
@@ -37,9 +37,13 @@ export default function DashboardLayout({
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-clip">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(70%_60%_at_50%_0%,rgba(15,76,129,0.13),transparent)]" />
-      <AppHeader userRole={userRole} />
+      <Suspense fallback={<div className="h-16 border-b bg-white/80" />}>
+        <AppHeader userRole={userRole} />
+      </Suspense>
       <main className="relative flex-1">{children}</main>
-      <AppFooter />
+      <Suspense fallback={null}>
+        <AppFooter />
+      </Suspense>
       <Toaster />
     </div>
   );

@@ -3,6 +3,7 @@ import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
 import { isValidBatchYear, normalizeBatchYear } from "@/lib/batchYear";
+import { createCachedResponse, apiCache } from "@/lib/apiCache";
 
 const VALID_SEMESTERS = new Set([
   "S1",
@@ -29,7 +30,14 @@ export async function GET(request: NextRequest) {
   try {
     const advisorScope = await resolveStaffAdvisorScope(request);
     if (!advisorScope) {
-      return NextResponse.json({ students: [] });
+      return createCachedResponse({ students: [] }, { maxAge: 30 });
+    }
+
+    const cacheKey = `students:${advisorScope.advisorId}`;
+    const cachedData = apiCache.get(cacheKey);
+
+    if (cachedData) {
+      return createCachedResponse(cachedData, { maxAge: 60 });
     }
 
     const students = await readJsonFile<Student[]>("students.json");
@@ -37,7 +45,10 @@ export async function GET(request: NextRequest) {
       (student) => student.advisorId === advisorScope.advisorId,
     );
 
-    return NextResponse.json({ students: scopedStudents });
+    const responseData = { students: scopedStudents };
+    apiCache.set(cacheKey, responseData);
+
+    return createCachedResponse(responseData, { maxAge: 60 });
   } catch (error) {
     console.error("Students load error:", error);
     return NextResponse.json(

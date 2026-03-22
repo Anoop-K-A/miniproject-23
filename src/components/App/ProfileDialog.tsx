@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -108,7 +115,16 @@ export function ProfileDialog() {
   const [form, setForm] = useState<ProfileFormState>(EMPTY_FORM);
   const [passwordForm, setPasswordForm] =
     useState<PasswordFormState>(EMPTY_PASSWORD_FORM);
+  const [updateMode, setUpdateMode] = useState<"profile" | "password">(
+    isAdminUser ? "password" : "profile",
+  );
   const profileRequestControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setUpdateMode(isAdminUser ? "password" : "profile");
+    }
+  }, [isAdminUser, open]);
 
   const applyProfileData = useCallback((dataUser: ProfileApiUser) => {
     setForm({
@@ -443,9 +459,31 @@ export function ProfileDialog() {
           <DialogDescription>
             {isAdminUser
               ? "For admin accounts, only password updates are allowed."
-              : "Edit your contact details, experience, and resume."}
+              : updateMode === "password"
+                ? "Update your account password."
+                : "Edit your contact details, experience, and resume."}
           </DialogDescription>
         </DialogHeader>
+
+        {!isAdminUser ? (
+          <div className="space-y-2">
+            <Label htmlFor="profile-update-mode">Update Option</Label>
+            <Select
+              value={updateMode}
+              onValueChange={(value) =>
+                setUpdateMode(value as "profile" | "password")
+              }
+            >
+              <SelectTrigger id="profile-update-mode">
+                <SelectValue placeholder="Select what to update" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="profile">Profile Details</SelectItem>
+                <SelectItem value="password">Password</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
 
         {loadingProfile && !isAdminUser ? (
           <div className="space-y-4 py-2">
@@ -472,7 +510,7 @@ export function ProfileDialog() {
               <Skeleton className="h-24 w-full" />
             </div>
           </div>
-        ) : isAdminUser ? (
+        ) : isAdminUser || updateMode === "password" ? (
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="profile-current-password">Current Password</Label>
@@ -642,7 +680,7 @@ export function ProfileDialog() {
           >
             Close
           </Button>
-          {isAdminUser ? (
+          {isAdminUser || updateMode === "password" ? (
             <Button onClick={handleChangePassword} disabled={savingProfile}>
               {savingProfile ? (
                 <>

@@ -36,7 +36,7 @@ export function ProfileHeader({ faculty }: ProfileHeaderProps) {
     faculty.isStaffAdvisor ? "staff-advisor" : null,
   ].filter(
     (role): role is string =>
-      Boolean(role) && role.trim().toLowerCase() !== "admin",
+      typeof role === "string" && role.trim().toLowerCase() !== "admin",
   );
 
   const rolesToDisplay = Array.from(

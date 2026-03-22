@@ -48,6 +48,8 @@ export function FacultyAuditPortfolio({
     useState<CourseReviewGroup | null>(null);
   const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
   const [eventReports, setEventReports] = useState<EventReport[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<
     {
       id: string;
@@ -234,10 +236,18 @@ export function FacultyAuditPortfolio({
 
     const loadPortfolioData = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+
+        // Use server-side filtering with facultyId to avoid transfers all data
         const [filesResponse, reportsResponse, messagesResponse] =
           await Promise.all([
-            fetch("/api/course-files"),
-            fetch("/api/event-reports"),
+            fetch(
+              `/api/course-files?facultyId=${encodeURIComponent(faculty.id)}&limit=100`,
+            ),
+            fetch(
+              `/api/event-reports?facultyId=${encodeURIComponent(faculty.id)}&limit=100`,
+            ),
             fetch(`/api/messages?facultyId=${faculty.id}`),
           ]);
 
@@ -245,23 +255,37 @@ export function FacultyAuditPortfolio({
         const reportsData = await reportsResponse.json();
         const messagesData = await messagesResponse.json();
 
-        if (!filesResponse.ok || !reportsResponse.ok || !messagesResponse.ok) {
+        if (!filesResponse.ok) {
+          setError("Failed to load course files");
+          return;
+        }
+        if (!reportsResponse.ok) {
+          setError("Failed to load event reports");
+          return;
+        }
+        if (!messagesResponse.ok) {
+          setError("Failed to load messages");
           return;
         }
 
-        const scopedFiles: CourseFile[] = (filesData.files ?? []).filter(
-          (file: CourseFile) =>
-            file.facultyId === faculty.id && !file.auditChecklistFinalized,
-        );
-        const scopedReports: EventReport[] = (reportsData.reports ?? []).filter(
-          (report: EventReport) => report.facultyId === faculty.id,
-        );
+        // Handle new paginated response format
+        const scopedFiles: CourseFile[] = (
+          filesData.data ||
+          filesData.files ||
+          []
+        ).filter((file: CourseFile) => !file.auditChecklistFinalized);
+
+        const scopedReports: EventReport[] =
+          reportsData.data || reportsData.reports || [];
 
         setCourseFiles(scopedFiles);
         setEventReports(scopedReports);
         setMessages(messagesData.messages ?? []);
       } catch (error) {
         console.error("Load faculty portfolio error:", error);
+        setError("Failed to load portfolio data. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -394,174 +418,197 @@ export function FacultyAuditPortfolio({
     <div className="space-y-6">
       <BackButton onBack={onBack} />
       <FacultyHeader faculty={profileFaculty} />
-      <Card>
-        <CardContent className="pt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Auditor Messages</h3>
-            <Badge variant="outline">{threads.length}</Badge>
-          </div>
-          {fileThreadGroups.length === 0 && reportThreadGroups.length === 0 ? (
-            <p className="text-sm text-gray-500">No messages yet.</p>
-          ) : (
-            <div className="space-y-3 max-h-130 overflow-y-auto pr-1">
-              {fileThreadGroups.map((group) => (
-                <div key={group.fileId} className="border rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{group.fileName}</p>
-                      <p className="text-xs text-gray-500">Course File</p>
-                    </div>
-                    <Badge variant="outline">
-                      {group.threads.reduce(
-                        (count, thread) => count + thread.messages.length,
-                        0,
-                      )}
-                    </Badge>
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    {group.threads.map((thread) => (
-                      <div
-                        key={thread.threadId}
-                        className="rounded-lg bg-gray-50 p-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Thread</span>
-                          <div className="flex items-center gap-2">
-                            {thread.lastMessage?.status && (
-                              <Badge variant="secondary">
-                                {thread.lastMessage.status}
-                              </Badge>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setActiveThreadId(thread.threadId);
-                                setIsReplyOpen(true);
-                              }}
-                            >
-                              Reply
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleResolveThread(thread.threadId)
-                              }
-                            >
-                              OK
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1">
-                          {thread.messages.map((msg) => (
-                            <div
-                              key={msg.id}
-                              className="rounded-md bg-white p-2"
-                            >
-                              <div className="flex items-center justify-between text-xs text-gray-500">
-                                <span>
-                                  {msg.senderName ||
-                                    msg.senderRole ||
-                                    "Message"}
-                                </span>
-                                {msg.createdAt && (
-                                  <span>
-                                    {new Date(msg.createdAt).toLocaleString()}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-700 mt-1">
-                                {msg.message}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              {reportThreadGroups.map((group) => (
-                <div key={group.reportId} className="border rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{group.reportName}</p>
-                      <p className="text-xs text-gray-500">Event Report</p>
-                    </div>
-                    <Badge variant="outline">
-                      {group.threads.reduce(
-                        (count, thread) => count + thread.messages.length,
-                        0,
-                      )}
-                    </Badge>
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    {group.threads.map((thread) => (
-                      <div
-                        key={thread.threadId}
-                        className="rounded-lg bg-gray-50 p-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Thread</span>
-                          <div className="flex items-center gap-2">
-                            {thread.lastMessage?.status && (
-                              <Badge variant="secondary">
-                                {thread.lastMessage.status}
-                              </Badge>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setActiveThreadId(thread.threadId);
-                                setIsReplyOpen(true);
-                              }}
-                            >
-                              Reply
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleResolveThread(thread.threadId)
-                              }
-                            >
-                              OK
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1">
-                          {thread.messages.map((msg) => (
-                            <div
-                              key={msg.id}
-                              className="rounded-md bg-white p-2"
-                            >
-                              <div className="flex items-center justify-between text-xs text-gray-500">
-                                <span>
-                                  {msg.senderName ||
-                                    msg.senderRole ||
-                                    "Message"}
-                                </span>
-                                {msg.createdAt && (
-                                  <span>
-                                    {new Date(msg.createdAt).toLocaleString()}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-700 mt-1">
-                                {msg.message}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <span className="ml-4 text-gray-600">Loading portfolio...</span>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
+          <p className="text-red-800 font-medium">Error</p>
+          <p className="text-red-700 text-sm mt-1">{error}</p>
+        </div>
+      )}
+
+      {/* Main Content */}
+      {!isLoading && !error && (
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Auditor Messages</h3>
+              <Badge variant="outline">{threads.length}</Badge>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            {fileThreadGroups.length === 0 &&
+            reportThreadGroups.length === 0 ? (
+              <p className="text-sm text-gray-500">No messages yet.</p>
+            ) : (
+              <div className="space-y-3 max-h-130 overflow-y-auto pr-1">
+                {fileThreadGroups.map((group) => (
+                  <div key={group.fileId} className="border rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">{group.fileName}</p>
+                        <p className="text-xs text-gray-500">Course File</p>
+                      </div>
+                      <Badge variant="outline">
+                        {group.threads.reduce(
+                          (count, thread) => count + thread.messages.length,
+                          0,
+                        )}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 space-y-3">
+                      {group.threads.map((thread) => (
+                        <div
+                          key={thread.threadId}
+                          className="rounded-lg bg-gray-50 p-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Thread</span>
+                            <div className="flex items-center gap-2">
+                              {thread.lastMessage?.status && (
+                                <Badge variant="secondary">
+                                  {thread.lastMessage.status}
+                                </Badge>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setActiveThreadId(thread.threadId);
+                                  setIsReplyOpen(true);
+                                }}
+                              >
+                                Reply
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  handleResolveThread(thread.threadId)
+                                }
+                              >
+                                OK
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1">
+                            {thread.messages.map((msg) => (
+                              <div
+                                key={msg.id}
+                                className="rounded-md bg-white p-2"
+                              >
+                                <div className="flex items-center justify-between text-xs text-gray-500">
+                                  <span>
+                                    {msg.senderName ||
+                                      msg.senderRole ||
+                                      "Message"}
+                                  </span>
+                                  {msg.createdAt && (
+                                    <span>
+                                      {new Date(msg.createdAt).toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-700 mt-1">
+                                  {msg.message}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {reportThreadGroups.map((group) => (
+                  <div key={group.reportId} className="border rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">
+                          {group.reportName}
+                        </p>
+                        <p className="text-xs text-gray-500">Event Report</p>
+                      </div>
+                      <Badge variant="outline">
+                        {group.threads.reduce(
+                          (count, thread) => count + thread.messages.length,
+                          0,
+                        )}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 space-y-3">
+                      {group.threads.map((thread) => (
+                        <div
+                          key={thread.threadId}
+                          className="rounded-lg bg-gray-50 p-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Thread</span>
+                            <div className="flex items-center gap-2">
+                              {thread.lastMessage?.status && (
+                                <Badge variant="secondary">
+                                  {thread.lastMessage.status}
+                                </Badge>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setActiveThreadId(thread.threadId);
+                                  setIsReplyOpen(true);
+                                }}
+                              >
+                                Reply
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  handleResolveThread(thread.threadId)
+                                }
+                              >
+                                OK
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1">
+                            {thread.messages.map((msg) => (
+                              <div
+                                key={msg.id}
+                                className="rounded-md bg-white p-2"
+                              >
+                                <div className="flex items-center justify-between text-xs text-gray-500">
+                                  <span>
+                                    {msg.senderName ||
+                                      msg.senderRole ||
+                                      "Message"}
+                                  </span>
+                                  {msg.createdAt && (
+                                    <span>
+                                      {new Date(msg.createdAt).toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-700 mt-1">
+                                  {msg.message}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
       <PortfolioTabs
         courseFiles={courseFiles}
         eventReports={eventReports}

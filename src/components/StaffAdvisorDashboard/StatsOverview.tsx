@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStats } from "./types";
 import { GraduationCap, UserCheck, TrendingUp, BookOpen } from "lucide-react";
@@ -6,7 +7,7 @@ interface StatsOverviewProps {
   stats: DashboardStats;
 }
 
-export function StatsOverview({ stats }: StatsOverviewProps) {
+function StatsOverviewComponent({ stats }: StatsOverviewProps) {
   const placementRate =
     stats.totalStudents > 0
       ? Math.round((stats.placedStudents / stats.totalStudents) * 100)
@@ -80,3 +81,6 @@ export function StatsOverview({ stats }: StatsOverviewProps) {
     </div>
   );
 }
+
+export const StatsOverview = memo(StatsOverviewComponent);
+StatsOverview.displayName = "StatsOverview";

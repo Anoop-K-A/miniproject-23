@@ -9,10 +9,17 @@ import { FacultyMember } from "../../types/faculty";
 import { mockStats, mockFacultyMembers } from "./mockData";
 
 export function FacultyDashboard() {
-  const [selectedFaculty, setSelectedFaculty] = useState<FacultyMember | null>(null);
+  const [selectedFaculty, setSelectedFaculty] = useState<FacultyMember | null>(
+    null,
+  );
 
   if (selectedFaculty) {
-    return <FacultyPortfolio faculty={selectedFaculty} onBack={() => setSelectedFaculty(null)} />;
+    return (
+      <FacultyPortfolio
+        faculty={selectedFaculty}
+        onBack={() => setSelectedFaculty(null)}
+      />
+    );
   }
 
   return (
@@ -20,13 +27,13 @@ export function FacultyDashboard() {
       <DashboardHeader />
       <StatsOverview stats={mockStats} />
       <PendingAlerts pendingReports={mockStats.pendingReports} />
-      <ActivitySection 
-        activities={mockStats.recentActivity} 
-        facultyMembers={mockFacultyMembers} 
+      <ActivitySection
+        activities={mockStats.recentActivity}
+        facultyMembers={mockFacultyMembers}
         onSelectFaculty={setSelectedFaculty}
       />
-      <AllFacultyMembers 
-        facultyMembers={mockFacultyMembers} 
+      <AllFacultyMembers
+        facultyMembers={mockFacultyMembers}
         onSelectFaculty={setSelectedFaculty}
       />
     </div>
