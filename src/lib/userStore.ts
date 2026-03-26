@@ -24,6 +24,7 @@ export interface UserRecord {
   firebaseUid?: string;
   phone?: string;
   status?: string;
+  emailVerified?: boolean;
   createdAt?: string;
   updatedAt?: string;
   lastActiveAt?: string;
@@ -244,6 +245,28 @@ export async function findUserByUsername(username: string) {
     nameRegex.test(String(user.name || "")),
   );
   return nameMatch ? cloneUserRecord(nameMatch) : null;
+}
+
+export async function findUserByEmail(email: string) {
+  const normalizedEmail = normalizeIdentity(email);
+  const users = await getAllUsers();
+
+  const emailMatch = users.find((user) => {
+    const userEmail = normalizeIdentity(user.email || "");
+    return userEmail === normalizedEmail;
+  });
+
+  return emailMatch ? cloneUserRecord(emailMatch) : null;
+}
+
+export async function isUsernameTaken(username: string) {
+  const normalizedUsername = normalizeIdentity(username);
+  const users = await getAllUsers();
+
+  return users.some((user) => {
+    const userUsername = normalizeIdentity(user.username || "");
+    return userUsername === normalizedUsername;
+  });
 }
 
 export async function findUserById(id: string) {
@@ -479,6 +502,27 @@ export async function updateUserLastActive(id: string) {
     },
   );
   invalidateUsersCache();
+}
+
+export async function updateUserVerification(
+  firebaseUid: string,
+  isVerified: boolean,
+) {
+  const collection = await getUsersCollection();
+  const timestamp = new Date().toISOString();
+
+  const result = await collection.updateOne(
+    { firebaseUid },
+    {
+      $set: {
+        emailVerified: isVerified,
+        updatedAt: timestamp,
+      },
+    },
+  );
+
+  invalidateUsersCache();
+  return result.modifiedCount > 0;
 }
 
 export async function deleteUserById(id: string) {

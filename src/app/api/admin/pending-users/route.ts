@@ -1,89 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebaseAdmin";
+import { getAllUsers, updateUserById } from "@/lib/userStore";
 
 // API endpoint to fetch pending user approvals
 export async function GET(request: NextRequest) {
   try {
     console.log("=== Pending Users Query ===");
-    console.log("Fetching pending users from Firestore...");
+    console.log("Fetching pending users from MongoDB...");
 
-    if (!adminDb) {
-      console.error("Firestore database not initialized");
-      return NextResponse.json(
-        { error: "Database not initialized" },
-        { status: 500 },
-      );
-    }
+    // Get all users from MongoDB
+    const allUsers = await getAllUsers();
+    console.log(`Total users in MongoDB: ${allUsers.length}`);
 
-    // First, let's get ALL users to see what's in the database
-    let allUsersSnapshot;
-    try {
-      allUsersSnapshot = await adminDb.collection("users").get();
-      console.log(`Total users in Firestore: ${allUsersSnapshot.size}`);
+    // Filter for users with status="pending" AND emailVerified=true
+    const pendingUsers = allUsers
+      .filter(
+        (user) =>
+          user.status === "pending" &&
+          (user.emailVerified === true ||
+            user.role === "admin" ||
+            user.roles?.includes("admin")),
+      )
+      .map((user) => ({
+        id: user.id,
+        email: user.email || "",
+        name: user.name || "Unknown",
+        department: user.department || "N/A",
+        role: user.role || "faculty",
+        createdAt: user.createdAt,
+        emailVerified: user.emailVerified,
+      }));
 
-      allUsersSnapshot.docs.forEach((doc) => {
-        const data = doc.data();
-        console.log(`  - ${data.email} (approved: ${data.approved})`);
-      });
-    } catch (error: any) {
-      if (error.code === 5 || error.message?.includes("NOT_FOUND")) {
-        console.log("Users collection does not exist yet");
-        return NextResponse.json({
-          pendingUsers: [],
-          count: 0,
-          allUsers: [],
-          debug: { message: "Users collection not found" },
-        });
-      }
-      throw error;
-    }
-
-    // Now query for pending users specifically
-    let snapshot;
-    try {
-      snapshot = await adminDb
-        .collection("users")
-        .where("approved", "==", false)
-        .get();
-    } catch (queryError: any) {
-      // If collection doesn't exist, return empty array
-      if (queryError.code === 5 || queryError.message?.includes("NOT_FOUND")) {
-        console.log(
-          "Users collection not found, returning empty pending users",
-        );
-        return NextResponse.json({
-          pendingUsers: [],
-          count: 0,
-        });
-      }
-      throw queryError;
-    }
-
-    console.log(`Found ${snapshot.size} pending users`);
-
-    const pendingUsers = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        email: data.email || "",
-        name: data.name || data.displayName || "Unknown",
-        department: data.department || "N/A",
-        createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
-      };
-    });
+    console.log(`Found ${pendingUsers.length} pending verified users`);
 
     return NextResponse.json({
       pendingUsers,
       count: pendingUsers.length,
       debug: {
-        totalUsersInDatabase: allUsersSnapshot.size,
-        pendingQuery: `approved == false`,
+        totalUsersInDatabase: allUsers.length,
+        pendingQuery: `status == "pending" AND emailVerified == true`,
       },
     });
   } catch (error: any) {
     console.error("Error fetching pending users:", {
       message: error?.message,
-      code: error?.code,
       details: error?.details,
       fullError: error,
     });
@@ -115,39 +74,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userRef = adminDb.collection("users").doc(userId);
-    const userDoc = await userRef.get();
-
-    if (!userDoc.exists) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
+    // Update user in MongoDB
     if (action === "approve") {
-      await userRef.update({
-        approved: true,
-        approvedAt: new Date(),
+      await updateUserById(userId, {
+        status: "active",
+        approvedAt: new Date().toISOString(),
       });
 
       return NextResponse.json({
         message: "User approved successfully",
         user: {
           id: userId,
-          approved: true,
+          status: "active",
         },
       });
     } else if (action === "reject") {
-      await userRef.update({
-        approved: false,
-        rejected: true,
-        rejectedAt: new Date(),
+      await updateUserById(userId, {
+        status: "rejected",
+        rejectedAt: new Date().toISOString(),
       });
 
       return NextResponse.json({
         message: "User rejected successfully",
         user: {
           id: userId,
-          approved: false,
-          rejected: true,
+          status: "rejected",
         },
       });
     }

@@ -2,7 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  swcMinify: true,
   compress: true,
   productionBrowserSourceMaps: false,
   images: {

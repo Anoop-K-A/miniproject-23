@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FacultyCard } from "@/components/faculty/FacultyCard";
 import type { FacultyMember } from "@/types/faculty";
@@ -15,6 +16,7 @@ const LOAD_MORE_STEP = 12;
 export const UserFacultyProfiles = memo(function UserFacultyProfiles({
   facultyMembers,
 }: UserFacultyProfilesProps) {
+  const router = useRouter();
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
   const visibleFaculty = useMemo(
@@ -23,6 +25,10 @@ export const UserFacultyProfiles = memo(function UserFacultyProfiles({
   );
 
   const remaining = facultyMembers.length - visibleCount;
+
+  const handleSelectFaculty = (faculty: FacultyMember) => {
+    router.push(`/faculty/${faculty.id}`);
+  };
 
   if (facultyMembers.length === 0) {
     return (
@@ -41,7 +47,11 @@ export const UserFacultyProfiles = memo(function UserFacultyProfiles({
     <>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         {visibleFaculty.map((faculty) => (
-          <FacultyCard key={faculty.id} faculty={faculty} onSelect={() => {}} />
+          <FacultyCard
+            key={faculty.id}
+            faculty={faculty}
+            onSelect={handleSelectFaculty}
+          />
         ))}
       </div>
       {remaining > 0 ? (
