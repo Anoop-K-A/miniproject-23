@@ -28,6 +28,7 @@ router.get("/", verifyToken, async (req, res) => {
     const responsibilities = await Responsibility.find(filters)
       .populate("facultyId", "name email department")
       .populate("assignedBy", "name email")
+      .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
       .lean();

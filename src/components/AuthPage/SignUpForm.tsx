@@ -18,10 +18,12 @@ import {
 import { Mail, Lock, User, Building, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import { SignUpFormData } from "./types";
+import { SignUpFormData, SignUpResult } from "./types";
 
 interface SignUpFormProps {
-  onSignUpSuccess: (formData: SignUpFormData) => Promise<void> | void;
+  onSignUpSuccess: (
+    formData: SignUpFormData,
+  ) => Promise<SignUpResult | void> | SignUpResult | void;
   onSwitchToSignIn: () => void;
 }
 
@@ -64,8 +66,16 @@ export function SignUpForm({
 
     try {
       setIsSubmitting(true);
-      await onSignUpSuccess(formData);
-      toast.success("Account created! Await admin approval before signing in.");
+      const result = await onSignUpSuccess(formData);
+
+      if (result?.warning) {
+        toast.warning(result.warning);
+      } else {
+        toast.success(
+          result?.message ||
+            "Account created! Check your email to verify your account before admin approval.",
+        );
+      }
     } catch (error) {
       console.error("Register error:", error);
       toast.error(

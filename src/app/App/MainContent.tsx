@@ -8,12 +8,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-import { FacultyDashboard } from "../components/FacultyDashboard";
+import { FacultyDashboard } from "../../components/FacultyDashboard";
 import { CourseFileManager } from "../components/CourseFileManager";
 import { EventReportManager } from "../components/EventReportManager";
-import { AuditorDashboard } from "../components/AuditorDashboard";
-import { StaffAdvisorDashboard } from "../components/StaffAdvisorDashboard";
-import { UserRole } from "./config";
+import { AuditorDashboard } from "../../components/AuditorDashboard";
+import { StaffAdvisorDashboard } from "../../components/StaffAdvisorDashboard";
+import type { UserRole } from "@/lib/roles";
 import type { DashboardStats, FacultyMember } from "../types/faculty";
 import type {
   DashboardStats as AuditorStats,
@@ -21,10 +21,11 @@ import type {
   RecentReview,
 } from "../components/AuditorDashboard/types";
 import type {
+  BatchCourseOverview,
   CareerStats,
   DashboardStats as StaffStats,
   Student,
-} from "../components/StaffAdvisorDashboard/types";
+} from "../../components/StaffAdvisorDashboard/types";
 import { useAuth } from "@/context/AuthContext";
 
 interface MainContentProps {
@@ -52,6 +53,7 @@ export function MainContent({
     stats: StaffStats;
     careerStats: CareerStats;
     students: Student[];
+    batchCourseOverview: BatchCourseOverview;
   } | null>(null);
 
   useEffect(() => {
@@ -124,6 +126,7 @@ export function MainContent({
               stats={staffData.stats}
               careerStats={staffData.careerStats}
               students={staffData.students}
+              batchCourseOverview={staffData.batchCourseOverview}
             />
           )}
         </TabsContent>

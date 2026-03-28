@@ -1,6 +1,7 @@
 "use client";
 
-import { UserRole, getRoleInfo } from "./config";
+import type { UserRole } from "@/lib/roles";
+import { getRoleInfo } from "./config";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";

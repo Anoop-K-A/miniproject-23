@@ -6,6 +6,7 @@ const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 const { upload } = require("../middleware/upload.middleware");
 const path = require("path");
 const fs = require("fs");
+const fsPromises = fs.promises;
 
 /**
  * POST /api/course-files/upload
@@ -71,8 +72,11 @@ router.post(
           "uploads",
           req.file.filename,
         );
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
+        try {
+          await fsPromises.access(filePath);
+          await fsPromises.unlink(filePath);
+        } catch {
+          // Best effort cleanup: ignore missing/locked file errors.
         }
       }
 
@@ -228,8 +232,11 @@ router.delete(
 
       // Delete file from disk
       const filePath = path.join(__dirname, "..", uploadedFile.filePath);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      try {
+        await fsPromises.access(filePath);
+        await fsPromises.unlink(filePath);
+      } catch {
+        // Best effort cleanup: ignore missing/locked file errors.
       }
 
       // Delete from MongoDB

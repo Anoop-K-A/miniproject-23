@@ -258,23 +258,32 @@ export function ProfileDialog() {
       }
     };
 
-    const idleScheduler =
-      typeof window !== "undefined" && "requestIdleCallback" in window
-        ? window.requestIdleCallback(() => {
-            void prefetchProfile();
-          })
-        : window.setTimeout(() => {
-            void prefetchProfile();
-          }, 300);
+    const browserWindow = typeof window !== "undefined" ? window : null;
+    let idleScheduler: number | null = null;
+    let timeoutScheduler: ReturnType<typeof setTimeout> | null = null;
+
+    if (browserWindow && "requestIdleCallback" in browserWindow) {
+      idleScheduler = browserWindow.requestIdleCallback(() => {
+        void prefetchProfile();
+      });
+    } else {
+      timeoutScheduler = globalThis.setTimeout(() => {
+        void prefetchProfile();
+      }, 300);
+    }
 
     return () => {
       cancelled = true;
-      if (typeof idleScheduler === "number") {
-        window.clearTimeout(idleScheduler);
+      if (timeoutScheduler) {
+        globalThis.clearTimeout(timeoutScheduler);
         return;
       }
-      if (typeof window !== "undefined" && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleScheduler);
+      if (
+        browserWindow &&
+        idleScheduler !== null &&
+        "cancelIdleCallback" in browserWindow
+      ) {
+        browserWindow.cancelIdleCallback(idleScheduler);
       }
     };
   }, [isAdminUser, user?.id]);

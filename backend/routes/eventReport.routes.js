@@ -28,9 +28,15 @@ router.get("/", verifyToken, async (req, res) => {
       query = query.where("eventType", "==", eventType);
     }
 
-    // Get total count
-    const countSnapshot = await query.get();
-    const total = countSnapshot.size;
+    // Use aggregate count to avoid reading all matching docs into memory.
+    let total = 0;
+    try {
+      const countSnapshot = await query.count().get();
+      total = countSnapshot.data().count || 0;
+    } catch {
+      const countSnapshot = await query.get();
+      total = countSnapshot.size;
+    }
 
     // Get paginated data
     const snapshot = await query

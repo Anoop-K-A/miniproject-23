@@ -42,7 +42,7 @@ export const FacultyCard = memo(function FacultyCard({
         faculty.isStaffAdvisor ? "staff-advisor" : null,
       ].filter(
         (role): role is string =>
-          Boolean(role) && role.trim().toLowerCase() !== "admin",
+          typeof role === "string" && role.trim().toLowerCase() !== "admin",
       ),
     [faculty.isStaffAdvisor, faculty.role, faculty.roles],
   );

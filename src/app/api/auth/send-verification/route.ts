@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendVerificationEmail } from "@/lib/emailService";
+import { EmailServiceError, sendVerificationEmail } from "@/lib/emailService";
 import { storeVerificationToken } from "@/lib/verificationTokenStore";
 import { randomBytes } from "crypto";
 
@@ -36,8 +36,27 @@ export async function POST(request: NextRequest) {
       });
     } catch (emailError) {
       console.error("Email sending failed:", emailError);
+
+      if (
+        emailError instanceof EmailServiceError &&
+        emailError.code === "EMAIL_SERVICE_NOT_CONFIGURED"
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Email service is not configured. Set GMAIL_USER and GMAIL_PASSWORD in environment variables.",
+            code: "EMAIL_SERVICE_NOT_CONFIGURED",
+          },
+          { status: 503 },
+        );
+      }
+
       return NextResponse.json(
-        { error: "Failed to send verification email" },
+        {
+          error:
+            "Failed to send verification email. Please try again or contact admin.",
+          code: "EMAIL_DELIVERY_FAILED",
+        },
         { status: 500 },
       );
     }

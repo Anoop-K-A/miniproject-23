@@ -1,14 +1,57 @@
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
-// Initialize transporter (you can configure with your SMTP settings)
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER || "your-email@gmail.com",
-    pass: process.env.GMAIL_PASSWORD || "your-app-password",
-  },
-});
+const PLACEHOLDER_GMAIL_USER = "your-email@gmail.com";
+const PLACEHOLDER_GMAIL_PASSWORD = "your-app-password";
+
+export class EmailServiceError extends Error {
+  code: string;
+
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = "EmailServiceError";
+    this.code = code;
+  }
+}
+
+function getSmtpAuth() {
+  const user = String(process.env.GMAIL_USER || "").trim();
+  const rawPassword = String(process.env.GMAIL_PASSWORD || "").trim();
+
+  // Gmail app passwords may be pasted with spaces.
+  const pass = rawPassword.replace(/\s+/g, "");
+
+  return { user, pass };
+}
+
+export function isEmailServiceConfigured(): boolean {
+  const { user, pass } = getSmtpAuth();
+  return (
+    Boolean(user) &&
+    Boolean(pass) &&
+    user !== PLACEHOLDER_GMAIL_USER &&
+    pass !== PLACEHOLDER_GMAIL_PASSWORD
+  );
+}
+
+function createTransporter() {
+  const { user, pass } = getSmtpAuth();
+
+  if (!isEmailServiceConfigured()) {
+    throw new EmailServiceError(
+      "EMAIL_SERVICE_NOT_CONFIGURED",
+      "Email service is not configured. Set GMAIL_USER and GMAIL_PASSWORD with a valid Gmail app password.",
+    );
+  }
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user,
+      pass,
+    },
+  });
+}
 
 /**
  * Generate a verification token
@@ -35,6 +78,8 @@ export async function sendVerificationEmail(
   fullName: string,
   verificationLink: string,
 ): Promise<void> {
+  const transporter = createTransporter();
+  const { user } = getSmtpAuth();
   const subject = "Verify Your Email Address - Faculty Portal";
 
   const htmlContent = `
@@ -90,7 +135,7 @@ export async function sendVerificationEmail(
 
   try {
     await transporter.sendMail({
-      from: process.env.GMAIL_USER || "noreply@facultyportal.com",
+      from: user,
       to: email,
       subject,
       html: htmlContent,
@@ -98,7 +143,10 @@ export async function sendVerificationEmail(
     console.log(`Verification email sent to ${email}`);
   } catch (error) {
     console.error(`Failed to send verification email to ${email}:`, error);
-    throw new Error("Failed to send verification email");
+    throw new EmailServiceError(
+      "EMAIL_DELIVERY_FAILED",
+      "Failed to send verification email",
+    );
   }
 }
 
@@ -110,6 +158,8 @@ export async function sendApprovalEmail(
   fullName: string,
   status: "approved" | "rejected",
 ): Promise<void> {
+  const transporter = createTransporter();
+  const { user } = getSmtpAuth();
   const subject =
     status === "approved"
       ? "Account Approved - Faculty Portal"
@@ -187,7 +237,7 @@ export async function sendApprovalEmail(
 
   try {
     await transporter.sendMail({
-      from: process.env.GMAIL_USER || "noreply@facultyportal.com",
+      from: user,
       to: email,
       subject,
       html: htmlContent,
@@ -195,6 +245,9 @@ export async function sendApprovalEmail(
     console.log(`Approval email sent to ${email}`);
   } catch (error) {
     console.error(`Failed to send approval email to ${email}:`, error);
-    throw new Error("Failed to send approval email");
+    throw new EmailServiceError(
+      "EMAIL_DELIVERY_FAILED",
+      "Failed to send approval email",
+    );
   }
 }

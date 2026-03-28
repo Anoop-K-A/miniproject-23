@@ -13,6 +13,12 @@ export interface SignUpFormData {
   department: string;
 }
 
+export interface SignUpResult {
+  message?: string;
+  warning?: string;
+  code?: string;
+}
+
 export interface AuthUser {
   id: string;
   username: string;
@@ -20,6 +26,7 @@ export interface AuthUser {
   role: UserRole;
   roles?: UserRole[];
   department?: string;
+  emailVerified?: boolean;
 }
 
 export interface AuthPageProps {

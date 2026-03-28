@@ -113,14 +113,15 @@ export function AuditorDashboard({
 
   useEffect(() => {
     const run = () => setShowDeferredSections(true);
+    const browserWindow = typeof window !== "undefined" ? window : null;
 
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      const idleId = window.requestIdleCallback(run, { timeout: 500 });
-      return () => window.cancelIdleCallback(idleId);
+    if (browserWindow && "requestIdleCallback" in browserWindow) {
+      const idleId = browserWindow.requestIdleCallback(run, { timeout: 500 });
+      return () => browserWindow.cancelIdleCallback(idleId);
     }
 
-    const timerId = window.setTimeout(run, 150);
-    return () => window.clearTimeout(timerId);
+    const timerId = globalThis.setTimeout(run, 150);
+    return () => globalThis.clearTimeout(timerId);
   }, []);
 
   if (selectedFaculty) {

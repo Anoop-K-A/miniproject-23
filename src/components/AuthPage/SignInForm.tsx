@@ -28,6 +28,77 @@ export function SignInForm({
     username: "",
     password: "",
   });
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [canResendVerification, setCanResendVerification] = useState(false);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
+  const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
+
+  const handleResendVerification = async () => {
+    if (!formData.username.trim()) {
+      toast.error("Enter your username or email to resend verification");
+      return;
+    }
+
+    setIsResendingVerification(true);
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ identifier: formData.username.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || "Failed to resend verification email");
+        return;
+      }
+
+      toast.success(data.message || "Verification email sent");
+    } catch (error) {
+      console.error("Resend verification error:", error);
+      toast.error("Failed to resend verification email");
+    } finally {
+      setIsResendingVerification(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!formData.username.trim()) {
+      toast.error("Enter your username or email to reset password");
+      return;
+    }
+
+    setIsSendingPasswordReset(true);
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ identifier: formData.username.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || "Unable to send password reset email");
+        return;
+      }
+
+      toast.success(
+        data.message ||
+          "If your account exists, a password reset email has been sent.",
+      );
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      toast.error("Unable to send password reset email");
+    } finally {
+      setIsSendingPasswordReset(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +107,9 @@ export function SignInForm({
       toast.error("Please enter username and password");
       return;
     }
+
+    setLoginError(null);
+    setCanResendVerification(false);
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -52,10 +126,18 @@ export function SignInForm({
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.error || "Login failed");
+        const errorMessage = data.error || "Login failed";
+        const needsEmailVerification =
+          data.code === "EMAIL_VERIFICATION_REQUIRED";
+
+        setLoginError(errorMessage);
+        setCanResendVerification(needsEmailVerification);
+        toast.error(errorMessage);
         return;
       }
 
+      setLoginError(null);
+      setCanResendVerification(false);
       toast.success("Sign in successful!");
 
       // Call callback with user role and roles
@@ -68,6 +150,7 @@ export function SignInForm({
           role: data.role,
           roles: data.roles || [data.role],
           department: data.department,
+          emailVerified: data.emailVerified,
         });
       }
     } catch (error) {
@@ -126,9 +209,37 @@ export function SignInForm({
             </div>
           </div>
 
+          {loginError && (
+            <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3">
+              <p className="text-sm text-amber-800">{loginError}</p>
+              {canResendVerification && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendVerification}
+                  disabled={isResendingVerification}
+                  className="w-full"
+                >
+                  {isResendingVerification
+                    ? "Sending verification..."
+                    : "Resend verification email"}
+                </Button>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-end">
-            <Button type="button" variant="link" className="h-auto p-0 text-sm">
-              Forgot password?
+            <Button
+              type="button"
+              variant="link"
+              className="h-auto p-0 text-sm"
+              onClick={handleForgotPassword}
+              disabled={isSendingPasswordReset}
+            >
+              {isSendingPasswordReset
+                ? "Sending reset link..."
+                : "Forgot password?"}
             </Button>
           </div>
 
