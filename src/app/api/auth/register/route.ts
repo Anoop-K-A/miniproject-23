@@ -1,32 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from "crypto";
 import type { UserRole } from "@/lib/roles";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { createUser, findUserByEmail, isUsernameTaken } from "@/lib/userStore";
-import { EmailServiceError, sendVerificationEmail } from "@/lib/emailService";
-import { storeVerificationToken } from "@/lib/verificationTokenStore";
 import {
   isPrimaryAdminUsername,
   normalizeRoleInput,
   normalizeUsername,
 } from "@/lib/adminConfig";
-
-async function sendFacultyVerification(
-  email: string,
-  fullName: string,
-  firebaseUid: string,
-) {
-  const token = randomBytes(32).toString("hex");
-  storeVerificationToken(token, {
-    email,
-    firebaseUid,
-    createdAt: Date.now(),
-  });
-
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const verificationLink = `${baseUrl}/verify-email?token=${token}`;
-  await sendVerificationEmail(email, fullName, verificationLink);
-}
 
 export async function POST(request: NextRequest) {
   let createdFirebaseUid: string | null = null;
@@ -34,7 +14,6 @@ export async function POST(request: NextRequest) {
   let fullName = "";
   let department = "";
   let normalizedRole: UserRole = "faculty";
-  let emailWarning: string | null = null;
 
   try {
     const {
@@ -139,57 +118,21 @@ export async function POST(request: NextRequest) {
       roles: [normalizedRole],
       department,
       status: normalizedRole === "faculty" ? "pending" : "active",
+      emailVerified: true,
       firebaseUid: firebaseUser.uid,
     });
     console.log("[REGISTER] MongoDB user created");
-
-    // Send verification email (for faculty only)
-    if (normalizedRole === "faculty") {
-      try {
-        console.log("[REGISTER] Sending verification email...");
-        await sendFacultyVerification(
-          normalizedEmail,
-          fullName,
-          firebaseUser.uid,
-        );
-        console.log("[REGISTER] Verification email sent");
-      } catch (emailError) {
-        console.warn(
-          "Email sending failed, but user account was created:",
-          emailError,
-        );
-        if (
-          emailError instanceof EmailServiceError &&
-          emailError.code === "EMAIL_SERVICE_NOT_CONFIGURED"
-        ) {
-          emailWarning =
-            "Account created, but email service is not configured. Please ask admin to set GMAIL_USER and GMAIL_PASSWORD, then use Resend Verification from login.";
-        } else {
-          emailWarning =
-            "Account created, but verification email could not be delivered. Use Resend Verification from login.";
-        }
-        // Don't fail the registration if email fails
-      }
-    }
 
     console.log("[REGISTER] Registration successful");
     return NextResponse.json(
       {
         message:
           normalizedRole === "faculty"
-            ? "Account created! Please check your email to verify your account. Admin can only see your profile after email verification."
+            ? "Account created! Your profile is now pending admin approval."
             : "User created successfully",
         firebaseUid: firebaseUser.uid,
-        ...(emailWarning
-          ? {
-              warning: emailWarning,
-              code: "VERIFICATION_EMAIL_SEND_FAILED",
-            }
-          : {}),
       },
-      {
-        status: emailWarning ? 202 : 200,
-      },
+      { status: 200 },
     );
   } catch (error) {
     console.error("[REGISTER] Error occurred:", error);
@@ -213,49 +156,6 @@ export async function POST(request: NextRequest) {
         : null;
 
       if (existingByEmail) {
-        const existingRole =
-          normalizeRoleInput(existingByEmail.role) || "faculty";
-        if (
-          existingRole === "faculty" &&
-          existingByEmail.emailVerified !== true &&
-          existingByEmail.firebaseUid
-        ) {
-          try {
-            await sendFacultyVerification(
-              existingByEmail.email || normalizedEmail,
-              existingByEmail.name || fullName || "Faculty Member",
-              existingByEmail.firebaseUid,
-            );
-            return NextResponse.json(
-              {
-                message:
-                  "Account already exists and is pending email verification. We sent a fresh verification email.",
-                code: "EMAIL_ALREADY_EXISTS_VERIFICATION_RESENT",
-              },
-              { status: 409 },
-            );
-          } catch (resendError) {
-            console.warn(
-              "[REGISTER] Failed to resend verification email:",
-              resendError,
-            );
-
-            const resendConfigError =
-              resendError instanceof EmailServiceError &&
-              resendError.code === "EMAIL_SERVICE_NOT_CONFIGURED";
-
-            return NextResponse.json(
-              {
-                error: resendConfigError
-                  ? "This email is already registered and pending verification, but email service is not configured. Ask admin to configure GMAIL_USER and GMAIL_PASSWORD."
-                  : "This email is already registered and pending verification. Please use login and resend verification.",
-                code: "EMAIL_ALREADY_EXISTS_PENDING_VERIFICATION",
-              },
-              { status: 409 },
-            );
-          }
-        }
-
         return NextResponse.json(
           {
             error:
@@ -277,28 +177,14 @@ export async function POST(request: NextRequest) {
             roles: [normalizedRole],
             department: department || "General",
             status: normalizedRole === "faculty" ? "pending" : "active",
+            emailVerified: true,
             firebaseUid: firebaseUser.uid,
           });
-
-          if (normalizedRole === "faculty") {
-            try {
-              await sendFacultyVerification(
-                normalizedEmail,
-                fullName || normalizedEmail,
-                firebaseUser.uid,
-              );
-            } catch (recoveryEmailError) {
-              console.warn(
-                "[REGISTER] Recovered profile but failed to send verification email:",
-                recoveryEmailError,
-              );
-            }
-          }
 
           return NextResponse.json(
             {
               message:
-                "Your account already existed in authentication and has been linked. Please verify your email to continue.",
+                "Your account already existed in authentication and has been linked.",
               code: "PROFILE_RECOVERED_FROM_AUTH",
             },
             { status: 200 },
@@ -314,7 +200,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "This email is already registered. Please sign in or use resend verification from the login page.",
+            "This email is already registered. Please sign in instead of creating a new account.",
           code: "EMAIL_ALREADY_EXISTS",
         },
         { status: 409 },

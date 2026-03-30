@@ -73,7 +73,7 @@ export function SignUpForm({
       } else {
         toast.success(
           result?.message ||
-            "Account created! Check your email to verify your account before admin approval.",
+            "Account created! Your profile is now pending admin approval.",
         );
       }
     } catch (error) {

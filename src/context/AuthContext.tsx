@@ -65,6 +65,7 @@ export interface AuthUser {
   role: UserRole;
   roles?: UserRole[];
   department?: string;
+  profileImageUrl?: string;
 }
 
 interface AuthContextType {
@@ -76,6 +77,7 @@ interface AuthContextType {
   register: (role: UserRole) => void;
   logout: () => void;
   switchRole: (role: UserRole) => void;
+  updateUserProfile: (patch: Partial<AuthUser>) => void;
   isLoading: boolean;
 }
 
@@ -223,9 +225,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     document.cookie = `auth_role=${role}; path=/`;
   };
 
+  const updateUserProfile = (patch: Partial<AuthUser>) => {
+    if (!user) {
+      return;
+    }
+
+    const nextUser: AuthUser = {
+      ...user,
+      ...patch,
+      role:
+        patch.role && assignedRoles.includes(patch.role)
+          ? patch.role
+          : user.role,
+      roles: user.roles,
+    };
+
+    setUser(nextUser);
+    localStorage.setItem("auth_user", JSON.stringify(nextUser));
+    document.cookie = `auth_user=${nextUser.username}; path=/`;
+  };
+
   // Keep role assignments synced so admin role updates reflect without page refresh.
   useEffect(() => {
     if (!isAuthenticated || !user?.id) {
+      return;
+    }
+
+    // "public-user" is a synthetic read-only login and does not have a persisted user record.
+    if (user.id === "public-user") {
       return;
     }
 
@@ -246,7 +273,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const data = (await response.json()) as {
-          user?: Partial<AuthUser> & { role?: string; roles?: string[] };
+          user?: Partial<AuthUser> & {
+            role?: string;
+            roles?: string[];
+            profileImageUrl?: string;
+          };
         };
 
         if (isDisposed || !data.user?.role) {
@@ -283,6 +314,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             data.user.department !== undefined
               ? data.user.department
               : user.department,
+          profileImageUrl:
+            data.user.profileImageUrl !== undefined
+              ? data.user.profileImageUrl
+              : user.profileImageUrl,
         };
 
         const rolesChanged =
@@ -291,7 +326,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profileChanged =
           nextUser.username !== user.username ||
           nextUser.name !== user.name ||
-          nextUser.department !== user.department;
+          nextUser.department !== user.department ||
+          nextUser.profileImageUrl !== user.profileImageUrl;
 
         if (!rolesChanged && !roleChanged && !profileChanged) {
           return;
@@ -334,6 +370,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user?.username,
     user?.name,
     user?.department,
+    user?.profileImageUrl,
     userRole,
     assignedRoles,
   ]);
@@ -347,6 +384,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     logout,
     switchRole,
+    updateUserProfile,
     isLoading,
   };
 

@@ -215,16 +215,6 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedUserRole = normalizeRoleInput(user.role) || "faculty";
-    if (normalizedUserRole === "faculty" && user.emailVerified !== true) {
-      return NextResponse.json(
-        {
-          error:
-            "Email verification required. Please verify your email from the link we sent before signing in.",
-          code: "EMAIL_VERIFICATION_REQUIRED",
-        },
-        { status: 403 },
-      );
-    }
 
     const normalizedStatus = user.status?.toLowerCase();
     const isApproved =
@@ -264,6 +254,7 @@ export async function POST(request: NextRequest) {
       role: normalizedRole,
       roles: normalizedRoles,
       department: user.department,
+      profileImageUrl: user.profileImageUrl ?? "",
       emailVerified: user.emailVerified === true,
     });
   } catch (error) {

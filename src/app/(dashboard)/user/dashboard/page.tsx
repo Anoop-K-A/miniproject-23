@@ -35,6 +35,7 @@ export default async function UserDashboardPage() {
       courses: Array.isArray(user.courses) ? user.courses : [],
       specialization: user.specialization ?? "General",
       experience: user.experience ?? "",
+      profileImageUrl: user.profileImageUrl ?? "",
       resumeUrl: user.resumeUrl,
       resumeFileName: user.resumeFileName,
     }));

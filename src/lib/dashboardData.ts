@@ -46,6 +46,7 @@ interface UserRecord {
   courses?: string[];
   specialization?: string;
   experience?: string;
+  profileImageUrl?: string;
   resumeUrl?: string;
   resumeFileName?: string;
   facultyRole?: string;
@@ -301,6 +302,7 @@ export async function getFacultyDashboardData(
       courses: mergedCourses,
       specialization: user.specialization ?? "",
       experience: user.experience ?? "",
+      profileImageUrl: user.profileImageUrl ?? "",
       resumeUrl: user.resumeUrl ?? "",
       resumeFileName: user.resumeFileName ?? "",
     };
@@ -438,6 +440,7 @@ export async function getAuditorDashboardData() {
         email: user.email ?? user.username,
         phone: user.phone ?? "",
         experience: user.experience ?? "",
+        profileImageUrl: user.profileImageUrl ?? "",
         resumeUrl: user.resumeUrl ?? "",
         resumeFileName: user.resumeFileName ?? "",
       };

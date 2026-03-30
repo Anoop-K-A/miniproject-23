@@ -54,6 +54,7 @@ export function FacultyProfileView({
             email?: string;
             phone?: string;
             experience?: string;
+            profileImageUrl?: string;
             resumeUrl?: string;
             resumeFileName?: string;
           };
@@ -67,6 +68,7 @@ export function FacultyProfileView({
             email: data.user?.email ?? prev.email,
             phone: data.user?.phone ?? prev.phone,
             experience: data.user?.experience ?? prev.experience,
+            profileImageUrl: data.user?.profileImageUrl ?? "",
             resumeUrl: data.user?.resumeUrl ?? "",
             resumeFileName: data.user?.resumeFileName ?? "",
           }));

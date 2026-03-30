@@ -10,12 +10,20 @@ export function FacultyHeader({ faculty }: FacultyHeaderProps) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-start gap-4">
-        <div className="h-16 w-16 bg-linear-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-semibold">
-          {faculty.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")}
-        </div>
+        {faculty.profileImageUrl ? (
+          <img
+            src={faculty.profileImageUrl}
+            alt={`${faculty.name} profile`}
+            className="h-16 w-16 rounded-full border object-cover"
+          />
+        ) : (
+          <div className="h-16 w-16 bg-linear-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-semibold">
+            {faculty.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")}
+          </div>
+        )}
         <div className="space-y-3">
           <h2 className="text-2xl font-bold text-gray-900">{faculty.name}</h2>
           <p className="text-gray-600">{faculty.department}</p>

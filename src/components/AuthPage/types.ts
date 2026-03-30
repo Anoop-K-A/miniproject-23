@@ -26,6 +26,7 @@ export interface AuthUser {
   role: UserRole;
   roles?: UserRole[];
   department?: string;
+  profileImageUrl?: string;
   emailVerified?: boolean;
 }
 

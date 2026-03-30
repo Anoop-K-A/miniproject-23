@@ -97,6 +97,7 @@ function AppHeaderComponent({ userRole }: AppHeaderProps) {
   const [unreadThreads, setUnreadThreads] = useState<ThreadSummary[]>([]);
   const displayName = user?.name ?? "User";
   const department = user?.department ?? "College";
+  const profileImageUrl = user?.profileImageUrl ?? "";
   const showMessageNotifications = useMemo(
     () => userRole === "faculty" || userRole === "auditor",
     [userRole],
@@ -201,7 +202,15 @@ function AppHeaderComponent({ userRole }: AppHeaderProps) {
             <div
               className={`h-10 w-10 ${roleInfo.color} rounded-xl text-white flex items-center justify-center font-semibold shadow-sm shrink-0`}
             >
-              {initials || "U"}
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt={`${displayName} profile`}
+                  className="h-10 w-10 rounded-xl object-cover"
+                />
+              ) : (
+                initials || "U"
+              )}
             </div>
 
             <div className="min-w-0">

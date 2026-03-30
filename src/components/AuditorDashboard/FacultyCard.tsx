@@ -31,9 +31,17 @@ export const FacultyCard = memo(function FacultyCard({
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
-            <div className="h-12 w-12 bg-linear-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white shrink-0">
-              {initials}
-            </div>
+            {faculty.profileImageUrl ? (
+              <img
+                src={faculty.profileImageUrl}
+                alt={`${faculty.name} profile`}
+                className="h-12 w-12 rounded-full border object-cover shrink-0"
+              />
+            ) : (
+              <div className="h-12 w-12 bg-linear-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white shrink-0">
+                {initials}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="font-medium">{faculty.name}</p>
               <p className="text-sm text-gray-500">{faculty.department}</p>

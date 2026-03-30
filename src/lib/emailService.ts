@@ -14,6 +14,26 @@ export class EmailServiceError extends Error {
   }
 }
 
+function mapEmailError(error: unknown): EmailServiceError {
+  const mailError = error as {
+    code?: string;
+    responseCode?: number;
+    message?: string;
+  };
+
+  const code = String(mailError?.code || "").toUpperCase();
+  const responseCode = Number(mailError?.responseCode || 0);
+
+  if (code === "EAUTH" || responseCode === 535) {
+    return new EmailServiceError(
+      "EMAIL_AUTH_FAILED",
+      "Email authentication failed. Set GMAIL_USER and a valid Gmail App Password in GMAIL_PASSWORD.",
+    );
+  }
+
+  return new EmailServiceError("EMAIL_DELIVERY_FAILED", "Failed to send email");
+}
+
 function getSmtpAuth() {
   const user = String(process.env.GMAIL_USER || "").trim();
   const rawPassword = String(process.env.GMAIL_PASSWORD || "").trim();
@@ -143,10 +163,7 @@ export async function sendVerificationEmail(
     console.log(`Verification email sent to ${email}`);
   } catch (error) {
     console.error(`Failed to send verification email to ${email}:`, error);
-    throw new EmailServiceError(
-      "EMAIL_DELIVERY_FAILED",
-      "Failed to send verification email",
-    );
+    throw mapEmailError(error);
   }
 }
 
@@ -245,9 +262,6 @@ export async function sendApprovalEmail(
     console.log(`Approval email sent to ${email}`);
   } catch (error) {
     console.error(`Failed to send approval email to ${email}:`, error);
-    throw new EmailServiceError(
-      "EMAIL_DELIVERY_FAILED",
-      "Failed to send approval email",
-    );
+    throw mapEmailError(error);
   }
 }

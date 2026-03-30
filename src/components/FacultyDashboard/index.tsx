@@ -69,6 +69,7 @@ export function FacultyDashboard({
           : "/api/dashboard/faculty";
         const response = await fetch(url, {
           signal: activeController.signal,
+          cache: "no-store",
         });
         const data = await response.json();
         if (response.ok) {
