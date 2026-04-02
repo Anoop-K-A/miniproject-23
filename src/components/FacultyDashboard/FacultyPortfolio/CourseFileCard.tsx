@@ -29,8 +29,8 @@ export function CourseFileCard({
                 <p className="text-sm text-gray-600">{file.courseName}</p>
               </div>
             </div>
-            <Badge className={getStatusColor(file.status)}>
-              {file.status}
+            <Badge className={getStatusColor(file.status ?? "Pending")}>
+              {file.status ?? "Pending"}
             </Badge>
           </div>
 

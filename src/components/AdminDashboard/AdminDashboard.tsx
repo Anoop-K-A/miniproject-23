@@ -156,13 +156,14 @@ function mapApiUserWithEngagement(
 
 export function AdminDashboard() {
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
-  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -198,9 +199,31 @@ export function AdminDashboard() {
     }
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (
+    page = currentPage,
+    query = searchQuery,
+    status = filterStatus,
+  ) => {
+    setIsUsersLoading(true);
     try {
-      const usersResponse = await fetch("/api/users?limit=500");
+      const searchParams = new URLSearchParams({
+        limit: String(pageSize),
+        offset: String((page - 1) * pageSize),
+        includeTotal: "1",
+      });
+
+      const trimmedQuery = query.trim();
+      if (trimmedQuery) {
+        searchParams.set("search", trimmedQuery);
+      }
+
+      if (status !== "all") {
+        searchParams.set("status", status);
+      }
+
+      const usersResponse = await fetch(
+        `/api/users?${searchParams.toString()}`,
+      );
       const usersData = await usersResponse.json();
 
       if (!usersResponse.ok) {
@@ -212,7 +235,11 @@ export function AdminDashboard() {
         mapApiUserWithEngagement(user),
       );
       setUsers(mappedUsers);
-      setCurrentPage(1); // Reset to first page
+      setTotalUsers(
+        typeof usersData.total === "number"
+          ? usersData.total
+          : mappedUsers.length,
+      );
 
       if (typeof window !== "undefined") {
         if ("requestIdleCallback" in window) {
@@ -230,45 +257,37 @@ export function AdminDashboard() {
     } catch (error) {
       console.error("Load users error:", error);
       toast.error("Failed to load users");
+    } finally {
+      setIsUsersLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    const timer = window.setTimeout(() => {
+      void fetchUsers(currentPage, searchQuery, filterStatus);
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [currentPage, searchQuery, filterStatus]);
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
     [notifications],
   );
 
-  const filteredUsers = useMemo(() => {
-    let next = [...users];
+  const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
 
-    if (searchQuery) {
-      const needle = searchQuery.toLowerCase();
-      next = next.filter(
-        (user) =>
-          user.name.toLowerCase().includes(needle) ||
-          user.email.toLowerCase().includes(needle) ||
-          (user.department || "").toLowerCase().includes(needle),
-      );
-    }
+  const handleSearchChange = (value: string) => {
+    setCurrentPage(1);
+    setSearchQuery(value);
+  };
 
-    if (filterStatus !== "all") {
-      next = next.filter((user) => user.status === filterStatus);
-    }
-
-    return next;
-  }, [users, searchQuery, filterStatus]);
-
-  // Apply pagination to filtered results
-  const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredUsers.slice(start, start + pageSize);
-  }, [filteredUsers, currentPage]);
-
-  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  const handleFilterStatusChange = (value: string) => {
+    setCurrentPage(1);
+    setFilterStatus(value);
+  };
 
   const pushNotification = (
     message: string,
@@ -282,46 +301,6 @@ export function AdminDashboard() {
       read: false,
     };
     setNotifications((prev) => [notification, ...prev]);
-  };
-
-  const handleAddUser = async (payload: {
-    name: string;
-    email: string;
-    password: string;
-    phone?: string;
-    department?: string;
-    role: AdminUser["role"];
-    roles?: UserRole[];
-  }) => {
-    try {
-      const rolesArray = payload.roles || [payload.role];
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: payload.name,
-          password: payload.password,
-          name: payload.name,
-          role: payload.role,
-          roles: rolesArray,
-          department: payload.department,
-          email: payload.email,
-          phone: payload.phone,
-          status: "active",
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        toast.error(data.error || "Failed to add user");
-        return;
-      }
-      await fetchUsers();
-      toast.success(`User ${payload.name} added successfully`);
-      pushNotification(`User ${payload.name} added`, "success");
-    } catch (error) {
-      console.error("Add user error:", error);
-      toast.error("Failed to add user");
-    }
   };
 
   const updateUser = async (id: string, payload: Partial<ApiUser>) => {
@@ -401,7 +380,6 @@ export function AdminDashboard() {
     if (updated) {
       toast.success(`Status updated to ${newStatus}`);
       pushNotification(`Status updated to ${newStatus}`, "info");
-      await fetchUsers();
     }
   };
 
@@ -432,19 +410,18 @@ export function AdminDashboard() {
         onToggleNotifications={setShowNotifications}
         onMarkAllRead={markAllAsRead}
         onMarkRead={markNotificationAsRead}
-        addDialogOpen={isAddUserDialogOpen}
-        onAddDialogOpenChange={setIsAddUserDialogOpen}
-        onAddUser={handleAddUser}
       />
 
-      <AdminStats users={users} />
+      <AdminStats users={users} totalUsers={totalUsers} />
 
       <UsersTable
-        users={paginatedUsers}
+        users={users}
+        totalUsers={totalUsers}
+        isLoading={isUsersLoading}
         searchQuery={searchQuery}
         filterStatus={filterStatus}
-        onSearchChange={setSearchQuery}
-        onFilterStatusChange={setFilterStatus}
+        onSearchChange={handleSearchChange}
+        onFilterStatusChange={handleFilterStatusChange}
         onEdit={(user) => {
           setSelectedUser(user);
           setIsEditDialogOpen(true);
@@ -462,9 +439,8 @@ export function AdminDashboard() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between gap-4 mt-6">
           <p className="text-sm text-gray-600">
-            Showing {(currentPage - 1) * pageSize + 1} to{" "}
-            {Math.min(currentPage * pageSize, filteredUsers.length)} of{" "}
-            {filteredUsers.length} users
+            Showing {totalUsers === 0 ? 0 : (currentPage - 1) * pageSize + 1} to{" "}
+            {Math.min(currentPage * pageSize, totalUsers)} of {totalUsers} users
           </p>
           <div className="flex gap-2">
             <button

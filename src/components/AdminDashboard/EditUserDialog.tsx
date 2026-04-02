@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ChevronDown } from "lucide-react";
 import type { AdminUser, AdminUserStatus } from "./types";
 import type { UserRole } from "@/lib/roles";
 
@@ -47,22 +40,6 @@ interface EditUserDialogProps {
 interface FormData extends Omit<AdminUser, "role"> {
   role: AdminUser["role"];
   roles?: UserRole[];
-  adminPassword?: string;
-  userPassword?: string;
-}
-
-function hasRole(user: AdminUser, targetRole: UserRole) {
-  const normalizedTarget = targetRole.toLowerCase();
-  const primaryRole = String(user.role || "")
-    .trim()
-    .toLowerCase();
-  const roles = (user.roles || []).map((role) =>
-    String(role || "")
-      .trim()
-      .toLowerCase(),
-  );
-
-  return primaryRole === normalizedTarget || roles.includes(normalizedTarget);
 }
 
 export function EditUserDialog({
@@ -72,49 +49,15 @@ export function EditUserDialog({
   onUpdateUser,
 }: EditUserDialogProps) {
   const [formData, setFormData] = useState<FormData>(user as FormData);
-  const [selectedRoles, setSelectedRoles] = useState<Set<UserRole>>(
-    new Set(user.roles || [user.role]),
-  );
 
   useEffect(() => {
     setFormData({
       ...(user as FormData),
-      adminPassword: "",
-      userPassword: "",
     });
-    setSelectedRoles(new Set(user.roles || [user.role]));
   }, [user]);
-
-  const roleOptions: Array<{ value: UserRole; label: string }> = [
-    { value: "faculty", label: "Faculty" },
-    { value: "auditor", label: "Auditor" },
-    { value: "staff-advisor", label: "Staff Advisor" },
-    { value: "user", label: "User" },
-    { value: "admin", label: "Admin" },
-  ];
-
-  const canEditAdminRole = hasRole(user, "admin") || false;
-  const isAdminAccount = hasRole(user, "admin") || false;
-  const isUserAccount = hasRole(user, "user") || false;
-
-  const selectedRoleLabels = roleOptions
-    .filter((option) => selectedRoles.has(option.value))
-    .map((option) => option.label);
-
-  const toggleRole = (role: UserRole) => {
-    const newRoles = new Set(selectedRoles);
-    if (newRoles.has(role)) {
-      newRoles.delete(role);
-    } else {
-      newRoles.add(role);
-    }
-    setSelectedRoles(newRoles);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const rolesArray = Array.from(selectedRoles);
-    const primaryRole = rolesArray[0] || "faculty";
 
     onUpdateUser({
       id: user.id,
@@ -122,22 +65,9 @@ export function EditUserDialog({
       email: formData.email,
       phone: formData.phone || undefined,
       department: formData.department || undefined,
-      role: primaryRole,
-      roles: rolesArray,
+      role: user.role,
+      roles: user.roles,
       status: formData.status,
-      password: (isAdminAccount
-        ? formData.adminPassword
-        : isUserAccount
-          ? formData.userPassword
-          : ""
-      )?.trim()
-        ? (isAdminAccount
-            ? formData.adminPassword
-            : isUserAccount
-              ? formData.userPassword
-              : ""
-          )?.trim()
-        : undefined,
     });
     onOpenChange(false);
   };
@@ -194,46 +124,7 @@ export function EditUserDialog({
                 }
               />
             </div>
-            <div className="col-span-1 sm:col-span-2 space-y-3">
-              <Label>Roles</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    <span className="text-left">
-                      {selectedRoleLabels.length === 0
-                        ? "Select roles..."
-                        : selectedRoleLabels.join(", ")}
-                    </span>
-                    <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-3" align="start">
-                  <div className="space-y-2">
-                    {roleOptions.map((option) => (
-                      <div
-                        key={option.value}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={`role-${option.value}`}
-                          checked={selectedRoles.has(option.value)}
-                          disabled={
-                            option.value === "admin" && !canEditAdminRole
-                          }
-                          onCheckedChange={() => toggleRole(option.value)}
-                        />
-                        <label
-                          htmlFor={`role-${option.value}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                        >
-                          {option.label}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+
             <div className="space-y-2">
               <Label htmlFor="edit-status">Status</Label>
               <Select
@@ -256,44 +147,6 @@ export function EditUserDialog({
                   <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="edit-admin-password">
-                Reset Admin Password (Optional)
-              </Label>
-              <Input
-                id="edit-admin-password"
-                type="password"
-                disabled={!isAdminAccount}
-                value={formData.adminPassword ?? ""}
-                placeholder={
-                  isAdminAccount
-                    ? "Leave blank to keep current password"
-                    : "Only enabled when editing an admin account"
-                }
-                onChange={(e) =>
-                  setFormData({ ...formData, adminPassword: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="edit-user-password">
-                Reset User Password (Optional)
-              </Label>
-              <Input
-                id="edit-user-password"
-                type="password"
-                disabled={!isUserAccount}
-                value={formData.userPassword ?? ""}
-                placeholder={
-                  isUserAccount
-                    ? "Leave blank to keep current password"
-                    : "Only enabled when editing a user account"
-                }
-                onChange={(e) =>
-                  setFormData({ ...formData, userPassword: e.target.value })
-                }
-              />
             </div>
           </div>
           <DialogFooter>

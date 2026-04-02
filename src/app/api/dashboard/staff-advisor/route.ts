@@ -4,8 +4,8 @@ import { unstable_cache } from "next/cache";
 
 const getCachedStaffAdvisorDashboardData = unstable_cache(
   async (username?: string | null) => getStaffAdvisorDashboardData(username),
-  ["staff-advisor-dashboard-data-v1"],
-  { revalidate: 20 },
+  ["staff-advisor-dashboard-data-v2"],
+  { revalidate: 30 },
 );
 
 export async function GET(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const data = await getCachedStaffAdvisorDashboardData(username);
   return NextResponse.json(data, {
     headers: {
-      "Cache-Control": "private, max-age=15, stale-while-revalidate=45",
+      "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
     },
   });
 }

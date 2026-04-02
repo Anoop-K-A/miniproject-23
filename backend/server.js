@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const courseFileRoutes = require("./routes/courseFile.routes");
 const responsibilityRoutes = require("./routes/responsibility.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 // Load environment variables
 dotenv.config({ path: "../.env.local" });
@@ -42,6 +43,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/course-files", courseFileRoutes);
 app.use("/api/responsibilities", responsibilityRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // 404 handler
 app.use((req, res) => {

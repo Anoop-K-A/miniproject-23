@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { randomUUID } from "crypto";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 
 interface RemarkRecord {
   id: string;
@@ -14,7 +16,13 @@ interface RemarkRecord {
 
 export async function GET() {
   try {
-    const remarks = await readJsonFile<RemarkRecord[]>("remarks.json");
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
+    const remarks = (await db
+      .collection<RemarkRecord>(COLLECTIONS.remarks)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as RemarkRecord[];
     return NextResponse.json({ remarks });
   } catch (error) {
     console.error("Remarks load error:", error);
@@ -27,12 +35,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const payload = await request.json();
-    const remarks = await readJsonFile<RemarkRecord[]>("remarks.json");
     const timestamp = new Date().toISOString();
 
     const newRemark: RemarkRecord = {
-      id: Date.now().toString(),
+      id: randomUUID(),
       authorId: payload.authorId,
       entityType: payload.entityType,
       entityId: payload.entityId,
@@ -42,8 +51,12 @@ export async function POST(request: NextRequest) {
       updatedAt: timestamp,
     };
 
-    const updatedRemarks = [newRemark, ...remarks];
-    await writeJsonFile("remarks.json", updatedRemarks);
+    await db.collection<RemarkRecord>(COLLECTIONS.remarks).insertOne(newRemark);
+    const updatedRemarks = (await db
+      .collection<RemarkRecord>(COLLECTIONS.remarks)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as RemarkRecord[];
 
     return NextResponse.json({ remarks: updatedRemarks });
   } catch (error) {

@@ -4,8 +4,8 @@ import { unstable_cache } from "next/cache";
 
 const getCachedAuditorDashboardData = unstable_cache(
   async () => getAuditorDashboardData(),
-  ["auditor-dashboard-data-v1"],
-  { revalidate: 30 },
+  ["auditor-dashboard-data-v2"],
+  { revalidate: 10 },
 );
 
 export async function GET() {

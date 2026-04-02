@@ -53,7 +53,7 @@ interface CreateUserInput {
 
 let indexesEnsured = false;
 let seedEnsured = false;
-const USERS_CACHE_TTL_MS = 5000;
+const USERS_CACHE_TTL_MS = 20000;
 let usersCache: { expiresAt: number; users: UserRecord[] } | null = null;
 
 function normalizeIdentity(value: string) {

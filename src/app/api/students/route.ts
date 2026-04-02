@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { randomUUID } from "crypto";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
 import { isValidBatchYear, normalizeBatchYear } from "@/lib/batchYear";
@@ -28,6 +30,8 @@ function normalizeSemesterInput(value: unknown) {
 
 export async function GET(request: NextRequest) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const advisorScope = await resolveStaffAdvisorScope(request);
     if (!advisorScope) {
       return createCachedResponse({ students: [] }, { maxAge: 30 });
@@ -40,10 +44,11 @@ export async function GET(request: NextRequest) {
       return createCachedResponse(cachedData, { maxAge: 60 });
     }
 
-    const students = await readJsonFile<Student[]>("students.json");
-    const scopedStudents = students.filter(
-      (student) => student.advisorId === advisorScope.advisorId,
-    );
+    const scopedStudents = (await db
+      .collection<Student>(COLLECTIONS.students)
+      .find({ advisorId: advisorScope.advisorId })
+      .sort({ createdAt: -1 })
+      .toArray()) as Student[];
 
     const responseData = { students: scopedStudents };
     apiCache.set(cacheKey, responseData);
@@ -60,6 +65,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const advisorScope = await resolveStaffAdvisorScope(request);
     if (!advisorScope) {
       return NextResponse.json(
@@ -69,7 +76,6 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = await request.json();
-    const students = await readJsonFile<Student[]>("students.json");
     const timestamp = new Date().toISOString();
 
     const rollNumber = String(payload.rollNumber ?? "").trim();
@@ -103,12 +109,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const duplicateInAdvisorScope = students.some(
-      (student) =>
-        student.advisorId === advisorScope.advisorId &&
-        student.batchYear?.trim().toLowerCase() === batchYear.toLowerCase() &&
-        student.rollNumber.trim().toLowerCase() === rollNumber.toLowerCase(),
-    );
+    const duplicateInAdvisorScope = await db
+      .collection<Student>(COLLECTIONS.students)
+      .findOne({
+        advisorId: advisorScope.advisorId,
+        batchYear,
+        rollNumber,
+      });
 
     if (duplicateInAdvisorScope) {
       return NextResponse.json(
@@ -118,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     const newStudent: Student & { createdAt?: string; updatedAt?: string } = {
-      id: Date.now().toString(),
+      id: randomUUID(),
       advisorId: advisorScope.advisorId,
       name: payload.name,
       rollNumber,
@@ -139,12 +146,17 @@ export async function POST(request: NextRequest) {
       updatedAt: timestamp,
     };
 
-    const updatedStudents = [newStudent, ...students];
-    await writeJsonFile("students.json", updatedStudents);
+    await db
+      .collection<
+        Student & { createdAt?: string; updatedAt?: string }
+      >(COLLECTIONS.students)
+      .insertOne(newStudent);
 
-    const scopedStudents = updatedStudents.filter(
-      (student) => student.advisorId === advisorScope.advisorId,
-    );
+    const scopedStudents = (await db
+      .collection<Student>(COLLECTIONS.students)
+      .find({ advisorId: advisorScope.advisorId })
+      .sort({ createdAt: -1 })
+      .toArray()) as Student[];
 
     return NextResponse.json({ student: newStudent, students: scopedStudents });
   } catch (error) {

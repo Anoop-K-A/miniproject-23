@@ -1,19 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { randomUUID } from "crypto";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 import type { EventReport } from "@/components/EventReportManager/types";
-import { recomputeEngagementForFaculty } from "@/lib/engagements";
 import { getAllUsers } from "@/lib/userStore";
+
+function parsePositiveInt(value: string | null, fallback: number) {
+  if (!value) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+  return parsed;
+}
+
+function toBooleanFlag(value: string | null, fallback: boolean) {
+  if (value === null) {
+    return fallback;
+  }
+  return value !== "0" && value.toLowerCase() !== "false";
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const payload = await request.json();
-    const reports = await readJsonFile<EventReport[]>("eventReports.json");
     const users = await getAllUsers();
     const facultyUser = users.find((user) => user.id === payload.facultyId);
     const timestamp = new Date().toISOString();
 
     const newReport: EventReport & { facultyName?: string } = {
-      id: Date.now().toString(),
+      id: randomUUID(),
       facultyId: payload.facultyId,
       eventName: payload.eventName,
       community: payload.community,
@@ -36,13 +56,17 @@ export async function POST(request: NextRequest) {
       updatedAt: timestamp,
     };
 
-    const updatedReports = [newReport, ...reports];
-    await writeJsonFile("eventReports.json", updatedReports);
+    await db
+      .collection<
+        EventReport & { facultyName?: string }
+      >(COLLECTIONS.eventReports)
+      .insertOne(newReport);
 
-    // Recompute engagement after report creation
-    if (payload.facultyId) {
-      await recomputeEngagementForFaculty(payload.facultyId);
-    }
+    const updatedReports = (await db
+      .collection<EventReport>(COLLECTIONS.eventReports)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as EventReport[];
 
     return NextResponse.json({ reports: updatedReports });
   } catch (error) {
@@ -54,22 +78,116 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const reports = await readJsonFile<EventReport[]>("eventReports.json");
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
+    const searchParams = request.nextUrl.searchParams;
+    const facultyId = String(searchParams.get("facultyId") || "").trim();
+    const status = String(searchParams.get("status") || "")
+      .trim()
+      .toLowerCase();
+    const community = String(searchParams.get("community") || "")
+      .trim()
+      .toLowerCase();
+    const search = String(searchParams.get("search") || "")
+      .trim()
+      .toLowerCase();
+    const limit = parsePositiveInt(searchParams.get("limit"), 0);
+    const offset = parsePositiveInt(searchParams.get("offset"), 0);
+    const includeMeta = toBooleanFlag(searchParams.get("includeMeta"), true);
+
+    const query: Record<string, unknown> = {};
+    if (facultyId) {
+      query.facultyId = facultyId;
+    }
+    if (status) {
+      query.status = new RegExp(`^${status}$`, "i");
+    }
+    if (community) {
+      query.community = new RegExp(`^${community}$`, "i");
+    }
+
+    const reports = (await db
+      .collection<EventReport>(COLLECTIONS.eventReports)
+      .find(query)
+      .sort({ createdAt: -1 })
+      .toArray()) as EventReport[];
     const users = await getAllUsers();
-    const communities = await readJsonFile<string[]>(
-      "reports/communities.json",
-    );
-    const reportsWithFaculty = reports.map((report) => {
-      const facultyUser = users.find((user) => user.id === report.facultyId);
+    const filteredReports = reports.filter((report) => {
+      if (facultyId && String(report.facultyId || "") !== facultyId) {
+        return false;
+      }
+
+      if (status && String(report.status || "").toLowerCase() !== status) {
+        return false;
+      }
+
+      if (
+        community &&
+        String(report.community || "")
+          .trim()
+          .toLowerCase() !== community
+      ) {
+        return false;
+      }
+
+      if (!search) {
+        return true;
+      }
+
+      const haystack = [
+        report.eventName,
+        report.community,
+        report.description,
+        report.location,
+        report.facultyCoordinator,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(search);
+    });
+
+    const pagedReports =
+      limit > 0
+        ? filteredReports.slice(offset, offset + limit)
+        : filteredReports.slice(offset);
+
+    const userById = new Map(users.map((user) => [user.id, user]));
+    const reportsWithFaculty = pagedReports.map((report) => {
+      const facultyUser = userById.get(String(report.facultyId || ""));
       return {
         ...report,
         facultyName: facultyUser?.name,
         department: facultyUser?.department ?? report.department,
       };
     });
-    return NextResponse.json({ reports: reportsWithFaculty, communities });
+
+    if (!includeMeta) {
+      return NextResponse.json({
+        reports: reportsWithFaculty,
+        total: filteredReports.length,
+        offset,
+        limit,
+      });
+    }
+
+    const communities = (
+      await db
+        .collection<EventReport>(COLLECTIONS.eventReports)
+        .distinct("community")
+    )
+      .filter((value): value is string => typeof value === "string")
+      .sort((a, b) => a.localeCompare(b));
+    return NextResponse.json({
+      reports: reportsWithFaculty,
+      communities,
+      total: filteredReports.length,
+      offset,
+      limit,
+    });
   } catch (error) {
     console.error("Event report load error:", error);
     return NextResponse.json(

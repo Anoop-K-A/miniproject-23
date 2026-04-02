@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { UserPlus, ChevronDown } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,11 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import type { AdminUser } from "./types";
 import type { UserRole } from "@/lib/roles";
 
@@ -48,34 +42,9 @@ export function AddUserDialog({
     phone: "",
     department: "",
   });
-  const [selectedRoles, setSelectedRoles] = useState<Set<UserRole>>(
-    new Set(["faculty"]),
-  );
-
-  const roleOptions: Array<{ value: UserRole; label: string }> = [
-    { value: "faculty", label: "Faculty" },
-    { value: "auditor", label: "Auditor" },
-    { value: "staff-advisor", label: "Staff Advisor" },
-  ];
-
-  const selectedRoleLabels = roleOptions
-    .filter((option) => selectedRoles.has(option.value))
-    .map((option) => option.label);
-
-  const toggleRole = (role: UserRole) => {
-    const newRoles = new Set(selectedRoles);
-    if (newRoles.has(role)) {
-      newRoles.delete(role);
-    } else {
-      newRoles.add(role);
-    }
-    setSelectedRoles(newRoles);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const rolesArray = Array.from(selectedRoles);
-    const primaryRole = rolesArray[0] || "faculty";
 
     onAddUser({
       name: formData.name,
@@ -83,8 +52,8 @@ export function AddUserDialog({
       password: formData.password,
       phone: formData.phone || undefined,
       department: formData.department || undefined,
-      role: primaryRole,
-      roles: rolesArray,
+      role: "faculty",
+      roles: ["faculty"],
     });
     onOpenChange(false);
     setFormData({
@@ -94,7 +63,6 @@ export function AddUserDialog({
       phone: "",
       department: "",
     });
-    setSelectedRoles(new Set(["faculty"]));
   };
 
   return (
@@ -172,47 +140,6 @@ export function AddUserDialog({
                 setFormData({ ...formData, department: e.target.value })
               }
             />
-          </div>
-          <div className="space-y-3">
-            <Label>Roles *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-between"
-                >
-                  <span className="text-left">
-                    {selectedRoleLabels.length === 0
-                      ? "Select roles..."
-                      : selectedRoleLabels.join(", ")}
-                  </span>
-                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56 p-3" align="start">
-                <div className="space-y-2">
-                  {roleOptions.map((option) => (
-                    <div
-                      key={option.value}
-                      className="flex items-center space-x-2"
-                    >
-                      <Checkbox
-                        id={`add-role-${option.value}`}
-                        checked={selectedRoles.has(option.value)}
-                        onCheckedChange={() => toggleRole(option.value)}
-                      />
-                      <label
-                        htmlFor={`add-role-${option.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                      >
-                        {option.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
           </div>
           <DialogFooter>
             <Button

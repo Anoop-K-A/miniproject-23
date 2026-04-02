@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 
 interface RemarkRecord {
   id: string;
@@ -17,22 +18,20 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const { id } = await params;
     const payload = await request.json();
-    const remarks = await readJsonFile<RemarkRecord[]>("remarks.json");
     const updatedAt = new Date().toISOString();
 
-    const updatedRemarks = remarks.map((remark) =>
-      remark.id === id
-        ? {
-            ...remark,
-            ...payload,
-            updatedAt,
-          }
-        : remark,
-    );
-
-    await writeJsonFile("remarks.json", updatedRemarks);
+    await db
+      .collection<RemarkRecord>(COLLECTIONS.remarks)
+      .updateOne({ id }, { $set: { ...payload, updatedAt } });
+    const updatedRemarks = (await db
+      .collection<RemarkRecord>(COLLECTIONS.remarks)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as RemarkRecord[];
     return NextResponse.json({ remarks: updatedRemarks });
   } catch (error) {
     console.error("Remark update error:", error);
@@ -48,10 +47,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const { id } = await params;
-    const remarks = await readJsonFile<RemarkRecord[]>("remarks.json");
-    const updatedRemarks = remarks.filter((remark) => remark.id !== id);
-    await writeJsonFile("remarks.json", updatedRemarks);
+    await db.collection<RemarkRecord>(COLLECTIONS.remarks).deleteOne({ id });
+    const updatedRemarks = (await db
+      .collection<RemarkRecord>(COLLECTIONS.remarks)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as RemarkRecord[];
     return NextResponse.json({ remarks: updatedRemarks });
   } catch (error) {
     console.error("Remark delete error:", error);

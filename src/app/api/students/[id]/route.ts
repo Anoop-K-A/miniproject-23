@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
 import { isValidBatchYear, normalizeBatchYear } from "@/lib/batchYear";
@@ -30,6 +31,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const advisorScope = await resolveStaffAdvisorScope(request);
     if (!advisorScope) {
       return NextResponse.json(
@@ -40,10 +43,11 @@ export async function PATCH(
 
     const { id } = await params;
     const payload = await request.json();
-    const students = await readJsonFile<Student[]>("students.json");
     const updatedAt = new Date().toISOString();
 
-    const existingStudent = students.find((student) => student.id === id);
+    const existingStudent = await db
+      .collection<Student>(COLLECTIONS.students)
+      .findOne({ id });
     if (
       !existingStudent ||
       existingStudent.advisorId !== advisorScope.advisorId
@@ -83,16 +87,14 @@ export async function PATCH(
       payload.batchYear ?? existingStudent.batchYear,
     );
 
-    const duplicateInAdvisorScope = students.some(
-      (student) =>
-        student.id !== existingStudent.id &&
-        student.advisorId === advisorScope.advisorId &&
-        String(student.rollNumber ?? "")
-          .trim()
-          .toLowerCase() === nextRollNumber.toLowerCase() &&
-        normalizeBatchYear(student.batchYear).toLowerCase() ===
-          nextBatchYear.toLowerCase(),
-    );
+    const duplicateInAdvisorScope = await db
+      .collection<Student>(COLLECTIONS.students)
+      .findOne({
+        id: { $ne: existingStudent.id },
+        advisorId: advisorScope.advisorId,
+        rollNumber: nextRollNumber,
+        batchYear: nextBatchYear,
+      });
 
     if (duplicateInAdvisorScope) {
       return NextResponse.json(
@@ -108,11 +110,9 @@ export async function PATCH(
       updatedAt,
     } as Student;
 
-    const updatedStudents = students.map((student) =>
-      student.id === id ? nextStudent : student,
-    );
-
-    await writeJsonFile("students.json", updatedStudents);
+    await db
+      .collection<Student>(COLLECTIONS.students)
+      .updateOne({ id }, { $set: nextStudent });
     return NextResponse.json({ student: nextStudent });
   } catch (error) {
     console.error("Student update error:", error);
@@ -128,6 +128,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const advisorScope = await resolveStaffAdvisorScope(request);
     if (!advisorScope) {
       return NextResponse.json(
@@ -137,9 +139,9 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const students = await readJsonFile<Student[]>("students.json");
-
-    const existingStudent = students.find((student) => student.id === id);
+    const existingStudent = await db
+      .collection<Student>(COLLECTIONS.students)
+      .findOne({ id });
     if (
       !existingStudent ||
       existingStudent.advisorId !== advisorScope.advisorId
@@ -147,11 +149,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    const updatedStudents = students.filter(
-      (student) =>
-        !(student.id === id && student.advisorId === advisorScope.advisorId),
-    );
-    await writeJsonFile("students.json", updatedStudents);
+    await db
+      .collection<Student>(COLLECTIONS.students)
+      .deleteOne({ id, advisorId: advisorScope.advisorId });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Student delete error:", error);

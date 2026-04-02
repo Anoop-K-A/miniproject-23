@@ -9,7 +9,10 @@
     "lint": "next lint",
     "migrate:users:mongodb": "node scripts/migrate-users-json-to-mongodb.mjs",
     "cleanup:firebase": "node scripts/cleanup-orphaned-firebase-accounts.mjs",
-    "cleanup:firebase:delete": "DELETE_ORPHANED=true node scripts/cleanup-orphaned-firebase-accounts.mjs"
+    "cleanup:firebase:delete": "DELETE_ORPHANED=true node scripts/cleanup-orphaned-firebase-accounts.mjs",
+    "cleanup:deployment": "node scripts/cleanup-for-deployment.mjs",
+    "cleanup:mongodb:deployment": "node scripts/cleanup-mongodb-deployment.mjs",
+    "migrate:normalized:mongo": "node scripts/migrate-json-to-normalized-mongo.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -51,6 +54,7 @@
     "date-fns": "3.6.0",
     "dotenv": "^17.2.3",
     "embla-carousel-react": "8.6.0",
+    "firebase": "^12.11.0",
     "firebase-admin": "^13.7.0",
     "input-otp": "1.4.2",
     "lucide-react": "^0.487.0",

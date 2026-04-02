@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { randomUUID } from "crypto";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
 
@@ -8,6 +10,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const advisorScope = await resolveStaffAdvisorScope(request);
     if (!advisorScope) {
       return NextResponse.json(
@@ -18,37 +22,34 @@ export async function POST(
 
     const { id } = await params;
     const payload = await request.json();
-    const students = await readJsonFile<Student[]>("students.json");
 
-    const targetStudent = students.find((student) => student.id === id);
+    const targetStudent = await db
+      .collection<Student>(COLLECTIONS.students)
+      .findOne({ id });
     if (!targetStudent || targetStudent.advisorId !== advisorScope.advisorId) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    const updatedStudents = students.map((student) => {
-      if (student.id !== id || student.advisorId !== advisorScope.advisorId) {
-        return student;
-      }
+    const newActivity = {
+      id: `act-${randomUUID()}`,
+      name: payload.name,
+      community: payload.community,
+      points: payload.points,
+      date: new Date().toISOString().split("T")[0],
+    };
 
-      const newActivity = {
-        id: `act-${Date.now()}`,
-        name: payload.name,
-        community: payload.community,
-        points: payload.points,
-        date: new Date().toISOString().split("T")[0],
-      };
+    await db.collection<Student>(COLLECTIONS.students).updateOne(
+      { id, advisorId: advisorScope.advisorId },
+      {
+        $push: { activities: newActivity },
+        $inc: { activityPoints: payload.points },
+        $set: { updatedAt: new Date().toISOString() },
+      },
+    );
 
-      return {
-        ...student,
-        activities: [...student.activities, newActivity],
-        activityPoints: student.activityPoints + payload.points,
-        updatedAt: new Date().toISOString(),
-      };
-    });
-
-    await writeJsonFile("students.json", updatedStudents);
-
-    const updatedStudent = updatedStudents.find((student) => student.id === id);
+    const updatedStudent = await db
+      .collection<Student>(COLLECTIONS.students)
+      .findOne({ id });
     return NextResponse.json({ student: updatedStudent });
   } catch (error) {
     console.error("Student activity error:", error);

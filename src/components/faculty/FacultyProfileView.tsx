@@ -127,6 +127,13 @@ export function FacultyProfileView({
       <PortfolioTabs
         courseFiles={courseFiles}
         eventReports={eventReports}
+        courseFilesPage={1}
+        eventReportsPage={1}
+        pageSize={10}
+        totalCourseFiles={courseFiles.length}
+        totalEventReports={eventReports.length}
+        onCourseFilesPageChange={() => {}}
+        onEventReportsPageChange={() => {}}
         students={[]}
         showStudents={false}
         onViewFile={handleViewFile}

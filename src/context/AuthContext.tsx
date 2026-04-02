@@ -4,6 +4,7 @@ import React, {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   ReactNode,
 } from "react";
@@ -40,12 +41,15 @@ function normalizeAuthPayload(authUser: AuthUser) {
     authUser.role,
     ...(authUser.roles || []),
   ]);
-  const roles = candidateRoles.length > 0 ? candidateRoles : ["faculty"];
-  const activeRole = roles.includes("admin")
-    ? "admin"
-    : roles.includes(authUser.role)
-      ? authUser.role
-      : roles[0];
+  const roles: UserRole[] =
+    candidateRoles.length > 0 ? candidateRoles : ["faculty"];
+  const activeRole = (
+    roles.includes("admin")
+      ? "admin"
+      : roles.includes(authUser.role)
+        ? authUser.role
+        : roles[0]
+  ) as UserRole;
 
   return {
     user: {
@@ -89,6 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [assignedRoles, setAssignedRoles] = useState<UserRole[]>(["faculty"]);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const userRoleRef = useRef<UserRole>("faculty");
+  const assignedRolesRef = useRef<UserRole[]>(["faculty"]);
+  const userRef = useRef<AuthUser | null>(null);
 
   const persistAuthState = (
     nextUser: AuthUser,
@@ -144,13 +151,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...(parsedUser?.roles || []),
       ]);
 
-      const normalizedRoles =
+      const normalizedRoles: UserRole[] =
         hydratedRoles.length > 0 ? hydratedRoles : ["faculty"];
-      const normalizedRole = normalizedRoles.includes("admin")
-        ? "admin"
-        : normalizedRoles.includes(savedRole)
-          ? savedRole
-          : normalizedRoles[0];
+      const normalizedRole = (
+        normalizedRoles.includes("admin")
+          ? "admin"
+          : normalizedRoles.includes(savedRole)
+            ? savedRole
+            : normalizedRoles[0]
+      ) as UserRole;
 
       setUserRole(normalizedRole);
       setAssignedRoles(normalizedRoles);
@@ -198,7 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const switchRole = (role: UserRole) => {
-    if (!assignedRoles.includes(role)) {
+    if (!assignedRoles.includes(role) || role === userRole) {
       return;
     }
 
@@ -213,6 +222,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       document.cookie = `auth_user=${nextUser.username}; path=/`;
     }
   };
+
+  useEffect(() => {
+    userRoleRef.current = userRole;
+    assignedRolesRef.current = assignedRoles;
+    userRef.current = user;
+  }, [userRole, assignedRoles, user]);
 
   const register = (role: UserRole) => {
     setUserRole(role);
@@ -251,18 +266,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const currentUser = userRef.current;
+    if (!currentUser?.id) {
+      return;
+    }
+
     // "public-user" is a synthetic read-only login and does not have a persisted user record.
-    if (user.id === "public-user") {
+    if (currentUser.id === "public-user") {
       return;
     }
 
     let isDisposed = false;
-    const hasAdminRole = assignedRoles.includes("admin");
+    const hasAdminRole = assignedRolesRef.current.includes("admin");
 
     const syncCurrentUser = async () => {
       try {
+        const activeUser = userRef.current;
+        if (!activeUser?.id) {
+          return;
+        }
+
         const response = await fetch(
-          `/api/users/${encodeURIComponent(user.id)}`,
+          `/api/users/${encodeURIComponent(activeUser.id)}`,
           {
             cache: "no-store",
           },
@@ -300,34 +325,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const activeRole = normalizedRoles.includes("admin")
           ? "admin"
-          : normalizedRoles.includes(userRole)
-            ? userRole
+          : normalizedRoles.includes(userRoleRef.current)
+            ? userRoleRef.current
             : normalizedRoles[0];
 
         const nextUser: AuthUser = {
-          id: data.user.id || user.id,
-          username: data.user.username || user.username,
-          name: data.user.name || user.name,
+          id: data.user.id || activeUser.id,
+          username: data.user.username || activeUser.username,
+          name: data.user.name || activeUser.name,
           role: activeRole,
           roles: normalizedRoles,
           department:
             data.user.department !== undefined
               ? data.user.department
-              : user.department,
+              : activeUser.department,
           profileImageUrl:
             data.user.profileImageUrl !== undefined
               ? data.user.profileImageUrl
-              : user.profileImageUrl,
+              : activeUser.profileImageUrl,
         };
 
         const rolesChanged =
-          normalizedRoles.join("|") !== assignedRoles.join("|");
-        const roleChanged = activeRole !== userRole;
+          normalizedRoles.join("|") !== assignedRolesRef.current.join("|");
+        const roleChanged = activeRole !== userRoleRef.current;
         const profileChanged =
-          nextUser.username !== user.username ||
-          nextUser.name !== user.name ||
-          nextUser.department !== user.department ||
-          nextUser.profileImageUrl !== user.profileImageUrl;
+          nextUser.username !== activeUser.username ||
+          nextUser.name !== activeUser.name ||
+          nextUser.department !== activeUser.department ||
+          nextUser.profileImageUrl !== activeUser.profileImageUrl;
 
         if (!rolesChanged && !roleChanged && !profileChanged) {
           return;
@@ -364,16 +389,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [
-    isAuthenticated,
-    user?.id,
-    user?.username,
-    user?.name,
-    user?.department,
-    user?.profileImageUrl,
-    userRole,
-    assignedRoles,
-  ]);
+  }, [isAuthenticated, user?.id]);
 
   const value = {
     isAuthenticated,

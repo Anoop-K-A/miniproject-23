@@ -71,6 +71,7 @@ function buildCourseTeachingEntries(files: CourseFile[]) {
 export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const { user, userRole } = useAuth();
   const showStudents = faculty.isStaffAdvisor === true;
+  const pageSize = 40;
   const [profileFaculty, setProfileFaculty] = useState<FacultyMember>(faculty);
   const [selectedFile, setSelectedFile] = useState<CourseFile | null>(null);
   const [selectedReport, setSelectedReport] = useState<EventReport | null>(
@@ -80,6 +81,10 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
   const [isReportViewOpen, setIsReportViewOpen] = useState(false);
   const [courseFiles, setCourseFiles] = useState<CourseFile[]>([]);
   const [eventReports, setEventReports] = useState<EventReport[]>([]);
+  const [courseFilesPage, setCourseFilesPage] = useState(1);
+  const [eventReportsPage, setEventReportsPage] = useState(1);
+  const [courseFilesTotal, setCourseFilesTotal] = useState(0);
+  const [eventReportsTotal, setEventReportsTotal] = useState(0);
   const [students, setStudents] = useState<Student[]>([]);
   const [messages, setMessages] = useState<
     {
@@ -94,6 +99,11 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
     }[]
   >([]);
   const canViewMessages = userRole !== "faculty";
+
+  useEffect(() => {
+    setCourseFilesPage(1);
+    setEventReportsPage(1);
+  }, [faculty.id]);
 
   useEffect(() => {
     setProfileFaculty(faculty);
@@ -142,8 +152,12 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
     const loadPortfolioData = async () => {
       try {
         const requests = [
-          fetch("/api/course-files"),
-          fetch("/api/event-reports"),
+          fetch(
+            `/api/course-files?facultyId=${encodeURIComponent(faculty.id)}&limit=${pageSize}&offset=${(courseFilesPage - 1) * pageSize}&includeMeta=0`,
+          ),
+          fetch(
+            `/api/event-reports?facultyId=${encodeURIComponent(faculty.id)}&limit=${pageSize}&offset=${(eventReportsPage - 1) * pageSize}&includeMeta=0`,
+          ),
         ];
         if (showStudents) {
           requests.push(fetch("/api/students"));
@@ -164,16 +178,22 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
           return;
         }
 
-        const scopedFiles: CourseFile[] = (filesData.files ?? []).filter(
-          (file: CourseFile) => file.facultyId === faculty.id,
-        );
-        const scopedReports: EventReport[] = (reportsData.reports ?? []).filter(
-          (report: EventReport) => report.facultyId === faculty.id,
-        );
+        const scopedFiles: CourseFile[] = filesData.files ?? [];
+        const scopedReports: EventReport[] = reportsData.reports ?? [];
         const autoCourses = buildCourseTeachingEntries(scopedFiles);
 
         setCourseFiles(scopedFiles);
         setEventReports(scopedReports);
+        setCourseFilesTotal(
+          typeof filesData.total === "number"
+            ? filesData.total
+            : scopedFiles.length,
+        );
+        setEventReportsTotal(
+          typeof reportsData.total === "number"
+            ? reportsData.total
+            : scopedReports.length,
+        );
         setProfileFaculty((previous) => ({
           ...previous,
           courses: autoCourses,
@@ -228,7 +248,15 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
         window.removeEventListener("dashboard:data-updated", handler);
       };
     }
-  }, [faculty, faculty.id, faculty.department, showStudents, canViewMessages]);
+  }, [
+    faculty,
+    faculty.id,
+    faculty.department,
+    showStudents,
+    canViewMessages,
+    courseFilesPage,
+    eventReportsPage,
+  ]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -303,6 +331,13 @@ export function FacultyPortfolio({ faculty, onBack }: FacultyPortfolioProps) {
       <PortfolioTabs
         courseFiles={courseFiles}
         eventReports={eventReports}
+        courseFilesPage={courseFilesPage}
+        eventReportsPage={eventReportsPage}
+        pageSize={pageSize}
+        totalCourseFiles={courseFilesTotal}
+        totalEventReports={eventReportsTotal}
+        onCourseFilesPageChange={setCourseFilesPage}
+        onEventReportsPageChange={setEventReportsPage}
         students={students}
         showStudents={showStudents}
         onViewFile={handleViewFile}

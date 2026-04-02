@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, memo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
 import dynamic from "next/dynamic";
 import { UserRole, getRoleInfo } from "@/components/App/config";
 import { useAuth } from "@/context/AuthContext";
@@ -14,8 +14,11 @@ import {
 } from "@/components/ui/dialog";
 import { Bell } from "lucide-react";
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { safelyNavigate } from "@/lib/safeNavigation";
+import { RoleSwitcher } from "@/components/App/RoleSwitcher";
+import { getDashboardPath } from "@/lib/roles";
 
 const ProfileDialog = dynamic(
   () =>
@@ -91,10 +94,14 @@ function getUnreadThreadSummaries(
 
 function AppHeaderComponent({ userRole }: AppHeaderProps) {
   const roleInfo = getRoleInfo(userRole);
-  const { user, logout } = useAuth();
+  const { user, logout, assignedRoles, switchRole } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadThreads, setUnreadThreads] = useState<ThreadSummary[]>([]);
+  const [switchingRole, setSwitchingRole] = useState<UserRole | null>(null);
+  const pendingPathRef = useRef<string | null>(null);
+  const switchTimeoutRef = useRef<number | null>(null);
   const displayName = user?.name ?? "User";
   const department = user?.department ?? "College";
   const profileImageUrl = user?.profileImageUrl ?? "";
@@ -105,6 +112,84 @@ function AppHeaderComponent({ userRole }: AppHeaderProps) {
   const showProfileDialog = useMemo(() => userRole !== "user", [userRole]);
 
   const unreadCount = unreadThreads.length;
+
+  const clearRoleSwitchState = useCallback(() => {
+    setSwitchingRole(null);
+    pendingPathRef.current = null;
+
+    if (switchTimeoutRef.current !== null) {
+      window.clearTimeout(switchTimeoutRef.current);
+      switchTimeoutRef.current = null;
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("portal:switch-end"));
+    }
+  }, []);
+
+  const handleRoleChange = useCallback(
+    (role: UserRole) => {
+      if (role === userRole || switchingRole) {
+        return;
+      }
+
+      const targetPath = getDashboardPath(role);
+      pendingPathRef.current = targetPath;
+      setSwitchingRole(role);
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("portal:switch-start", {
+            detail: { role, path: targetPath },
+          }),
+        );
+      }
+
+      switchRole(role);
+      safelyNavigate(() => router.replace(targetPath));
+
+      if (switchTimeoutRef.current !== null) {
+        window.clearTimeout(switchTimeoutRef.current);
+      }
+
+      switchTimeoutRef.current = window.setTimeout(() => {
+        clearRoleSwitchState();
+      }, 4500);
+    },
+    [clearRoleSwitchState, router, switchRole, switchingRole, userRole],
+  );
+
+  useEffect(() => {
+    if (!switchingRole || !pendingPathRef.current) {
+      return;
+    }
+
+    if (pathname === pendingPathRef.current) {
+      const settleTimeout = window.setTimeout(() => {
+        clearRoleSwitchState();
+      }, 120);
+
+      return () => {
+        window.clearTimeout(settleTimeout);
+      };
+    }
+  }, [clearRoleSwitchState, pathname, switchingRole]);
+
+  useEffect(() => {
+    return () => {
+      if (switchTimeoutRef.current !== null) {
+        window.clearTimeout(switchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    assignedRoles.forEach((role) => {
+      if (role !== userRole) {
+        void router.prefetch(getDashboardPath(role));
+      }
+    });
+  }, [assignedRoles, userRole, router]);
 
   const loadMessageNotifications = useCallback(async () => {
     if (!showMessageNotifications) {
@@ -196,6 +281,11 @@ function AppHeaderComponent({ userRole }: AppHeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white">
+      {switchingRole && (
+        <div className="h-0.5 w-full overflow-hidden bg-slate-200">
+          <div className="h-full w-1/3 animate-[portalSwitch_1.2s_ease-in-out_infinite] bg-slate-700" />
+        </div>
+      )}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -306,7 +396,36 @@ function AppHeaderComponent({ userRole }: AppHeaderProps) {
             </Button>
           </div>
         </div>
+
+        {assignedRoles.length > 1 && (
+          <div className="pb-3">
+            <RoleSwitcher
+              currentRole={userRole}
+              assignedRoles={assignedRoles}
+              onRoleChange={handleRoleChange}
+              variant="inline"
+              switchingRole={switchingRole}
+            />
+            {switchingRole && (
+              <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-slate-500">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Switching to {getRoleInfo(switchingRole).name}...
+              </p>
+            )}
+          </div>
+        )}
       </div>
+
+      <style jsx>{`
+        @keyframes portalSwitch {
+          0% {
+            transform: translateX(-110%);
+          }
+          100% {
+            transform: translateX(360%);
+          }
+        }
+      `}</style>
     </header>
   );
 }
