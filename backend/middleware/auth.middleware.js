@@ -1,6 +1,8 @@
 const { admin } = require("../config/firebase.config");
 const User = require("../models/User");
 const { isPrimaryAdminEmail } = require("../config/admin.config");
+const { sendError } = require("../utils");
+const { HTTP_STATUS, ERROR_CODES } = require("../constants");
 
 function userHasAdminRole(user) {
   return user?.role === "admin" || user?.roles?.includes("admin");
@@ -19,26 +21,74 @@ async function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "No token provided" });
+      return sendError(
+        res,
+        "No authorization token provided",
+        HTTP_STATUS.UNAUTHORIZED,
+        ERROR_CODES.NO_TOKEN_PROVIDED,
+      );
     }
 
     const token = authHeader.split("Bearer ")[1];
 
     // Verify the Firebase ID token
-    const decodedToken = await admin.auth().verifyIdToken(token);
+    let decodedToken;
+    try {
+      decodedToken = await admin.auth().verifyIdToken(token);
+    } catch (firebaseError) {
+      if (firebaseError.code === "auth/id-token-expired") {
+        return sendError(
+          res,
+          "Authorization token has expired",
+          HTTP_STATUS.UNAUTHORIZED,
+          ERROR_CODES.TOKEN_EXPIRED,
+        );
+      }
+      return sendError(
+        res,
+        "Invalid authorization token",
+        HTTP_STATUS.UNAUTHORIZED,
+        ERROR_CODES.INVALID_TOKEN,
+      );
+    }
+
     const firebaseUid = decodedToken.uid;
 
     // Fetch user data from MongoDB
-    const user = await User.findOne({ firebaseUid });
+    const user = await User.findOne({ firebaseUid }).select("+password");
 
     if (!user) {
-      return res.status(404).json({ error: "User not found in database" });
+      return sendError(
+        res,
+        "User not found",
+        HTTP_STATUS.NOT_FOUND,
+        ERROR_CODES.USER_NOT_FOUND,
+      );
+    }
+
+    // Check if account is deleted
+    if (user.deletedAt) {
+      return sendError(
+        res,
+        "User account has been deleted",
+        HTTP_STATUS.FORBIDDEN,
+        ERROR_CODES.ACCOUNT_INACTIVE,
+      );
     }
 
     // Check user status
     if (user.status === "inactive") {
-      return res.status(403).json({ error: "User account is inactive" });
+      return sendError(
+        res,
+        "User account is inactive",
+        HTTP_STATUS.FORBIDDEN,
+        ERROR_CODES.ACCOUNT_INACTIVE,
+      );
     }
+
+    // Record successful login
+    user.recordLogin(req.ip);
+    await user.save();
 
     // Attach user to request
     req.user = user;
@@ -47,91 +97,103 @@ async function verifyToken(req, res, next) {
     next();
   } catch (error) {
     console.error("Token verification error:", error.message);
-    return res.status(401).json({
-      error: "Invalid or expired token",
-      details: error.message,
-    });
+    return sendError(
+      res,
+      "Authentication failed",
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      ERROR_CODES.INTERNAL_ERROR,
+      { originalError: error.message },
+    );
   }
 }
 
 /**
- * Middleware to check if user is admin
+ * Middleware to require admin role
  */
-async function requireAdmin(req, res, next) {
+function requireAdmin(req, res, next) {
   if (!req.user) {
-    return res.status(401).json({ error: "No user in request" });
+    return sendError(
+      res,
+      "Authentication required",
+      HTTP_STATUS.UNAUTHORIZED,
+      ERROR_CODES.INVALID_TOKEN,
+    );
   }
 
-  if (!isPrimaryAdminUser(req.user)) {
-    return res.status(403).json({ error: "Admin access required" });
+  if (!userHasAdminRole(req.user)) {
+    return sendError(
+      res,
+      "Admin access required",
+      HTTP_STATUS.FORBIDDEN,
+      ERROR_CODES.UNAUTHORIZED_ROLE,
+    );
   }
 
   next();
 }
 
 /**
- * Middleware to check if user has specified role(s)
+ * Middleware to require primary admin role
  */
-function requireRole(allowedRoles) {
-  return async (req, res, next) => {
+function requirePrimaryAdmin(req, res, next) {
+  if (!req.user) {
+    return sendError(
+      res,
+      "Authentication required",
+      HTTP_STATUS.UNAUTHORIZED,
+      ERROR_CODES.INVALID_TOKEN,
+    );
+  }
+
+  if (!isPrimaryAdminUser(req.user)) {
+    return sendError(
+      res,
+      "Primary admin access required",
+      HTTP_STATUS.FORBIDDEN,
+      ERROR_CODES.UNAUTHORIZED_ROLE,
+    );
+  }
+
+  next();
+}
+
+/**
+ * Middleware to require specific role
+ */
+function requireRole(roleOrRoles) {
+  return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ error: "No user in request" });
+      return sendError(
+        res,
+        "Authentication required",
+        HTTP_STATUS.UNAUTHORIZED,
+        ERROR_CODES.INVALID_TOKEN,
+      );
     }
 
-    const normalizedUserRoles = new Set(
-      [req.user.role, ...(req.user.roles || [])].filter(Boolean),
+    const roles = Array.isArray(roleOrRoles) ? roleOrRoles : [roleOrRoles];
+    const hasRequiredRole = roles.some(
+      (role) => req.user.role === role || req.user.roles?.includes(role),
     );
 
-    if (
-      normalizedUserRoles.has("admin") &&
-      !isPrimaryAdminEmail(req.user.email)
-    ) {
-      normalizedUserRoles.delete("admin");
-    }
-
-    const hasRole = allowedRoles.some((role) => normalizedUserRoles.has(role));
-
-    if (!hasRole) {
-      return res.status(403).json({
-        error: `Access required. Allowed roles: ${allowedRoles.join(", ")}`,
-      });
+    if (!hasRequiredRole) {
+      return sendError(
+        res,
+        `Access denied. Required roles: ${roles.join(", ")}`,
+        HTTP_STATUS.FORBIDDEN,
+        ERROR_CODES.UNAUTHORIZED_ROLE,
+      );
     }
 
     next();
   };
 }
 
-/**
- * Optional authentication middleware - doesn't fail if no token
- */
-async function optionalAuth(req, res, next) {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return next();
-    }
-
-    const token = authHeader.split("Bearer ")[1];
-    const decodedToken = await admin.auth().verifyIdToken(token);
-
-    const user = await User.findOne({ firebaseUid: decodedToken.uid });
-
-    if (user) {
-      req.user = user;
-      req.firebaseUid = decodedToken.uid;
-    }
-
-    next();
-  } catch (error) {
-    // Silently fail, continue without user
-    next();
-  }
-}
-
 module.exports = {
   verifyToken,
   requireAdmin,
+  requirePrimaryAdmin,
   requireRole,
-  optionalAuth,
+  userHasAdminRole,
+  isPrimaryAdminUser,
 };

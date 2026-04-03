@@ -2,7 +2,85 @@ const express = require("express");
 const router = express.Router();
 const UploadedFile = require("../models/UploadedFile");
 const User = require("../models/User");
+const Student = require("../models/Student");
+const EventReport = require("../models/EventReport");
+const mongoose = require("mongoose");
 const { verifyToken } = require("../middleware/auth.middleware");
+
+const LEGACY_PENDING_STATUSES = ["pending", "submitted"];
+
+function normalizeStatusValue(value) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  if (!normalized) return "";
+  if (normalized === "in review") return "in_review";
+  if (
+    ["pending", "submitted", "approved", "rejected", "in_review"].includes(
+      normalized,
+    )
+  ) {
+    return normalized;
+  }
+
+  return normalized;
+}
+
+function buildStatusOrQuery(statusValues) {
+  const normalizedValues = Array.isArray(statusValues)
+    ? statusValues.map(normalizeStatusValue).filter(Boolean)
+    : [normalizeStatusValue(statusValues)].filter(Boolean);
+
+  if (!normalizedValues.length) {
+    return {};
+  }
+
+  const legacyValues = normalizedValues.flatMap((status) => {
+    const titleCase = status.replace(/_/g, " ");
+    return [
+      status,
+      titleCase,
+      titleCase.charAt(0).toUpperCase() + titleCase.slice(1),
+    ];
+  });
+
+  return {
+    $or: [
+      { "review.status": { $in: normalizedValues } },
+      { status: { $in: legacyValues } },
+    ],
+  };
+}
+
+function getFileStatus(file) {
+  return normalizeStatusValue(file?.review?.status || file?.status);
+}
+
+function withCompatibilityFields(file) {
+  const status = getFileStatus(file);
+  return {
+    ...file,
+    id: String(file?._id || file?.id || ""),
+    status,
+    review: {
+      ...(file?.review || {}),
+      status,
+    },
+  };
+}
+
+function buildAdvisorQuery(advisorId) {
+  if (!advisorId) {
+    return {};
+  }
+
+  if (mongoose.isValidObjectId(advisorId)) {
+    return { $or: [{ advisorId }, { advisorId: String(advisorId) }] };
+  }
+
+  return { advisorId: String(advisorId) };
+}
 
 /**
  * GET /api/dashboard/faculty-list
@@ -74,9 +152,14 @@ router.get("/faculty-stats/:facultyId", verifyToken, async (req, res) => {
     const { facultyId } = req.params;
 
     const files = await UploadedFile.find({ facultyId }).lean();
-    const pendingFiles = files.filter(
-      (f) => f.status === "pending" || f.status === "submitted",
-    ).length;
+    const pendingFiles = await UploadedFile.countDocuments({
+      facultyId,
+      ...buildStatusOrQuery(LEGACY_PENDING_STATUSES),
+    });
+
+    const totalReports = await EventReport.countDocuments({
+      $or: [{ facultyId }, { facultyId: String(facultyId) }],
+    });
 
     const totalParticipants = files.reduce(
       (sum, f) => sum + (f.participants || 0),
@@ -98,7 +181,7 @@ router.get("/faculty-stats/:facultyId", verifyToken, async (req, res) => {
     res.json({
       stats: {
         totalFiles: files.length,
-        totalReports: 0,
+        totalReports,
         pendingReports: pendingFiles,
         totalParticipants,
         recentActivity,
@@ -119,13 +202,15 @@ router.get("/all-files", verifyToken, async (req, res) => {
     const files = await UploadedFile.find({})
       .populate("facultyId", "name email department")
       .select(
-        "fileName originalFileName courseCode courseName semester academicYear status uploadedAt facultyId",
+        "fileName originalFileName courseCode courseName semester academicYear review.status status uploadedAt facultyId",
       )
       .lean();
 
+    const normalizedFiles = files.map(withCompatibilityFields);
+
     // Group by faculty
     const grouped = {};
-    for (const file of files) {
+    for (const file of normalizedFiles) {
       const fId = file.facultyId?._id?.toString() || "unknown";
       if (!grouped[fId]) {
         grouped[fId] = [];
@@ -133,7 +218,7 @@ router.get("/all-files", verifyToken, async (req, res) => {
       grouped[fId].push(file);
     }
 
-    res.json({ files: grouped, total: files.length });
+    res.json({ files: grouped, total: normalizedFiles.length });
   } catch (error) {
     console.error("Error fetching files:", error);
     res.status(500).json({ error: "Failed to fetch files" });
@@ -147,7 +232,7 @@ router.get("/all-files", verifyToken, async (req, res) => {
 router.get("/engagements", verifyToken, async (req, res) => {
   try {
     const files = await UploadedFile.find({})
-      .select("facultyId status uploadedAt")
+      .select("facultyId review.status status uploadedAt")
       .lean();
 
     const faculty = await User.find({ role: "faculty" })
@@ -161,7 +246,7 @@ router.get("/engagements", verifyToken, async (req, res) => {
       );
       const uploadedCount = userFiles.length;
       const approvedCount = userFiles.filter(
-        (f) => f.status === "approved",
+        (f) => getFileStatus(f) === "approved",
       ).length;
 
       return {
@@ -189,13 +274,9 @@ router.get("/engagements", verifyToken, async (req, res) => {
 router.get("/students", verifyToken, async (req, res) => {
   try {
     const advisorId = String(req.query.advisorId || "").trim();
-    const query = advisorId ? { advisorId } : {};
+    const query = advisorId ? buildAdvisorQuery(advisorId) : {};
 
-    const students = await User.db
-      .collection("students")
-      .find(query)
-      .sort({ createdAt: -1 })
-      .toArray();
+    const students = await Student.find(query).sort({ createdAt: -1 }).lean();
 
     const normalizedStudents = students.map((student) => ({
       ...student,

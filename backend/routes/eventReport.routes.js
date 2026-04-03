@@ -1,9 +1,56 @@
 const express = require("express");
 const router = express.Router();
-const { db, bucket } = require("../config/firebase.config");
+const { bucket } = require("../config/firebase.config");
 const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 const { upload } = require("../middleware/upload.middleware");
-const path = require("path");
+const mongoose = require("mongoose");
+const EventReport = require("../models/EventReport");
+
+function normalizeStatus(value) {
+  return String(value || "pending")
+    .trim()
+    .toLowerCase();
+}
+
+function buildStatusQuery(status) {
+  const normalized = normalizeStatus(status);
+  if (!normalized) return {};
+
+  return {
+    $or: [
+      { status: normalized },
+      { status: normalized.toUpperCase() },
+      { status: normalized.charAt(0).toUpperCase() + normalized.slice(1) },
+    ],
+  };
+}
+
+function buildFacultyQuery(facultyId) {
+  if (!facultyId) return {};
+
+  if (mongoose.isValidObjectId(facultyId)) {
+    return { $or: [{ facultyId }, { facultyId: String(facultyId) }] };
+  }
+
+  return { facultyId: String(facultyId) };
+}
+
+function normalizeEventReport(doc) {
+  const report = typeof doc.toObject === "function" ? doc.toObject() : doc;
+  return {
+    ...report,
+    id: report._id ? report._id.toString() : report.id,
+    date: report.eventDate
+      ? new Date(report.eventDate).toISOString().slice(0, 10)
+      : report.date,
+    status: normalizeStatus(report.status),
+  };
+}
+
+function toPositiveNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
 
 /**
  * GET /api/event-reports
@@ -16,45 +63,21 @@ router.get("/", verifyToken, async (req, res) => {
     const limit = Math.min(50, parseInt(req.query.limit) || 20);
     const offset = (page - 1) * limit;
 
-    let query = db.collection("eventReports");
+    const filters = {
+      ...buildFacultyQuery(facultyId),
+      ...(status ? buildStatusQuery(status) : {}),
+      ...(eventType ? { eventType } : {}),
+    };
 
-    if (facultyId) {
-      query = query.where("facultyId", "==", facultyId);
-    }
-    if (status) {
-      query = query.where("status", "==", status);
-    }
-    if (eventType) {
-      query = query.where("eventType", "==", eventType);
-    }
-
-    // Use aggregate count to avoid reading all matching docs into memory.
-    let total = 0;
-    try {
-      const countSnapshot = await query.count().get();
-      total = countSnapshot.data().count || 0;
-    } catch {
-      const countSnapshot = await query.get();
-      total = countSnapshot.size;
-    }
-
-    // Get paginated data
-    const snapshot = await query
-      .orderBy("createdAt", "desc")
+    const total = await EventReport.countDocuments(filters);
+    const eventReports = await EventReport.find(filters)
+      .sort({ createdAt: -1 })
       .limit(limit)
-      .offset(offset)
-      .get();
-
-    const eventReports = [];
-    snapshot.forEach((doc) => {
-      eventReports.push({
-        id: doc.id,
-        ...doc.data(),
-      });
-    });
+      .skip(offset)
+      .lean();
 
     res.json({
-      data: eventReports,
+      data: eventReports.map(normalizeEventReport),
       pagination: {
         page,
         limit,
@@ -93,9 +116,8 @@ router.post(
         return res.status(400).json({ error: "Missing required fields" });
       }
 
-      const facultyId = req.user.uid;
-      const facultyDoc = await db.collection("users").doc(facultyId).get();
-      const facultyData = facultyDoc.data();
+      const facultyId = req.user._id;
+      const facultyData = req.user;
 
       // Upload images if provided
       const imageUrls = [];
@@ -123,27 +145,22 @@ router.post(
 
       const eventReportData = {
         facultyId,
-        facultyName: facultyData.name,
-        department: facultyData.department,
+        facultyName: facultyData.name || "",
+        department: facultyData.department || "",
         title,
         eventType,
-        date,
+        eventDate: new Date(date),
         venue: venue || "",
         description: description || "",
-        participants: participants || "",
+        participants: toPositiveNumber(participants, 0),
         outcomes: outcomes || "",
         images: imageUrls,
         status: "pending",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
 
-      const docRef = await db.collection("eventReports").add(eventReportData);
+      const created = await EventReport.create(eventReportData);
 
-      res.status(201).json({
-        id: docRef.id,
-        ...eventReportData,
-      });
+      res.status(201).json(normalizeEventReport(created));
     } catch (error) {
       console.error("Error creating event report:", error);
       res.status(500).json({
@@ -161,16 +178,17 @@ router.post(
 router.get("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const doc = await db.collection("eventReports").doc(id).get();
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid event report id" });
+    }
 
-    if (!doc.exists) {
+    const doc = await EventReport.findById(id).lean();
+
+    if (!doc) {
       return res.status(404).json({ error: "Event report not found" });
     }
 
-    res.json({
-      id: doc.id,
-      ...doc.data(),
-    });
+    res.json(normalizeEventReport(doc));
   } catch (error) {
     console.error("Error fetching event report:", error);
     res.status(500).json({ error: "Failed to fetch event report" });
@@ -185,18 +203,20 @@ router.patch("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const doc = await db.collection("eventReports").doc(id).get();
-
-    if (!doc.exists) {
-      return res.status(404).json({ error: "Event report not found" });
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid event report id" });
     }
 
-    const reportData = doc.data();
+    const doc = await EventReport.findById(id);
+
+    if (!doc) {
+      return res.status(404).json({ error: "Event report not found" });
+    }
     const userRoles = req.user.roles || [req.user.role];
 
     // Check permissions
     if (
-      reportData.facultyId !== req.user.uid &&
+      doc.facultyId.toString() !== req.user._id.toString() &&
       !userRoles.includes("admin") &&
       !userRoles.includes("staff-advisor")
     ) {
@@ -225,16 +245,24 @@ router.patch("/:id", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "No valid fields to update" });
     }
 
-    updates.updatedAt = new Date().toISOString();
+    if (updates.date) {
+      updates.eventDate = new Date(updates.date);
+      delete updates.date;
+    }
 
-    await db.collection("eventReports").doc(id).update(updates);
+    if (updates.participants !== undefined) {
+      updates.participants = toPositiveNumber(updates.participants, 0);
+    }
 
-    const updatedDoc = await db.collection("eventReports").doc(id).get();
+    if (updates.status) {
+      updates.status = normalizeStatus(updates.status);
+    }
 
-    res.json({
-      id: updatedDoc.id,
-      ...updatedDoc.data(),
-    });
+    await doc.updateOne(updates);
+
+    const updatedDoc = await EventReport.findById(id).lean();
+
+    res.json(normalizeEventReport(updatedDoc));
   } catch (error) {
     console.error("Error updating event report:", error);
     res.status(500).json({ error: "Failed to update event report" });
@@ -253,26 +281,29 @@ router.delete(
     try {
       const { id } = req.params;
 
-      const doc = await db.collection("eventReports").doc(id).get();
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ error: "Invalid event report id" });
+      }
 
-      if (!doc.exists) {
+      const doc = await EventReport.findById(id);
+
+      if (!doc) {
         return res.status(404).json({ error: "Event report not found" });
       }
 
-      const reportData = doc.data();
       const userRoles = req.user.roles || [req.user.role];
 
       // Check if user owns the report or is admin
       if (
-        reportData.facultyId !== req.user.uid &&
+        doc.facultyId.toString() !== req.user._id.toString() &&
         !userRoles.includes("admin")
       ) {
         return res.status(403).json({ error: "Access denied" });
       }
 
       // Delete images from Firebase Storage
-      if (reportData.images && reportData.images.length > 0) {
-        for (const image of reportData.images) {
+      if (doc.images && doc.images.length > 0) {
+        for (const image of doc.images) {
           try {
             const file = bucket.file(image.storagePath);
             await file.delete();
@@ -282,8 +313,8 @@ router.delete(
         }
       }
 
-      // Delete from Firestore
-      await db.collection("eventReports").doc(id).delete();
+      // Delete from MongoDB
+      await EventReport.findByIdAndDelete(id);
 
       res.json({ message: "Event report deleted successfully" });
     } catch (error) {

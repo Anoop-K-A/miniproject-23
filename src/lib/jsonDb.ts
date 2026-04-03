@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { ObjectId } from "mongodb";
 import { getMongoDb } from "@/lib/mongoDb";
 
 interface JsonStoreDocument {
@@ -30,6 +31,20 @@ const mongoBackedFiles = new Set<string>([
   "careerActivities.json",
 ]);
 
+const mongoCollectionByFile = new Map<string, string>([
+  ["courseFiles.json", "coursefiles"],
+  ["eventReports.json", "eventreports"],
+  ["audits.json", "audits"],
+  ["remarks.json", "remarks"],
+  ["auditorMessages.json", "auditormessages"],
+  ["students.json", "students"],
+  ["courses.json", "courses"],
+  ["engagements.json", "engagements"],
+  ["assignments.json", "assignments"],
+  ["responsibilities.json", "responsibilities"],
+  ["careerActivities.json", "careeractivities"],
+]);
+
 const seededFiles = new Set<string>();
 
 function normalizeFileName(fileName: string) {
@@ -38,6 +53,11 @@ function normalizeFileName(fileName: string) {
 
 function isMongoBackedFile(fileName: string) {
   return mongoBackedFiles.has(normalizeFileName(fileName));
+}
+
+function getMongoCollectionName(fileName: string) {
+  const normalized = normalizeFileName(fileName);
+  return mongoCollectionByFile.get(normalized) ?? null;
 }
 
 function getCachedData<T>(fileName: string): T | null {
@@ -70,10 +90,33 @@ async function getJsonStoreCollection() {
   return db.collection<JsonStoreDocument>("jsonStore");
 }
 
+async function getMongoBackedCollection(fileName: string) {
+  const collectionName = getMongoCollectionName(fileName);
+  if (!collectionName) {
+    throw new Error(`No Mongo collection mapping for ${fileName}`);
+  }
+
+  const db = await getMongoDb();
+  return db.collection(collectionName);
+}
+
 async function readFileFromDisk<T>(fileName: string): Promise<T> {
-  const filePath = getDataFilePath(fileName);
-  const fileContents = await fs.readFile(filePath, "utf-8");
-  return JSON.parse(fileContents) as T;
+  try {
+    const filePath = getDataFilePath(fileName);
+    const fileContents = await fs.readFile(filePath, "utf-8");
+    return JSON.parse(fileContents) as T;
+  } catch (error) {
+    // If file doesn't exist or can't be read, return empty array as default
+    if (
+      error instanceof Error &&
+      (error.message.includes("ENOENT") ||
+        error.message.includes("no such file"))
+    ) {
+      return [] as T;
+    }
+    // Re-throw other errors
+    throw error;
+  }
 }
 
 async function seedMongoFileFromDisk(fileName: string) {
@@ -85,33 +128,71 @@ async function seedMongoFileFromDisk(fileName: string) {
 
   seededFiles.add(normalizedFileName);
 
-  const collection = await getJsonStoreCollection();
-  const existing = await collection.findOne({ _id: normalizedFileName });
+  const collection = await getMongoBackedCollection(normalizedFileName);
+  const existingCount = await collection.countDocuments({});
+  if (existingCount > 0) {
+    return;
+  }
+
+  const existing = await collection.findOne({ legacyId: normalizedFileName });
   if (existing) {
     return;
   }
 
   try {
     const data = await readFileFromDisk<unknown>(normalizedFileName);
+
+    // If data is empty array or falsy, skip seeding
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      return;
+    }
+
     const timestamp = new Date().toISOString();
 
-    await collection.updateOne(
-      { _id: normalizedFileName },
-      {
-        $set: {
-          data,
-          updatedAt: timestamp,
-        },
-        $setOnInsert: {
-          createdAt: timestamp,
-        },
-      },
-      { upsert: true },
-    );
+    const docs = Array.isArray(data)
+      ? data.map((item) => prepareMongoDocument(item))
+      : [prepareMongoDocument(data)];
+
+    if (docs.length > 0) {
+      await collection.insertMany(docs);
+    }
   } catch (error) {
-    // If seed file is missing we keep default behavior and let the read fail later.
-    console.warn(`Skipping Mongo seed for ${normalizedFileName}:`, error);
+    // Silently skip if seed file is missing or can't be read
+    // The readJsonFile function will handle returning empty data
   }
+}
+
+function prepareMongoDocument(item: unknown) {
+  if (!item || typeof item !== "object") {
+    return {
+      _id: new ObjectId(),
+      data: item,
+    };
+  }
+
+  const source = item as Record<string, unknown>;
+  const legacyId =
+    typeof source.id === "string" && source.id.trim()
+      ? source.id.trim()
+      : typeof source._id === "string" && source._id.trim()
+        ? source._id.trim()
+        : undefined;
+
+  const { id, _id, ...rest } = source;
+
+  return {
+    _id: new ObjectId(),
+    ...(legacyId ? { legacyId } : {}),
+    ...rest,
+  };
+}
+
+function restoreMongoDocument(doc: Record<string, unknown>) {
+  const { _id, legacyId, ...rest } = doc;
+  return {
+    id: typeof legacyId === "string" && legacyId ? legacyId : String(_id),
+    ...rest,
+  };
 }
 
 function validateSerializableJson(data: unknown) {
@@ -130,22 +211,15 @@ async function writeMongoBackedData(fileName: string, data: unknown) {
   const writeLock = (async () => {
     try {
       validateSerializableJson(data);
-      const timestamp = new Date().toISOString();
-      const collection = await getJsonStoreCollection();
+      const collection = await getMongoBackedCollection(normalizedFileName);
+      const docs = Array.isArray(data)
+        ? data.map((item) => prepareMongoDocument(item))
+        : [prepareMongoDocument(data)];
 
-      await collection.updateOne(
-        { _id: normalizedFileName },
-        {
-          $set: {
-            data,
-            updatedAt: timestamp,
-          },
-          $setOnInsert: {
-            createdAt: timestamp,
-          },
-        },
-        { upsert: true },
-      );
+      await collection.deleteMany({});
+      if (docs.length > 0) {
+        await collection.insertMany(docs);
+      }
     } finally {
       locks.delete(normalizedFileName);
     }
@@ -174,16 +248,27 @@ export async function readJsonFile<T>(fileName: string): Promise<T> {
   }
 
   await seedMongoFileFromDisk(normalizedFileName);
-  const collection = await getJsonStoreCollection();
-  const document = await collection.findOne({ _id: normalizedFileName });
+  const collection = await getMongoBackedCollection(normalizedFileName);
+  const documents = await collection.find({}).sort({ _id: 1 }).toArray();
 
-  if (!document) {
-    const fallbackData = await readFileFromDisk<T>(normalizedFileName);
-    setCachedData(normalizedFileName, fallbackData);
-    return fallbackData;
+  if (!documents.length) {
+    // If MongoDB is empty, try fallback to file
+    try {
+      const fallbackData = await readFileFromDisk<T>(normalizedFileName);
+      if (fallbackData) {
+        setCachedData(normalizedFileName, fallbackData);
+        return fallbackData;
+      }
+    } catch (error) {
+      // Fallback failed, will return empty array below
+    }
+    // Return empty array if both MongoDB and file are empty/missing
+    const emptyData = [] as T;
+    setCachedData(normalizedFileName, emptyData);
+    return emptyData;
   }
 
-  const data = document.data as T;
+  const data = documents.map((document) => restoreMongoDocument(document)) as T;
   setCachedData(normalizedFileName, data);
   return data;
 }

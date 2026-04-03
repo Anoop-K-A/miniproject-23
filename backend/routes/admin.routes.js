@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { auth, db } = require("../config/firebase.config");
+const User = require("../models/User");
+const UploadedFile = require("../models/UploadedFile");
+const EventReport = require("../models/EventReport");
 const { verifyToken, requireAdmin } = require("../middleware/auth.middleware");
 const { isPrimaryAdminEmail } = require("../config/admin.config");
 
@@ -212,32 +215,37 @@ router.delete("/users/:id", verifyToken, requireAdmin, async (req, res) => {
  */
 router.get("/stats", verifyToken, requireAdmin, async (req, res) => {
   try {
-    const usersSnapshot = await db.collection("users").get();
-    const courseFilesSnapshot = await db.collection("courseFiles").get();
-    const eventReportsSnapshot = await db.collection("eventReports").get();
+    const [users, totalCourseFiles, totalEventReports, pendingCourseFiles] =
+      await Promise.all([
+        User.find({}).select("status role roles").lean(),
+        UploadedFile.countDocuments({}),
+        EventReport.countDocuments({}),
+        UploadedFile.countDocuments({
+          $or: [
+            { "review.status": { $in: ["pending", "submitted"] } },
+            {
+              status: { $in: ["pending", "Pending", "submitted", "Submitted"] },
+            },
+          ],
+        }),
+      ]);
 
     const stats = {
-      totalUsers: usersSnapshot.size,
+      totalUsers: users.length,
       pendingUsers: 0,
       activeUsers: 0,
-      totalCourseFiles: courseFilesSnapshot.size,
-      pendingCourseFiles: 0,
-      totalEventReports: eventReportsSnapshot.size,
+      totalCourseFiles,
+      pendingCourseFiles,
+      totalEventReports,
       usersByRole: {},
     };
 
-    usersSnapshot.forEach((doc) => {
-      const data = doc.data();
+    users.forEach((data) => {
       if (data.status === "pending") stats.pendingUsers++;
       if (data.status === "active") stats.activeUsers++;
 
       const role = data.role || "unknown";
       stats.usersByRole[role] = (stats.usersByRole[role] || 0) + 1;
-    });
-
-    courseFilesSnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.status === "Pending") stats.pendingCourseFiles++;
     });
 
     res.json(stats);

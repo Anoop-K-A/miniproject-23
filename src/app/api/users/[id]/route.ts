@@ -81,8 +81,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const payload = await request.json();
-    const usersBeforeUpdate = await getAllUsers();
-    const existingUser = usersBeforeUpdate.find((user) => user.id === id);
+    const existingUser = await findUserById(id);
 
     if (!existingUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

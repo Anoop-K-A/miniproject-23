@@ -60,6 +60,36 @@ function normalizeIdentity(value: string) {
   return value.trim().toLowerCase();
 }
 
+function matchesUserIdentifier(user: UserRecord, identifier: string) {
+  const rawIdentifier = String(identifier || "").trim();
+  if (!rawIdentifier) {
+    return false;
+  }
+
+  const normalizedIdentifier = normalizeIdentity(rawIdentifier);
+  const directCandidates = [
+    String(user.id || ""),
+    String((user as any)._id || ""),
+    String(user.firebaseUid || ""),
+  ];
+
+  if (directCandidates.some((candidate) => candidate === rawIdentifier)) {
+    return true;
+  }
+
+  const normalizedCandidates = [
+    String(user.username || ""),
+    String(user.email || ""),
+  ]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map(normalizeIdentity);
+
+  return normalizedCandidates.some(
+    (candidate) => candidate === normalizedIdentifier,
+  );
+}
+
 function mapUserDocument(document: UserDocument): UserRecord {
   const { _id, id, ...rest } = document;
   return {
@@ -271,10 +301,7 @@ export async function isUsernameTaken(username: string) {
 
 export async function findUserById(id: string) {
   const users = await getAllUsers();
-  const directMatch = users.find(
-    (user) =>
-      String(user.id || "") === id || String((user as any)._id || "") === id,
-  );
+  const directMatch = users.find((user) => matchesUserIdentifier(user, id));
   if (directMatch) {
     return cloneUserRecord(directMatch);
   }
@@ -376,7 +403,14 @@ export async function createUser(input: CreateUserInput) {
 
 export async function updateUserById(id: string, updates: Partial<UserRecord>) {
   const collection = await getUsersCollection();
-  const existingUser = await collection.findOne({ _id: id });
+  const existingUserRecord = await findUserById(id);
+
+  if (!existingUserRecord) {
+    return null;
+  }
+
+  const resolvedId = String(existingUserRecord.id || id);
+  const existingUser = await collection.findOne({ _id: resolvedId });
 
   if (!existingUser) {
     return null;
@@ -483,17 +517,23 @@ export async function updateUserById(id: string, updates: Partial<UserRecord>) {
   delete payload._id;
   delete payload.id;
 
-  await collection.updateOne({ _id: id }, { $set: payload });
+  await collection.updateOne({ _id: resolvedId }, { $set: payload });
   invalidateUsersCache();
-  return findUserById(id);
+  return findUserById(resolvedId);
 }
 
 export async function updateUserLastActive(id: string) {
   const collection = await getUsersCollection();
+  const existingUser = await findUserById(id);
+  if (!existingUser) {
+    return;
+  }
+
+  const resolvedId = String(existingUser.id || id);
   const timestamp = new Date().toISOString();
 
   await collection.updateOne(
-    { _id: id },
+    { _id: resolvedId },
     {
       $set: {
         lastActiveAt: timestamp,
@@ -527,6 +567,12 @@ export async function updateUserVerification(
 
 export async function deleteUserById(id: string) {
   const collection = await getUsersCollection();
-  await collection.deleteOne({ _id: id });
+  const existingUser = await findUserById(id);
+  if (!existingUser) {
+    return;
+  }
+
+  const resolvedId = String(existingUser.id || id);
+  await collection.deleteOne({ _id: resolvedId });
   invalidateUsersCache();
 }
