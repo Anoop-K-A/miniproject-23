@@ -22,11 +22,6 @@ export function middleware(request: NextRequest) {
   }
 
   if (isRootRoute) {
-    if (isAuthenticated && isValidRole(userRole)) {
-      return NextResponse.redirect(
-        new URL(getDashboardPath(userRole), request.url),
-      );
-    }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
