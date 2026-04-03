@@ -10,7 +10,7 @@ import { getDashboardPath } from "@/lib/roles";
 import { safelyNavigate } from "@/lib/safeNavigation";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -49,5 +49,13 @@ export default function LoginPage() {
       />
       <Toaster />
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <LoginPageContent />
+    </React.Suspense>
   );
 }
