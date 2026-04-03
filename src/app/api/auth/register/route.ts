@@ -95,8 +95,11 @@ export async function POST(request: NextRequest) {
     if (usernameTaken || existingByEmail) {
       console.log("[REGISTER] User already exists");
       return NextResponse.json(
-        { error: "Username or email already exists" },
-        { status: 400 },
+        {
+          error:
+            "Email is already registered. Please sign in or wait for admin approval.",
+        },
+        { status: 409 },
       );
     }
 
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[REGISTER] Creating MongoDB user...");
     await createUser({
-      username: fullName,
+      username: normalizedEmail,
       email: normalizedEmail,
       name: fullName,
       role: normalizedRole,
@@ -210,8 +213,11 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message === "DUPLICATE_USER") {
       console.log("[REGISTER] DUPLICATE_USER error");
       return NextResponse.json(
-        { error: "Username or email already exists" },
-        { status: 400 },
+        {
+          error:
+            "Email is already registered. Please sign in or wait for admin approval.",
+        },
+        { status: 409 },
       );
     }
 
