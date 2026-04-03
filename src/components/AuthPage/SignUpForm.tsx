@@ -77,7 +77,6 @@ export function SignUpForm({
         );
       }
     } catch (error) {
-      console.error("Register error:", error);
       toast.error(
         error instanceof Error
           ? error.message

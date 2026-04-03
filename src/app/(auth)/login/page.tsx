@@ -1,17 +1,34 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SignInForm } from "@/components/AuthPage/SignInForm";
 import { useAuth } from "@/context/AuthContext";
 import type { AuthUser } from "@/components/AuthPage/types";
 import { Toaster } from "@/components/ui/sonner";
 import { getDashboardPath } from "@/lib/roles";
 import { safelyNavigate } from "@/lib/safeNavigation";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
+  const hasShownRegisteredToast = React.useRef(false);
+
+  React.useEffect(() => {
+    if (hasShownRegisteredToast.current) {
+      return;
+    }
+
+    if (searchParams.get("registered") !== "1") {
+      return;
+    }
+
+    hasShownRegisteredToast.current = true;
+    toast.success("Account created! Await admin approval before signing in.");
+    safelyNavigate(() => router.replace("/login"));
+  }, [router, searchParams]);
 
   const handleLogin = (user: AuthUser) => {
     login(user);
