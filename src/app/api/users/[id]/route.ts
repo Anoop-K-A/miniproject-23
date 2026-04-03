@@ -137,7 +137,7 @@ export async function PATCH(
         !FACULTY_ASSIGNABLE_ROLES.includes(requestedRole)) ||
         (hasRolesField &&
           requestedRoles.some(
-            (role) =>
+            (role: any) =>
               !!normalizeRoleInput(role) &&
               !FACULTY_ASSIGNABLE_ROLES.includes(
                 normalizeRoleInput(
