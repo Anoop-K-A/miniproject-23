@@ -100,11 +100,9 @@ function cloneFacultyDashboardData(
  * Fetch dashboard data from MongoDB via API
  */
 async function fetchFromDashboardAPI<T>(endpoint: string): Promise<T> {
-  const baseUrlCandidates = [
+  const backendUrlCandidates = [
     process.env.NEXT_PUBLIC_BACKEND_URL,
     process.env.BACKEND_URL,
-    "http://localhost:5010",
-    "http://localhost:5000",
   ]
     .map((value) =>
       String(value || "")
@@ -113,6 +111,20 @@ async function fetchFromDashboardAPI<T>(endpoint: string): Promise<T> {
     )
     .filter(Boolean)
     .filter((value, index, array) => array.indexOf(value) === index);
+
+  const localhostFallbacks = ["http://localhost:5010", "http://localhost:5000"];
+  const baseUrlCandidates =
+    backendUrlCandidates.length > 0
+      ? backendUrlCandidates
+      : process.env.NODE_ENV === "production"
+        ? []
+        : localhostFallbacks;
+
+  if (baseUrlCandidates.length === 0) {
+    throw new Error(
+      "Dashboard API base URL is not configured. Set NEXT_PUBLIC_BACKEND_URL or BACKEND_URL in production.",
+    );
+  }
 
   const attemptErrors: string[] = [];
 
