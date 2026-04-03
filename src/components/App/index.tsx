@@ -4,6 +4,7 @@ import { RoleSwitcher } from "./RoleSwitcher";
 import { MainContent } from "./MainContent";
 import { AppFooter } from "./AppFooter";
 import { AuthPage } from "@/components/AuthPage";
+import type { AuthUser } from "@/components/AuthPage";
 import { Toaster } from "@/components/ui/sonner";
 import { UserRole } from "./config";
 
@@ -13,17 +14,11 @@ export function AppLayout() {
   const [assignedRoles, setAssignedRoles] = useState<UserRole[]>(["faculty"]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogin = (role: string) => {
+  const handleLogin = (user: AuthUser) => {
     setIsAuthenticated(true);
-    // Map the role from login to the internal role type
-    let mappedRole: UserRole = "faculty";
-    if (role === "Auditor") {
-      mappedRole = "auditor";
-    } else if (role === "Staff Advisor") {
-      mappedRole = "staff-advisor";
-    }
-    setUserRole(mappedRole);
-    setAssignedRoles([mappedRole]);
+    // Use the role from the authenticated user
+    setUserRole(user.role);
+    setAssignedRoles(user.roles || [user.role]);
   };
 
   // Show auth page if not authenticated

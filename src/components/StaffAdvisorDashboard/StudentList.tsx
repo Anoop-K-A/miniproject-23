@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useCallback, useDeferredValue, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -47,7 +47,6 @@ interface StudentFormState {
   email: string;
   phone: string;
   department: string;
-  semester: string;
   batchYear: string;
 }
 
@@ -57,13 +56,12 @@ const emptyForm: StudentFormState = {
   email: "",
   phone: "",
   department: "",
-  semester: "",
   batchYear: "",
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
 const batchYearOptions = getStandardBatchYearOptions();
+const INITIAL_VISIBLE_STUDENTS = 8;
 
 function resolveInitialBatchYear(defaultBatch?: string) {
   const normalized = normalizeBatchYear(defaultBatch);
@@ -73,7 +71,41 @@ function resolveInitialBatchYear(defaultBatch?: string) {
   return batchYearOptions[0] ?? "";
 }
 
-export function StudentList({
+interface CompactStudentRowProps {
+  student: Student;
+  onSelectStudent: (student: Student) => void;
+}
+
+const CompactStudentRow = memo(function CompactStudentRow({
+  student,
+  onSelectStudent,
+}: CompactStudentRowProps) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelectStudent(student)}
+      className="grid w-full grid-cols-12 items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-left hover:bg-slate-50"
+    >
+      <span className="col-span-4 truncate text-sm font-medium text-slate-900">
+        {student.name}
+      </span>
+      <span className="col-span-2 truncate text-xs text-slate-600">
+        {student.rollNumber}
+      </span>
+      <span className="col-span-2 text-xs text-slate-600">
+        CGPA {student.cgpa}
+      </span>
+      <span className="col-span-2 text-xs text-slate-600">
+        Att {student.attendance}%
+      </span>
+      <span className="col-span-2 truncate text-xs text-slate-600">
+        {student.placementStatus}
+      </span>
+    </button>
+  );
+});
+
+function StudentListComponent({
   students,
   stats,
   onSelectStudent,
@@ -85,6 +117,15 @@ export function StudentList({
     ...emptyForm,
     batchYear: resolveInitialBatchYear(stats.batchYear),
   });
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const normalizedSearchTerm = useMemo(
+    () => deferredSearchTerm.toLowerCase().trim(),
+    [deferredSearchTerm],
+  );
+  const [expandedBatches, setExpandedBatches] = useState<
+    Record<string, boolean>
+  >({});
+  const [openBatches, setOpenBatches] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<
     Partial<Record<keyof StudentFormState, string>>
   >({});
@@ -93,17 +134,16 @@ export function StudentList({
     () =>
       students.filter(
         (student) =>
-          student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          student.careerInterest
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()),
+          student.name.toLowerCase().includes(normalizedSearchTerm) ||
+          student.rollNumber.toLowerCase().includes(normalizedSearchTerm) ||
+          student.careerInterest.toLowerCase().includes(normalizedSearchTerm),
       ),
-    [students, searchTerm],
+    [students, normalizedSearchTerm],
   );
 
   const groupedStudents = useMemo(() => {
     const groups = new Map<string, Student[]>();
+
     filteredStudents.forEach((student) => {
       const key = student.batchYear?.trim() || "Unknown";
       if (!groups.has(key)) {
@@ -111,13 +151,94 @@ export function StudentList({
       }
       groups.get(key)?.push(student);
     });
-    return Array.from(groups.entries()).sort(([a], [b]) => b.localeCompare(a));
+
+    const sortedGroupEntries = Array.from(groups.entries()).map(
+      ([batch, studentsInBatch]) =>
+        [
+          batch,
+          [...studentsInBatch].sort((a, b) => {
+            const rollA = a.rollNumber?.trim() || "";
+            const rollB = b.rollNumber?.trim() || "";
+
+            const extractNumber = (roll: string) => {
+              const digits = roll.match(/\d+/g)?.join("");
+              return digits ? Number(digits) : NaN;
+            };
+
+            const numericA = extractNumber(rollA);
+            const numericB = extractNumber(rollB);
+
+            if (!Number.isNaN(numericA) && !Number.isNaN(numericB)) {
+              if (numericA !== numericB) return numericA - numericB;
+            }
+
+            return rollA.localeCompare(rollB, undefined, {
+              numeric: true,
+              sensitivity: "base",
+            });
+          }),
+        ] as [string, Student[]],
+    );
+
+    const sortBatchKey = (a: string, b: string) => {
+      const parseStart = (batch: string) => {
+        const parts = batch.split("-").map((p) => Number(p));
+        return Number.isNaN(parts[0]) ? 0 : parts[0];
+      };
+
+      return parseStart(b) - parseStart(a);
+    };
+
+    return sortedGroupEntries.sort(([batchA], [batchB]) =>
+      sortBatchKey(batchA, batchB),
+    );
   }, [filteredStudents]);
+
+  const batchStats = useMemo(() => {
+    const statsMap: Record<
+      string,
+      { count: number; avgCgpa: string; avgAttendance: number }
+    > = {};
+
+    for (const [batch, batchStudents] of groupedStudents) {
+      const count = batchStudents.length;
+      const totals = batchStudents.reduce(
+        (acc, student) => {
+          acc.cgpa += student.cgpa;
+          acc.attendance += student.attendance;
+          return acc;
+        },
+        { cgpa: 0, attendance: 0 },
+      );
+
+      statsMap[batch] = {
+        count,
+        avgCgpa: count > 0 ? (totals.cgpa / count).toFixed(1) : "0.0",
+        avgAttendance: count > 0 ? Math.round(totals.attendance / count) : 0,
+      };
+    }
+
+    return statsMap;
+  }, [groupedStudents]);
 
   const handleChange = (field: keyof StudentFormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
+
+  const toggleBatchVisibility = useCallback((batch: string) => {
+    setExpandedBatches((prev) => ({
+      ...prev,
+      [batch]: !prev[batch],
+    }));
+  }, []);
+
+  const toggleBatchOpen = useCallback((batch: string) => {
+    setOpenBatches((prev) => ({
+      ...prev,
+      [batch]: !prev[batch],
+    }));
+  }, []);
 
   const validate = () => {
     const nextErrors: Partial<Record<keyof StudentFormState, string>> = {};
@@ -137,9 +258,6 @@ export function StudentList({
     }
     if (!form.department.trim()) {
       nextErrors.department = "Department is required.";
-    }
-    if (!form.semester.trim()) {
-      nextErrors.semester = "Semester is required.";
     }
     const normalizedBatchYear = normalizeBatchYear(form.batchYear);
 
@@ -192,7 +310,7 @@ export function StudentList({
       email: form.email.trim(),
       phone: form.phone.trim() || "",
       department: form.department.trim(),
-      semester: form.semester.trim(),
+      semester: "",
       batchYear: batchKey,
       cgpa: 0,
       attendance: 0,
@@ -305,30 +423,6 @@ export function StudentList({
                       </p>
                     )}
                   </div>
-                  <div>
-                    <Label>Semester</Label>
-                    <Select
-                      value={form.semester}
-                      onValueChange={(value) => handleChange("semester", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select semester" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {semesterOptions.map((semesterOption) => (
-                          <SelectItem
-                            key={semesterOption}
-                            value={semesterOption}
-                          >
-                            {semesterOption}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.semester && (
-                      <p className="text-xs text-red-600">{errors.semester}</p>
-                    )}
-                  </div>
                 </div>
                 <div>
                   <Label>Batch Year</Label>
@@ -382,28 +476,124 @@ export function StudentList({
               No students found for the current search.
             </p>
           ) : (
-            groupedStudents.map(([batch, batchStudents]) => (
-              <div key={batch} className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold">Batch {batch}</p>
-                  <span className="text-xs text-muted-foreground">
-                    {batchStudents.length} students
-                  </span>
+            groupedStudents.map(([batch, batchStudents]) => {
+              const isOpen = openBatches[batch] === true;
+              const isExpanded = expandedBatches[batch] === true;
+              const visibleStudents = isExpanded
+                ? batchStudents
+                : batchStudents.slice(0, INITIAL_VISIBLE_STUDENTS);
+              const hiddenCount = batchStudents.length - visibleStudents.length;
+              const stats = batchStats[batch];
+              const useCompactRows =
+                normalizedSearchTerm.length > 0 || batchStudents.length > 10;
+
+              return (
+                <div
+                  key={batch}
+                  className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleBatchOpen(batch)}
+                    className="flex w-full cursor-pointer items-center justify-between bg-slate-50 px-4 py-3 text-left text-sm font-semibold text-slate-800 hover:bg-slate-100"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <span className="font-mono text-xs text-slate-500">
+                        {isOpen ? "[-]" : "[+]"}
+                      </span>
+                      <span>Batch {batch}</span>
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {batchStudents.length} student
+                      {batchStudents.length === 1 ? "" : "s"}
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="bg-white px-4 py-3">
+                      {/* Batch Statistics */}
+                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <p className="text-xs text-gray-500">
+                              Total Students
+                            </p>
+                            <p className="text-lg font-semibold text-blue-600">
+                              {stats?.count ?? batchStudents.length}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Avg CGPA</p>
+                            <p className="text-lg font-semibold text-purple-600">
+                              {stats?.avgCgpa ?? "0.0"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">
+                              Avg Attendance
+                            </p>
+                            <p className="text-lg font-semibold text-green-600">
+                              {stats?.avgAttendance ?? 0}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {useCompactRows
+                          ? visibleStudents.map((student) => (
+                              <CompactStudentRow
+                                key={student.id}
+                                student={student}
+                                onSelectStudent={onSelectStudent}
+                              />
+                            ))
+                          : visibleStudents.map((student) => (
+                              <StudentCard
+                                key={student.id}
+                                student={student}
+                                onViewDetails={onSelectStudent}
+                              />
+                            ))}
+
+                        {hiddenCount > 0 && (
+                          <div className="flex justify-center pt-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleBatchVisibility(batch)}
+                            >
+                              Show {hiddenCount} more
+                            </Button>
+                          </div>
+                        )}
+
+                        {isExpanded &&
+                          batchStudents.length > INITIAL_VISIBLE_STUDENTS && (
+                            <div className="flex justify-center pt-2">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleBatchVisibility(batch)}
+                              >
+                                Show less
+                              </Button>
+                            </div>
+                          )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-3">
-                  {batchStudents.map((student) => (
-                    <StudentCard
-                      key={student.id}
-                      student={student}
-                      onViewDetails={onSelectStudent}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </CardContent>
     </Card>
   );
 }
+
+export const StudentList = memo(StudentListComponent);
+StudentList.displayName = "StudentList";

@@ -17,6 +17,7 @@ import type {
   RecentReview,
 } from "@/components/AuditorDashboard/types";
 import type {
+  BatchCourseOverview,
   CareerStats,
   DashboardStats as StaffStats,
   Student,
@@ -48,6 +49,7 @@ export function MainContent({
     stats: StaffStats;
     careerStats: CareerStats;
     students: Student[];
+    batchCourseOverview: BatchCourseOverview;
   } | null>(null);
 
   useEffect(() => {
@@ -132,6 +134,7 @@ export function MainContent({
               stats={staffData.stats}
               careerStats={staffData.careerStats}
               students={staffData.students}
+              batchCourseOverview={staffData.batchCourseOverview}
             />
           )}
         </TabsContent>

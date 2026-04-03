@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { randomUUID } from "crypto";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import { resolveStaffAdvisorScope } from "@/lib/staffAdvisorScope";
 import { isValidBatchYear, normalizeBatchYear } from "@/lib/batchYear";
+import { createCachedResponse, apiCache } from "@/lib/apiCache";
 
 const VALID_SEMESTERS = new Set([
   "S1",
@@ -27,17 +30,30 @@ function normalizeSemesterInput(value: unknown) {
 
 export async function GET(request: NextRequest) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const advisorScope = await resolveStaffAdvisorScope(request);
     if (!advisorScope) {
-      return NextResponse.json({ students: [] });
+      return createCachedResponse({ students: [] }, { maxAge: 30 });
     }
 
-    const students = await readJsonFile<Student[]>("students.json");
-    const scopedStudents = students.filter(
-      (student) => student.advisorId === advisorScope.advisorId,
-    );
+    const cacheKey = `students:${advisorScope.advisorId}`;
+    const cachedData = apiCache.get(cacheKey);
 
-    return NextResponse.json({ students: scopedStudents });
+    if (cachedData) {
+      return createCachedResponse(cachedData, { maxAge: 60 });
+    }
+
+    const scopedStudents = (await db
+      .collection<Student>(COLLECTIONS.students)
+      .find({ advisorId: advisorScope.advisorId })
+      .sort({ createdAt: -1 })
+      .toArray()) as Student[];
+
+    const responseData = { students: scopedStudents };
+    apiCache.set(cacheKey, responseData);
+
+    return createCachedResponse(responseData, { maxAge: 60 });
   } catch (error) {
     console.error("Students load error:", error);
     return NextResponse.json(
@@ -49,6 +65,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const advisorScope = await resolveStaffAdvisorScope(request);
     if (!advisorScope) {
       return NextResponse.json(
@@ -58,7 +76,6 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = await request.json();
-    const students = await readJsonFile<Student[]>("students.json");
     const timestamp = new Date().toISOString();
 
     const rollNumber = String(payload.rollNumber ?? "").trim();
@@ -75,7 +92,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!VALID_SEMESTERS.has(normalizedSemester)) {
+    if (payload.semester && !VALID_SEMESTERS.has(normalizedSemester)) {
       return NextResponse.json(
         { error: "Semester must be one of S1 to S8" },
         { status: 400 },
@@ -92,12 +109,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const duplicateInAdvisorScope = students.some(
-      (student) =>
-        student.advisorId === advisorScope.advisorId &&
-        student.batchYear?.trim().toLowerCase() === batchYear.toLowerCase() &&
-        student.rollNumber.trim().toLowerCase() === rollNumber.toLowerCase(),
-    );
+    const duplicateInAdvisorScope = await db
+      .collection<Student>(COLLECTIONS.students)
+      .findOne({
+        advisorId: advisorScope.advisorId,
+        batchYear,
+        rollNumber,
+      });
 
     if (duplicateInAdvisorScope) {
       return NextResponse.json(
@@ -107,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     const newStudent: Student & { createdAt?: string; updatedAt?: string } = {
-      id: Date.now().toString(),
+      id: randomUUID(),
       advisorId: advisorScope.advisorId,
       name: payload.name,
       rollNumber,
@@ -128,12 +146,17 @@ export async function POST(request: NextRequest) {
       updatedAt: timestamp,
     };
 
-    const updatedStudents = [newStudent, ...students];
-    await writeJsonFile("students.json", updatedStudents);
+    await db
+      .collection<
+        Student & { createdAt?: string; updatedAt?: string }
+      >(COLLECTIONS.students)
+      .insertOne(newStudent);
 
-    const scopedStudents = updatedStudents.filter(
-      (student) => student.advisorId === advisorScope.advisorId,
-    );
+    const scopedStudents = (await db
+      .collection<Student>(COLLECTIONS.students)
+      .find({ advisorId: advisorScope.advisorId })
+      .sort({ createdAt: -1 })
+      .toArray()) as Student[];
 
     return NextResponse.json({ student: newStudent, students: scopedStudents });
   } catch (error) {

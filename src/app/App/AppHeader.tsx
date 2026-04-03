@@ -1,6 +1,7 @@
 "use client";
 
-import { UserRole, getRoleInfo } from "./config";
+import type { UserRole } from "@/lib/roles";
+import { getRoleInfo } from "./config";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ export function AppHeader({ userRole }: AppHeaderProps) {
   const router = useRouter();
   const displayName = user?.name ?? "";
   const department = user?.department ?? "";
+  const profileImageUrl = user?.profileImageUrl ?? "";
   const initials = displayName
     ? displayName
         .split(" ")
@@ -57,8 +59,16 @@ export function AppHeader({ userRole }: AppHeaderProps) {
               <p className="text-sm">{displayName}</p>
               <p className="text-xs text-gray-500">{department}</p>
             </div>
-            <div className="h-10 w-10 bg-purple-600 rounded-full flex items-center justify-center text-white">
-              {initials}
+            <div className="h-10 w-10 bg-purple-600 rounded-full flex items-center justify-center text-white overflow-hidden">
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt={`${displayName || "User"} profile`}
+                  className="h-10 w-10 object-cover"
+                />
+              ) : (
+                initials
+              )}
             </div>
           </div>
         </div>

@@ -8,7 +8,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { NotificationData } from "./types";
-import { AddUserDialog } from "./AddUserDialog";
 
 interface AdminHeaderProps {
   unreadCount: number;
@@ -17,17 +16,6 @@ interface AdminHeaderProps {
   onToggleNotifications: (open: boolean) => void;
   onMarkAllRead: () => void;
   onMarkRead: (id: string) => void;
-  addDialogOpen: boolean;
-  onAddDialogOpenChange: (open: boolean) => void;
-  onAddUser: (payload: {
-    name: string;
-    email: string;
-    password: string;
-    phone?: string;
-    department?: string;
-    designation?: string;
-    role: "faculty" | "auditor" | "staff-advisor" | "admin";
-  }) => void;
 }
 
 export function AdminHeader({
@@ -37,9 +25,6 @@ export function AdminHeader({
   onToggleNotifications,
   onMarkAllRead,
   onMarkRead,
-  addDialogOpen,
-  onAddDialogOpenChange,
-  onAddUser,
 }: AdminHeaderProps) {
   return (
     <div className="flex items-center justify-between">
@@ -101,12 +86,6 @@ export function AdminHeader({
             </div>
           </DialogContent>
         </Dialog>
-
-        <AddUserDialog
-          isOpen={addDialogOpen}
-          onOpenChange={onAddDialogOpenChange}
-          onAddUser={onAddUser}
-        />
       </div>
     </div>
   );

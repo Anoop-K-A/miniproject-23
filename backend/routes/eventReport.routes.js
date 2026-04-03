@@ -12,6 +12,9 @@ const path = require("path");
 router.get("/", verifyToken, async (req, res) => {
   try {
     const { facultyId, status, eventType } = req.query;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 20);
+    const offset = (page - 1) * limit;
 
     let query = db.collection("eventReports");
 
@@ -25,7 +28,22 @@ router.get("/", verifyToken, async (req, res) => {
       query = query.where("eventType", "==", eventType);
     }
 
-    const snapshot = await query.orderBy("createdAt", "desc").get();
+    // Use aggregate count to avoid reading all matching docs into memory.
+    let total = 0;
+    try {
+      const countSnapshot = await query.count().get();
+      total = countSnapshot.data().count || 0;
+    } catch {
+      const countSnapshot = await query.get();
+      total = countSnapshot.size;
+    }
+
+    // Get paginated data
+    const snapshot = await query
+      .orderBy("createdAt", "desc")
+      .limit(limit)
+      .offset(offset)
+      .get();
 
     const eventReports = [];
     snapshot.forEach((doc) => {
@@ -35,7 +53,15 @@ router.get("/", verifyToken, async (req, res) => {
       });
     });
 
-    res.json(eventReports);
+    res.json({
+      data: eventReports,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching event reports:", error);
     res.status(500).json({ error: "Failed to fetch event reports" });

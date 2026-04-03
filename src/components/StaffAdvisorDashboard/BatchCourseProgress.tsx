@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type {
   BatchCourseGroup,
-  BatchCourseProgress,
+  BatchCourseProgress as BatchProgressType,
   BatchFacultySummary,
 } from "./types";
 
@@ -25,7 +25,7 @@ interface BatchCourseProgressProps {
   groups: BatchCourseGroup[];
 }
 
-export function BatchCourseProgress({ groups }: BatchCourseProgressProps) {
+function BatchCourseProgressComponent({ groups }: BatchCourseProgressProps) {
   const [selectedFaculty, setSelectedFaculty] =
     useState<BatchFacultySummary | null>(null);
 
@@ -257,3 +257,6 @@ export function BatchCourseProgress({ groups }: BatchCourseProgressProps) {
     </Card>
   );
 }
+
+export const BatchCourseProgress = memo(BatchCourseProgressComponent);
+BatchCourseProgress.displayName = "BatchCourseProgress";

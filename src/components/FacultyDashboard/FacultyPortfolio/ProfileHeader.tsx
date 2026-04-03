@@ -118,7 +118,7 @@ export function ProfileHeader({ faculty }: ProfileHeaderProps) {
     faculty.isStaffAdvisor ? "staff-advisor" : null,
   ].filter(
     (role): role is string =>
-      Boolean(role) && role.trim().toLowerCase() !== "admin",
+      typeof role === "string" && role.trim().toLowerCase() !== "admin",
   );
 
   const rolesToDisplay = Array.from(
@@ -149,9 +149,17 @@ export function ProfileHeader({ faculty }: ProfileHeaderProps) {
         <div className="bg-linear-to-br from-slate-50 via-white to-slate-50 p-6 sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row">
             <div className="shrink-0">
-              <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-blue-600 to-indigo-600 text-3xl font-semibold text-white shadow-md ring-4 ring-blue-100">
-                {initials}
-              </div>
+              {faculty.profileImageUrl ? (
+                <img
+                  src={faculty.profileImageUrl}
+                  alt={`${faculty.name} profile`}
+                  className="h-24 w-24 rounded-3xl border border-blue-100 object-cover shadow-md ring-4 ring-blue-100"
+                />
+              ) : (
+                <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-blue-600 to-indigo-600 text-3xl font-semibold text-white shadow-md ring-4 ring-blue-100">
+                  {initials}
+                </div>
+              )}
             </div>
 
             <div className="flex-1 space-y-5">

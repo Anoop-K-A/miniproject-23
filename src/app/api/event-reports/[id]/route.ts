@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 import type { EventReport } from "@/components/EventReportManager/types";
 
 export async function PATCH(
@@ -7,25 +8,32 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const { id } = await params;
     const payload = await request.json();
-    const reports = await readJsonFile<EventReport[]>("eventReports.json");
     const updatedAt = new Date().toISOString();
 
-    const updatedReports = reports.map((report) =>
-      report.id === id
-        ? {
-            ...report,
-            ...payload,
-            responseDate: payload.facultyResponse
-              ? new Date().toISOString().split("T")[0]
-              : report.responseDate,
-            updatedAt,
-          }
-        : report,
+    const currentReport = await db
+      .collection<EventReport>(COLLECTIONS.eventReports)
+      .findOne({ id });
+    await db.collection<EventReport>(COLLECTIONS.eventReports).updateOne(
+      { id },
+      {
+        $set: {
+          ...payload,
+          responseDate: payload.facultyResponse
+            ? new Date().toISOString().split("T")[0]
+            : currentReport?.responseDate,
+          updatedAt,
+        },
+      },
     );
-
-    await writeJsonFile("eventReports.json", updatedReports);
+    const updatedReports = (await db
+      .collection<EventReport>(COLLECTIONS.eventReports)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as EventReport[];
     return NextResponse.json({ reports: updatedReports });
   } catch (error) {
     console.error("Event report update error:", error);
@@ -41,36 +49,24 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const { id } = await params;
-    const reports = await readJsonFile<EventReport[]>("eventReports.json");
-    const updatedReports = reports.filter((report) => report.id !== id);
-    const audits = await readJsonFile<
-      {
-        id: string;
-        entityType: string;
-        entityId: string;
-      }[]
-    >("audits.json");
-    const remarks = await readJsonFile<
-      {
-        id: string;
-        entityType: string;
-        entityId: string;
-      }[]
-    >("remarks.json");
+    await db
+      .collection<EventReport>(COLLECTIONS.eventReports)
+      .deleteOne({ id });
+    await db
+      .collection(COLLECTIONS.audits)
+      .deleteMany({ entityType: "event-report", entityId: id });
+    await db
+      .collection(COLLECTIONS.remarks)
+      .deleteMany({ entityType: "event-report", entityId: id });
 
-    const updatedAudits = audits.filter(
-      (audit) =>
-        !(audit.entityType === "event-report" && audit.entityId === id),
-    );
-    const updatedRemarks = remarks.filter(
-      (remark) =>
-        !(remark.entityType === "event-report" && remark.entityId === id),
-    );
-
-    await writeJsonFile("eventReports.json", updatedReports);
-    await writeJsonFile("audits.json", updatedAudits);
-    await writeJsonFile("remarks.json", updatedRemarks);
+    const updatedReports = (await db
+      .collection<EventReport>(COLLECTIONS.eventReports)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as EventReport[];
     return NextResponse.json({ reports: updatedReports });
   } catch (error) {
     console.error("Event report delete error:", error);

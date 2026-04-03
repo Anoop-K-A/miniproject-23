@@ -75,6 +75,8 @@ const uploadedFileSchema = new mongoose.Schema(
 uploadedFileSchema.index({ facultyId: 1, uploadedAt: -1 });
 uploadedFileSchema.index({ status: 1, uploadedAt: -1 });
 uploadedFileSchema.index({ courseCode: 1, academicYear: 1, uploadedAt: -1 });
+uploadedFileSchema.index({ academicYear: 1, uploadedAt: -1 });
+uploadedFileSchema.index({ facultyId: 1, status: 1, uploadedAt: -1 });
 
 const UploadedFile = mongoose.model("UploadedFile", uploadedFileSchema);
 

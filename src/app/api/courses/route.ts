@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { randomUUID } from "crypto";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 import type { CourseRecord } from "@/lib/data/schema";
 
 export async function GET(request: NextRequest) {
   try {
-    const courses = await readJsonFile<CourseRecord[]>("courses.json");
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
+    const courses = (await db
+      .collection<CourseRecord>(COLLECTIONS.courses)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as CourseRecord[];
     const facultyId = request.nextUrl.searchParams.get("facultyId");
 
     if (!facultyId) {
@@ -27,6 +35,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const payload = await request.json();
 
     if (!payload.code || !payload.name) {
@@ -36,11 +46,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const courses = await readJsonFile<CourseRecord[]>("courses.json");
     const timestamp = new Date().toISOString();
 
     const newCourse: CourseRecord = {
-      id: Date.now().toString(),
+      id: randomUUID(),
       code: payload.code,
       name: payload.name,
       department: payload.department,
@@ -51,8 +60,12 @@ export async function POST(request: NextRequest) {
       updatedAt: timestamp,
     };
 
-    const updatedCourses = [newCourse, ...courses];
-    await writeJsonFile("courses.json", updatedCourses);
+    await db.collection<CourseRecord>(COLLECTIONS.courses).insertOne(newCourse);
+    const updatedCourses = (await db
+      .collection<CourseRecord>(COLLECTIONS.courses)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as CourseRecord[];
 
     return NextResponse.json({ courses: updatedCourses });
   } catch (error) {

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ChevronDown } from "lucide-react";
 import type { AdminUser, AdminUserStatus } from "./types";
 import type { UserRole } from "@/lib/roles";
 
@@ -40,6 +33,7 @@ interface EditUserDialogProps {
     role: AdminUser["role"];
     roles?: UserRole[];
     status: AdminUserStatus;
+    password?: string;
   }) => void;
 }
 
@@ -55,39 +49,15 @@ export function EditUserDialog({
   onUpdateUser,
 }: EditUserDialogProps) {
   const [formData, setFormData] = useState<FormData>(user as FormData);
-  const [selectedRoles, setSelectedRoles] = useState<Set<UserRole>>(
-    new Set(user.roles || [user.role]),
-  );
 
   useEffect(() => {
-    setFormData(user as FormData);
-    setSelectedRoles(new Set(user.roles || [user.role]));
+    setFormData({
+      ...(user as FormData),
+    });
   }, [user]);
-
-  const roleOptions: Array<{ value: UserRole; label: string }> = [
-    { value: "faculty", label: "Faculty" },
-    { value: "auditor", label: "Auditor" },
-    { value: "staff-advisor", label: "Staff Advisor" },
-  ];
-
-  const selectedRoleLabels = roleOptions
-    .filter((option) => selectedRoles.has(option.value))
-    .map((option) => option.label);
-
-  const toggleRole = (role: UserRole) => {
-    const newRoles = new Set(selectedRoles);
-    if (newRoles.has(role)) {
-      newRoles.delete(role);
-    } else {
-      newRoles.add(role);
-    }
-    setSelectedRoles(newRoles);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const rolesArray = Array.from(selectedRoles);
-    const primaryRole = rolesArray[0] || "faculty";
 
     onUpdateUser({
       id: user.id,
@@ -95,8 +65,8 @@ export function EditUserDialog({
       email: formData.email,
       phone: formData.phone || undefined,
       department: formData.department || undefined,
-      role: primaryRole,
-      roles: rolesArray,
+      role: user.role,
+      roles: user.roles,
       status: formData.status,
     });
     onOpenChange(false);
@@ -104,7 +74,7 @@ export function EditUserDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit User: {user.name}</DialogTitle>
           <DialogDescription>
@@ -154,43 +124,7 @@ export function EditUserDialog({
                 }
               />
             </div>
-            <div className="col-span-1 sm:col-span-2 space-y-3">
-              <Label>Roles</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    <span className="text-left">
-                      {selectedRoleLabels.length === 0
-                        ? "Select roles..."
-                        : selectedRoleLabels.join(", ")}
-                    </span>
-                    <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-3" align="start">
-                  <div className="space-y-2">
-                    {roleOptions.map((option) => (
-                      <div
-                        key={option.value}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={`role-${option.value}`}
-                          checked={selectedRoles.has(option.value)}
-                          onCheckedChange={() => toggleRole(option.value)}
-                        />
-                        <label
-                          htmlFor={`role-${option.value}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                        >
-                          {option.label}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+
             <div className="space-y-2">
               <Label htmlFor="edit-status">Status</Label>
               <Select

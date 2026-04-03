@@ -10,6 +10,7 @@ import {
   PRIMARY_ADMIN_PASSWORD,
   PRIMARY_ADMIN_USERNAME,
   includesAdminRole,
+  normalizeRoleInput,
   sanitizeNonAdminRoles,
   isPrimaryAdminUsername,
   normalizeUsername,
@@ -213,6 +214,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const normalizedUserRole = normalizeRoleInput(user.role) || "faculty";
+
     const normalizedStatus = user.status?.toLowerCase();
     const isApproved =
       !normalizedStatus ||
@@ -222,7 +225,7 @@ export async function POST(request: NextRequest) {
 
     if (!isApproved) {
       return NextResponse.json(
-        { error: "Account pending approval" },
+        { error: "Account pending approval", code: "ACCOUNT_PENDING_APPROVAL" },
         { status: 403 },
       );
     }
@@ -251,6 +254,8 @@ export async function POST(request: NextRequest) {
       role: normalizedRole,
       roles: normalizedRoles,
       department: user.department,
+      profileImageUrl: user.profileImageUrl ?? "",
+      emailVerified: user.emailVerified === true,
     });
   } catch (error) {
     console.error("Login error:", error);

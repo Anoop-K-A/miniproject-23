@@ -4,6 +4,7 @@ import React, {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   ReactNode,
 } from "react";
@@ -40,12 +41,15 @@ function normalizeAuthPayload(authUser: AuthUser) {
     authUser.role,
     ...(authUser.roles || []),
   ]);
-  const roles = candidateRoles.length > 0 ? candidateRoles : ["faculty"];
-  const activeRole = roles.includes("admin")
-    ? "admin"
-    : roles.includes(authUser.role)
-      ? authUser.role
-      : roles[0];
+  const roles: UserRole[] =
+    candidateRoles.length > 0 ? candidateRoles : ["faculty"];
+  const activeRole = (
+    roles.includes("admin")
+      ? "admin"
+      : roles.includes(authUser.role)
+        ? authUser.role
+        : roles[0]
+  ) as UserRole;
 
   return {
     user: {
@@ -65,6 +69,7 @@ export interface AuthUser {
   role: UserRole;
   roles?: UserRole[];
   department?: string;
+  profileImageUrl?: string;
 }
 
 interface AuthContextType {
@@ -76,6 +81,7 @@ interface AuthContextType {
   register: (role: UserRole) => void;
   logout: () => void;
   switchRole: (role: UserRole) => void;
+  updateUserProfile: (patch: Partial<AuthUser>) => void;
   isLoading: boolean;
 }
 
@@ -87,6 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [assignedRoles, setAssignedRoles] = useState<UserRole[]>(["faculty"]);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const userRoleRef = useRef<UserRole>("faculty");
+  const assignedRolesRef = useRef<UserRole[]>(["faculty"]);
+  const userRef = useRef<AuthUser | null>(null);
 
   const persistAuthState = (
     nextUser: AuthUser,
@@ -142,13 +151,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...(parsedUser?.roles || []),
       ]);
 
-      const normalizedRoles =
+      const normalizedRoles: UserRole[] =
         hydratedRoles.length > 0 ? hydratedRoles : ["faculty"];
-      const normalizedRole = normalizedRoles.includes("admin")
-        ? "admin"
-        : normalizedRoles.includes(savedRole)
-          ? savedRole
-          : normalizedRoles[0];
+      const normalizedRole = (
+        normalizedRoles.includes("admin")
+          ? "admin"
+          : normalizedRoles.includes(savedRole)
+            ? savedRole
+            : normalizedRoles[0]
+      ) as UserRole;
 
       setUserRole(normalizedRole);
       setAssignedRoles(normalizedRoles);
@@ -196,7 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const switchRole = (role: UserRole) => {
-    if (!assignedRoles.includes(role)) {
+    if (!assignedRoles.includes(role) || role === userRole) {
       return;
     }
 
@@ -212,6 +223,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  useEffect(() => {
+    userRoleRef.current = userRole;
+    assignedRolesRef.current = assignedRoles;
+    userRef.current = user;
+  }, [userRole, assignedRoles, user]);
+
   const register = (role: UserRole) => {
     setUserRole(role);
     setAssignedRoles([role]);
@@ -223,18 +240,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     document.cookie = `auth_role=${role}; path=/`;
   };
 
+  const updateUserProfile = (patch: Partial<AuthUser>) => {
+    if (!user) {
+      return;
+    }
+
+    const nextUser: AuthUser = {
+      ...user,
+      ...patch,
+      role:
+        patch.role && assignedRoles.includes(patch.role)
+          ? patch.role
+          : user.role,
+      roles: user.roles,
+    };
+
+    setUser(nextUser);
+    localStorage.setItem("auth_user", JSON.stringify(nextUser));
+    document.cookie = `auth_user=${nextUser.username}; path=/`;
+  };
+
   // Keep role assignments synced so admin role updates reflect without page refresh.
   useEffect(() => {
     if (!isAuthenticated || !user?.id) {
       return;
     }
 
+    const currentUser = userRef.current;
+    if (!currentUser?.id) {
+      return;
+    }
+
+    // "public-user" is a synthetic read-only login and does not have a persisted user record.
+    if (currentUser.id === "public-user") {
+      return;
+    }
+
     let isDisposed = false;
+    const hasAdminRole = assignedRolesRef.current.includes("admin");
 
     const syncCurrentUser = async () => {
       try {
+        const activeUser = userRef.current;
+        if (!activeUser?.id) {
+          return;
+        }
+
         const response = await fetch(
-          `/api/users/${encodeURIComponent(user.id)}`,
+          `/api/users/${encodeURIComponent(activeUser.id)}`,
           {
             cache: "no-store",
           },
@@ -245,7 +298,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const data = (await response.json()) as {
-          user?: Partial<AuthUser> & { role?: string; roles?: string[] };
+          user?: Partial<AuthUser> & {
+            role?: string;
+            roles?: string[];
+            profileImageUrl?: string;
+          };
         };
 
         if (isDisposed || !data.user?.role) {
@@ -268,29 +325,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const activeRole = normalizedRoles.includes("admin")
           ? "admin"
-          : normalizedRoles.includes(userRole)
-            ? userRole
+          : normalizedRoles.includes(userRoleRef.current)
+            ? userRoleRef.current
             : normalizedRoles[0];
 
         const nextUser: AuthUser = {
-          id: user.id,
-          username: data.user.username || user.username,
-          name: data.user.name || user.name,
+          id: data.user.id || activeUser.id,
+          username: data.user.username || activeUser.username,
+          name: data.user.name || activeUser.name,
           role: activeRole,
           roles: normalizedRoles,
           department:
             data.user.department !== undefined
               ? data.user.department
-              : user.department,
+              : activeUser.department,
+          profileImageUrl:
+            data.user.profileImageUrl !== undefined
+              ? data.user.profileImageUrl
+              : activeUser.profileImageUrl,
         };
 
         const rolesChanged =
-          normalizedRoles.join("|") !== assignedRoles.join("|");
-        const roleChanged = activeRole !== userRole;
+          normalizedRoles.join("|") !== assignedRolesRef.current.join("|");
+        const roleChanged = activeRole !== userRoleRef.current;
         const profileChanged =
-          nextUser.username !== user.username ||
-          nextUser.name !== user.name ||
-          nextUser.department !== user.department;
+          nextUser.username !== activeUser.username ||
+          nextUser.name !== activeUser.name ||
+          nextUser.department !== activeUser.department ||
+          nextUser.profileImageUrl !== activeUser.profileImageUrl;
 
         if (!rolesChanged && !roleChanged && !profileChanged) {
           return;
@@ -302,7 +364,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const intervalId = window.setInterval(syncCurrentUser, 10000);
     const onFocus = () => {
       syncCurrentUser();
     };
@@ -316,21 +377,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibilityChange);
 
+    const intervalId = hasAdminRole
+      ? window.setInterval(syncCurrentUser, 300000) // 5 minutes instead of 30s - reduces API calls by 10x
+      : null;
+
     return () => {
       isDisposed = true;
-      window.clearInterval(intervalId);
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [
-    isAuthenticated,
-    user?.id,
-    user?.username,
-    user?.name,
-    user?.department,
-    userRole,
-    assignedRoles,
-  ]);
+  }, [isAuthenticated, user?.id]);
 
   const value = {
     isAuthenticated,
@@ -341,6 +400,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     logout,
     switchRole,
+    updateUserProfile,
     isLoading,
   };
 

@@ -5,7 +5,7 @@ import { MainContent } from "./MainContent";
 import { AppFooter } from "./AppFooter";
 import { AuthPage } from "../components/AuthPage";
 import { Toaster } from "../components/ui/sonner";
-import { UserRole } from "./config";
+import type { UserRole } from "@/lib/roles";
 
 export function AppLayout() {
   const [activeTab, setActiveTab] = useState("dashboard");

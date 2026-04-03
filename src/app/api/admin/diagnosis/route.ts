@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebaseAdmin";
+import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 
 export async function GET(request: NextRequest) {
   try {
@@ -60,17 +60,19 @@ export async function GET(request: NextRequest) {
 
     try {
       let pageToken: string | undefined;
-      let authSnapshot = await adminDb.app?.auth()?.listUsers(1000, pageToken);
-
-      if (authSnapshot) {
-        authUsers.total = authSnapshot.users.length;
-        authUsers.users = authSnapshot.users.map((u) => ({
-          uid: u.uid,
-          email: u.email,
-          displayName: u.displayName,
-          createdAt: u.metadata?.creationTime,
-        }));
-      }
+      do {
+        const authSnapshot = await adminAuth.listUsers(1000, pageToken);
+        authUsers.total += authSnapshot.users.length;
+        authUsers.users.push(
+          ...authSnapshot.users.map((u) => ({
+            uid: u.uid,
+            email: u.email,
+            displayName: u.displayName,
+            createdAt: u.metadata?.creationTime,
+          })),
+        );
+        pageToken = authSnapshot.pageToken;
+      } while (pageToken);
     } catch (error: any) {
       console.warn("Could not fetch Firebase Auth users:", error.message);
     }

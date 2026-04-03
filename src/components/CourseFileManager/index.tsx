@@ -267,7 +267,7 @@ export function CourseFileManager({
         const searchParams = new URLSearchParams({
           includeMeta: "1",
           includeFaculty: "1",
-          limit: "500",
+          limit: "200",
         });
 
         if (userRole === "faculty" && user?.id) {
@@ -332,7 +332,8 @@ export function CourseFileManager({
           return;
         }
 
-        const groupedThreads = (data.messages ?? []).reduce<
+        const messages: AuditorMessage[] = data.messages ?? [];
+        const groupedThreads = messages.reduce<
           Record<string, AuditorMessage[]>
         >(
           (
@@ -350,21 +351,23 @@ export function CourseFileManager({
           {},
         );
 
-        const pendingByEntity = Object.values(groupedThreads).reduce<
-          Record<string, number>
-        >((accumulator, threadMessages) => {
-          const latestMessage = [...threadMessages].sort((a, b) => {
-            const aTime = new Date(a.createdAt ?? 0).getTime();
-            const bTime = new Date(b.createdAt ?? 0).getTime();
-            return aTime - bTime;
-          })[threadMessages.length - 1];
+        const threadValues: AuditorMessage[][] = Object.values(groupedThreads);
+        const pendingByEntity = threadValues.reduce<Record<string, number>>(
+          (accumulator, threadMessages) => {
+            const latestMessage = [...threadMessages].sort((a, b) => {
+              const aTime = new Date(a.createdAt ?? 0).getTime();
+              const bTime = new Date(b.createdAt ?? 0).getTime();
+              return aTime - bTime;
+            })[threadMessages.length - 1];
 
-          if (latestMessage?.senderRole === "auditor") {
-            accumulator[latestMessage.entityId] =
-              (accumulator[latestMessage.entityId] ?? 0) + 1;
-          }
-          return accumulator;
-        }, {});
+            if (latestMessage?.senderRole === "auditor") {
+              accumulator[latestMessage.entityId] =
+                (accumulator[latestMessage.entityId] ?? 0) + 1;
+            }
+            return accumulator;
+          },
+          {},
+        );
 
         setPendingAuditorMessagesByFile(pendingByEntity);
       } catch (error) {
@@ -574,17 +577,44 @@ export function CourseFileManager({
       groups[groupKey].push(file);
     });
 
-    return Object.entries(groups).map(([groupKey, fileList]) => {
-      const [courseCode, academicYear] = groupKey.split("|");
-      const firstFile = fileList[0];
-      return {
-        courseCode,
-        courseName: firstFile.courseName,
-        academicYear,
-        semester: firstFile.semester,
-        files: fileList.sort((a, b) => a.fileName.localeCompare(b.fileName)),
-      };
-    });
+    const resolveFileTimestamp = (file: CourseFile) => {
+      const candidateTimestamps = [
+        file.updatedAt,
+        file.createdAt,
+        file.uploadDate,
+      ];
+
+      for (const candidate of candidateTimestamps) {
+        const parsed = Date.parse(String(candidate ?? ""));
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+
+      return 0;
+    };
+
+    return Object.entries(groups)
+      .map(([groupKey, fileList]) => {
+        const [courseCode, academicYear] = groupKey.split("|");
+        const firstFile = fileList[0];
+        const latestUploadMs = fileList.reduce(
+          (latest, file) => Math.max(latest, resolveFileTimestamp(file)),
+          0,
+        );
+
+        return {
+          courseCode,
+          courseName: firstFile.courseName,
+          academicYear,
+          semester: firstFile.semester,
+          latestUploadMs,
+          files: [...fileList].sort((a, b) =>
+            a.fileName.localeCompare(b.fileName),
+          ),
+        };
+      })
+      .sort((a, b) => b.latestUploadMs - a.latestUploadMs);
   }, [resolvedFiles]);
 
   return (
@@ -793,9 +823,9 @@ export function CourseFileManager({
           ) : null}
 
           {/* Files Folder View */}
-          <div className="border rounded-lg divide-y border-l-4 border-l-blue-500">
+          <div className="space-y-3">
             {resolvedFiles.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
+              <div className="rounded-xl border bg-white py-8 text-center text-gray-500">
                 No files found. Upload your first course file to get started.
               </div>
             ) : (
@@ -809,30 +839,45 @@ export function CourseFileManager({
                   expandedCourseChecklist[folderKey] ?? false;
 
                 return (
-                  <React.Fragment key={folderKey}>
+                  <div
+                    key={folderKey}
+                    className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+                  >
                     {/* Folder Header */}
-                    <div className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
+                    <div className="w-full border-l-4 border-l-blue-500 bg-slate-50/80 px-4 py-3 transition-colors hover:bg-slate-100/80 sm:px-5">
                       <button
                         onClick={() => toggleFolder(folderKey)}
-                        className="flex items-center gap-3 flex-1 min-w-0"
+                        className="flex w-full items-center gap-3 text-left"
                         type="button"
                       >
                         {isExpanded ? (
-                          <ChevronDown className="h-5 w-5 text-gray-600" />
+                          <ChevronDown className="h-5 w-5 shrink-0 text-slate-600" />
                         ) : (
-                          <ChevronRight className="h-5 w-5 text-gray-600" />
+                          <ChevronRight className="h-5 w-5 shrink-0 text-slate-600" />
                         )}
-                        <Folder className="h-5 w-5 text-blue-500" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-gray-800">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                          <Folder className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-semibold tracking-tight text-slate-800 sm:text-base">
                             {group.courseCode} • {group.academicYear}
                           </div>
-                          <div className="text-xs text-gray-600">
+                          <div className="truncate text-xs text-slate-500 sm:text-sm">
                             {group.courseName}
                           </div>
                         </div>
+
+                        <div className="ml-auto flex items-center gap-2 pl-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {group.files.length} Files
+                          </Badge>
+                          <Badge className="bg-emerald-100 text-xs text-emerald-800">
+                            {group.files.length}
+                          </Badge>
+                        </div>
                       </button>
-                      <div className="text-sm text-gray-600 flex items-center gap-2">
+
+                      <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 pt-3">
                         {courseChecklistReport && (
                           <Button
                             size="sm"
@@ -845,18 +890,12 @@ export function CourseFileManager({
                               : "View Checklist Sheet"}
                           </Button>
                         )}
-                        <Badge variant="secondary" className="text-xs">
-                          {group.files.length} Files
-                        </Badge>
-                        <Badge className="text-xs bg-green-100 text-green-800">
-                          {group.files.length}
-                        </Badge>
                       </div>
                     </div>
 
                     {/* Files in folder */}
                     {isExpanded && (
-                      <div className="divide-y">
+                      <div className="divide-y border-t border-slate-200">
                         {courseChecklistReport && isChecklistOpen && (
                           <div className="px-6 py-4 bg-white">
                             <div className="rounded-lg border p-3 space-y-3">
@@ -1007,7 +1046,7 @@ export function CourseFileManager({
                         })}
                       </div>
                     )}
-                  </React.Fragment>
+                  </div>
                 );
               })
             )}

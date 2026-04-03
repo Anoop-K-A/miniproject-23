@@ -3,7 +3,7 @@ import { FacultySectionTabs } from "@/components/faculty/FacultySectionTabs";
 import type { EventReport } from "@/components/EventReportManager/types";
 import { readJsonFile } from "@/lib/jsonDb";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 20;
 
 export default async function FacultyReportsPage() {
   const reports = await readJsonFile<EventReport[]>("eventReports.json");

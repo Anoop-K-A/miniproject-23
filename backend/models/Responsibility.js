@@ -53,6 +53,12 @@ const responsibilitySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+responsibilitySchema.index({ facultyId: 1, createdAt: -1 });
+responsibilitySchema.index({ facultyId: 1, type: 1, createdAt: -1 });
+responsibilitySchema.index({ type: 1, createdAt: -1 });
+responsibilitySchema.index({ status: 1, createdAt: -1 });
+responsibilitySchema.index({ assignedBy: 1, createdAt: -1 });
+
 const Responsibility = mongoose.model("Responsibility", responsibilitySchema);
 
 module.exports = Responsibility;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { findUserById, updateUserById } from "@/lib/userStore";
-import { PRIMARY_ADMIN_PASSWORD } from "@/lib/adminConfig";
+import { PRIMARY_ADMIN_PASSWORD, isPrimaryAdminEmail } from "@/lib/adminConfig";
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -111,19 +111,16 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (!hasAdminRole(user)) {
-      return NextResponse.json(
-        { error: "Only admin can change password here" },
-        { status: 403 },
-      );
-    }
-
+    const isAdminUser = hasAdminRole(user);
     const hasStoredPassword =
       typeof user.password === "string" && user.password.length > 0;
     const matchesStoredPassword =
       hasStoredPassword && user.password === currentPassword;
     const matchesBootstrapPassword =
-      !hasStoredPassword && currentPassword === PRIMARY_ADMIN_PASSWORD;
+      isAdminUser &&
+      !hasStoredPassword &&
+      isPrimaryAdminEmail(user.email || user.username || "") &&
+      currentPassword === PRIMARY_ADMIN_PASSWORD;
     let matchesFirebasePassword = false;
 
     if (!matchesStoredPassword && !matchesBootstrapPassword && user.email) {

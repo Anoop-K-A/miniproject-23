@@ -1,5 +1,6 @@
 import type { UserRecord } from "@/lib/userStore";
 
+// Only seed the admin user - all other test users should be created via registration
 export const userSeedData: UserRecord[] = [
   {
     id: "admin-1",
@@ -14,55 +15,5 @@ export const userSeedData: UserRecord[] = [
     createdAt: "2026-02-13T00:00:00.000Z",
     updatedAt: "2026-02-18T10:24:05.555Z",
     lastActiveAt: "2026-02-20T22:41:26.075Z",
-  },
-  {
-    id: "f1",
-    username: "Dr. John Doe",
-    password: "password123",
-    name: "Dr. John Doe",
-    role: "faculty",
-    roles: ["faculty", "staff-advisor"],
-    department: "Computer Science",
-    email: "faculty@test.com",
-    phone: "+1 (555) 123-4567",
-    facultyRole: "Associate Professor",
-    courses: [
-      "CS101 - Intro to Programming",
-      "CS201 - Data Structures",
-      "CS301 - Algorithms",
-    ],
-    specialization: "Artificial Intelligence & Machine Learning",
-    experience: "12 years",
-    status: "active",
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2026-02-20T05:54:25.238Z",
-    lastActiveAt: "2026-02-24T18:48:42.383Z",
-  },
-  {
-    id: "1770985873707",
-    username: "anoop",
-    password: "password123",
-    name: "anoop",
-    role: "faculty",
-    roles: ["faculty"],
-    department: "computer science and engineering",
-    status: "active",
-    createdAt: "2026-02-13T12:31:13.707Z",
-    updatedAt: "2026-02-20T22:48:41.137Z",
-    lastActiveAt: "2026-02-20T05:55:35.713Z",
-  },
-  {
-    id: "1771405829166",
-    username: "anoop ka",
-    password: "123456",
-    name: "anoop ka",
-    role: "faculty",
-    roles: ["faculty", "auditor", "staff-advisor"],
-    department: "computer science and engineering",
-    status: "active",
-    createdAt: "2026-02-18T09:10:29.166Z",
-    updatedAt: "2026-02-20T22:41:43.290Z",
-    lastActiveAt: "2026-03-04T16:32:21.191Z",
-    email: "aaa@gmail.com",
   },
 ];

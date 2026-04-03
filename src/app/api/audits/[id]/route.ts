@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 
 interface AuditRecord {
   id: string;
@@ -17,22 +18,20 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const { id } = await params;
     const payload = await request.json();
-    const audits = await readJsonFile<AuditRecord[]>("audits.json");
     const updatedAt = new Date().toISOString();
 
-    const updatedAudits = audits.map((audit) =>
-      audit.id === id
-        ? {
-            ...audit,
-            ...payload,
-            updatedAt,
-          }
-        : audit,
-    );
-
-    await writeJsonFile("audits.json", updatedAudits);
+    await db
+      .collection<AuditRecord>(COLLECTIONS.audits)
+      .updateOne({ id }, { $set: { ...payload, updatedAt } });
+    const updatedAudits = (await db
+      .collection<AuditRecord>(COLLECTIONS.audits)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as AuditRecord[];
     return NextResponse.json({ audits: updatedAudits });
   } catch (error) {
     console.error("Audit update error:", error);
@@ -48,10 +47,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const { id } = await params;
-    const audits = await readJsonFile<AuditRecord[]>("audits.json");
-    const updatedAudits = audits.filter((audit) => audit.id !== id);
-    await writeJsonFile("audits.json", updatedAudits);
+    await db.collection<AuditRecord>(COLLECTIONS.audits).deleteOne({ id });
+    const updatedAudits = (await db
+      .collection<AuditRecord>(COLLECTIONS.audits)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as AuditRecord[];
     return NextResponse.json({ audits: updatedAudits });
   } catch (error) {
     console.error("Audit delete error:", error);

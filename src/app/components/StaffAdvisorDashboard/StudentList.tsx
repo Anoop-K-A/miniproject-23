@@ -91,7 +91,7 @@ export function StudentList({
   const groupedStudents = useMemo(() => {
     const groups = new Map<string, Student[]>();
     filteredStudents.forEach((student) => {
-      const key = student.batchYear?.trim() || "Unknown";
+      const key = student.semester?.trim() || "Unknown";
       if (!groups.has(key)) {
         groups.set(key, []);
       }
@@ -133,7 +133,7 @@ export function StudentList({
     if (trimmedRoll && form.batchYear.trim()) {
       const existsInBatch = students.some(
         (student) =>
-          student.batchYear?.toLowerCase() ===
+          student.semester?.toLowerCase() ===
             form.batchYear.trim().toLowerCase() &&
           student.rollNumber.toLowerCase() === trimmedRoll.toLowerCase(),
       );
@@ -170,7 +170,6 @@ export function StudentList({
       phone: form.phone.trim() || "",
       department: form.department.trim(),
       semester: form.semester.trim(),
-      batchYear: batchKey,
       cgpa: 0,
       attendance: 0,
       careerInterest: "Not set",

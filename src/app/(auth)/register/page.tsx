@@ -2,13 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { SignUpForm } from "@/components/AuthPage/SignUpForm";
-import type { SignUpFormData } from "@/components/AuthPage/types";
+import type { SignUpFormData, SignUpResult } from "@/components/AuthPage/types";
 import { safelyNavigate } from "@/lib/safeNavigation";
 
 export default function RegisterPage() {
   const router = useRouter();
 
-  const handleSubmit = async (formData: SignUpFormData) => {
+  const handleSubmit = async (
+    formData: SignUpFormData,
+  ): Promise<SignUpResult> => {
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
@@ -26,11 +28,17 @@ export default function RegisterPage() {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "Registration failed");
+      throw new Error(data.error || data.message || "Registration failed");
     }
 
-    // Redirect with a query flag so login page can show a reliable success toast.
-    safelyNavigate(() => router.push("/login?registered=1"));
+    // Redirect to login after success
+    safelyNavigate(() => router.push("/login"));
+
+    return {
+      message: data.message,
+      warning: data.warning,
+      code: data.code,
+    };
   };
 
   return (

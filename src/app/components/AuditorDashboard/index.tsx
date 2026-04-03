@@ -10,10 +10,17 @@ import { FacultyMember } from "./types";
 import { mockStats, mockFacultyMembers, mockRecentReviews } from "./mockData";
 
 export function AuditorDashboard() {
-  const [selectedFaculty, setSelectedFaculty] = useState<FacultyMember | null>(null);
+  const [selectedFaculty, setSelectedFaculty] = useState<FacultyMember | null>(
+    null,
+  );
 
   if (selectedFaculty) {
-    return <FacultyAuditPortfolio faculty={selectedFaculty} onBack={() => setSelectedFaculty(null)} />;
+    return (
+      <FacultyAuditPortfolio
+        faculty={selectedFaculty}
+        onBack={() => setSelectedFaculty(null)}
+      />
+    );
   }
 
   return (
@@ -21,14 +28,14 @@ export function AuditorDashboard() {
       <DashboardHeader />
       <StatsOverview stats={mockStats} />
       <PendingReviewsAlert stats={mockStats} />
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ReviewStatistics stats={mockStats} />
         <RecentActivity reviews={mockRecentReviews} />
       </div>
 
-      <FacultySubmissionStatus 
-        facultyMembers={mockFacultyMembers} 
+      <FacultySubmissionStatus
+        facultyMembers={mockFacultyMembers}
         onSelectFaculty={setSelectedFaculty}
       />
     </div>

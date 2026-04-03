@@ -6,6 +6,7 @@ export interface Student {
   phone: string;
   department: string;
   semester: string;
+  batchYear?: string;
   cgpa: number;
   attendance: number;
   careerInterest: string;

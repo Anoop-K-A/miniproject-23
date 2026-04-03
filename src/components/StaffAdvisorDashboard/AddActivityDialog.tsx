@@ -1,8 +1,22 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Student } from "./types";
 import { Briefcase } from "lucide-react";
 
@@ -14,10 +28,14 @@ interface AddActivityDialogProps {
   onActivityNameChange: (value: string) => void;
   community: string;
   onCommunityChange: (value: string) => void;
+  semester: string;
+  onSemesterChange: (value: string) => void;
   activityPoints: string;
   onActivityPointsChange: (value: string) => void;
   onAddActivity: () => void;
 }
+
+const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
 
 export function AddActivityDialog({
   isOpen,
@@ -27,18 +45,24 @@ export function AddActivityDialog({
   onActivityNameChange,
   community,
   onCommunityChange,
+  semester,
+  onSemesterChange,
   activityPoints,
   onActivityPointsChange,
-  onAddActivity
+  onAddActivity,
 }: AddActivityDialogProps) {
   if (!student) return null;
 
   const getPlacementColor = (status: string) => {
     switch (status) {
-      case "Placed": return "bg-green-100 text-green-800";
-      case "In Process": return "bg-blue-100 text-blue-800";
-      case "Not Started": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Placed":
+        return "bg-green-100 text-green-800";
+      case "In Process":
+        return "bg-blue-100 text-blue-800";
+      case "Not Started":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -54,13 +78,20 @@ export function AddActivityDialog({
         <div className="space-y-6">
           {/* Student Header */}
           <div className="flex items-start gap-4">
-            <div className="h-16 w-16 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
-              {student.name.split(' ').map(n => n[0]).join('')}
+            <div className="h-16 w-16 bg-linear-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-2xl shrink-0">
+              {student.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold">{student.name}</h3>
-              <p className="text-gray-600">{student.rollNumber} • {student.department}</p>
-              <Badge className={getPlacementColor(student.placementStatus) + " mt-2"}>
+              <p className="text-gray-600">
+                {student.rollNumber} • {student.department}
+              </p>
+              <Badge
+                className={getPlacementColor(student.placementStatus) + " mt-2"}
+              >
                 {student.placementStatus}
               </Badge>
               {student.companyName && (
@@ -91,6 +122,24 @@ export function AddActivityDialog({
                   value={community}
                   onChange={(e) => onCommunityChange(e.target.value)}
                 />
+              </div>
+              <div>
+                <Label>Semester</Label>
+                <Select
+                  value={semester}
+                  onValueChange={(value) => onSemesterChange(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select semester" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {semesterOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Points</Label>

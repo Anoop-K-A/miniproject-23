@@ -10,6 +10,7 @@ export interface FacultyMember {
   courses: string[];
   specialization: string;
   experience: string;
+  profileImageUrl?: string;
   resumeUrl?: string;
   resumeFileName?: string;
 }
@@ -91,6 +92,9 @@ export interface CourseFile {
 export interface EventReport {
   id: string;
   facultyId?: string;
+  facultyCoordinator?: string;
+  community?: string;
+  department?: string;
   eventName: string;
   eventType: string;
   eventDate: string;

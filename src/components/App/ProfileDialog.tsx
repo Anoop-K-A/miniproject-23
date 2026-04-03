@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -20,7 +27,15 @@ import { FileText, Loader2, Upload, UserRound } from "lucide-react";
 import { toast } from "sonner";
 
 const MAX_RESUME_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_PROFILE_IMAGE_SIZE_BYTES = 3 * 1024 * 1024;
 const ALLOWED_RESUME_EXTENSIONS = [".pdf", ".doc", ".docx"];
+const ALLOWED_PROFILE_IMAGE_EXTENSIONS = [
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".gif",
+];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PROFILE_CACHE_TTL_MS = 60_000;
 
@@ -31,6 +46,7 @@ interface ProfileFormState {
   email: string;
   phone: string;
   experience: string;
+  profileImageUrl: string;
   resumeUrl: string;
   resumeFileName: string;
 }
@@ -48,6 +64,7 @@ const EMPTY_FORM: ProfileFormState = {
   email: "",
   phone: "",
   experience: "",
+  profileImageUrl: "",
   resumeUrl: "",
   resumeFileName: "",
 };
@@ -65,6 +82,7 @@ type ProfileApiUser = {
   email?: string;
   phone?: string;
   experience?: string;
+  profileImageUrl?: string;
   resumeUrl?: string;
   resumeFileName?: string;
 };
@@ -98,17 +116,45 @@ function deriveResumeFileName(url: string) {
 }
 
 export function ProfileDialog() {
-  const { user } = useAuth();
+  const auth = useAuth();
+  const user = auth.user;
+  const updateUserProfile =
+    typeof auth.updateUserProfile === "function"
+      ? auth.updateUserProfile
+      : (patch: { profileImageUrl?: string }) => {
+          if (!user) {
+            return;
+          }
+
+          const nextUser = {
+            ...user,
+            ...patch,
+          };
+
+          if (typeof window !== "undefined") {
+            localStorage.setItem("auth_user", JSON.stringify(nextUser));
+          }
+        };
   const isAdminUser =
     user?.role === "admin" || user?.roles?.includes("admin") === true;
   const [open, setOpen] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
+  const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
   const [form, setForm] = useState<ProfileFormState>(EMPTY_FORM);
   const [passwordForm, setPasswordForm] =
     useState<PasswordFormState>(EMPTY_PASSWORD_FORM);
+  const [updateMode, setUpdateMode] = useState<"profile" | "password">(
+    isAdminUser ? "password" : "profile",
+  );
   const profileRequestControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setUpdateMode(isAdminUser ? "password" : "profile");
+    }
+  }, [isAdminUser, open]);
 
   const applyProfileData = useCallback((dataUser: ProfileApiUser) => {
     setForm({
@@ -118,6 +164,7 @@ export function ProfileDialog() {
       email: dataUser.email ?? "",
       phone: dataUser.phone ?? "",
       experience: dataUser.experience ?? "",
+      profileImageUrl: dataUser.profileImageUrl ?? "",
       resumeUrl: dataUser.resumeUrl ?? "",
       resumeFileName:
         dataUser.resumeFileName ??
@@ -242,23 +289,32 @@ export function ProfileDialog() {
       }
     };
 
-    const idleScheduler =
-      typeof window !== "undefined" && "requestIdleCallback" in window
-        ? window.requestIdleCallback(() => {
-            void prefetchProfile();
-          })
-        : window.setTimeout(() => {
-            void prefetchProfile();
-          }, 300);
+    const browserWindow = typeof window !== "undefined" ? window : null;
+    let idleScheduler: number | null = null;
+    let timeoutScheduler: ReturnType<typeof setTimeout> | null = null;
+
+    if (browserWindow && "requestIdleCallback" in browserWindow) {
+      idleScheduler = browserWindow.requestIdleCallback(() => {
+        void prefetchProfile();
+      });
+    } else {
+      timeoutScheduler = globalThis.setTimeout(() => {
+        void prefetchProfile();
+      }, 300);
+    }
 
     return () => {
       cancelled = true;
-      if (typeof idleScheduler === "number") {
-        window.clearTimeout(idleScheduler);
+      if (timeoutScheduler) {
+        globalThis.clearTimeout(timeoutScheduler);
         return;
       }
-      if (typeof window !== "undefined" && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleScheduler);
+      if (
+        browserWindow &&
+        idleScheduler !== null &&
+        "cancelIdleCallback" in browserWindow
+      ) {
+        browserWindow.cancelIdleCallback(idleScheduler);
       }
     };
   }, [isAdminUser, user?.id]);
@@ -428,6 +484,68 @@ export function ProfileDialog() {
     }
   };
 
+  const handleProfileImageUpload = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0] ?? null;
+    event.target.value = "";
+
+    if (!file || !user?.id) {
+      return;
+    }
+
+    const extension = getFileExtension(file.name);
+    if (!ALLOWED_PROFILE_IMAGE_EXTENSIONS.includes(extension)) {
+      toast.error("Only PNG, JPG, JPEG, WEBP, or GIF files are allowed");
+      return;
+    }
+
+    if (file.size > MAX_PROFILE_IMAGE_SIZE_BYTES) {
+      toast.error("Profile image size should be less than 3MB");
+      return;
+    }
+
+    setUploadingProfileImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("userId", user.id);
+      formData.append("image", file);
+
+      const response = await fetch("/api/profile/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        profileImageUrl?: string;
+      };
+
+      if (!response.ok || !data.profileImageUrl) {
+        toast.error(data.error || "Failed to upload profile image");
+        return;
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        profileImageUrl: data.profileImageUrl || "",
+      }));
+      updateUserProfile({ profileImageUrl: data.profileImageUrl || "" });
+
+      profileDialogCache.delete(String(user.id));
+      toast.success("Profile image updated successfully");
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("dashboard:data-updated"));
+      }
+    } catch (error) {
+      console.error("Profile image upload error:", error);
+      toast.error("Failed to upload profile image");
+    } finally {
+      setUploadingProfileImage(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -443,9 +561,86 @@ export function ProfileDialog() {
           <DialogDescription>
             {isAdminUser
               ? "For admin accounts, only password updates are allowed."
-              : "Edit your contact details, experience, and resume."}
+              : updateMode === "password"
+                ? "Update your account password."
+                : "Edit your contact details, profile picture, experience, and resume."}
           </DialogDescription>
         </DialogHeader>
+
+        {!isAdminUser ? (
+          <div className="space-y-2">
+            <Label htmlFor="profile-update-mode">Update Option</Label>
+            <Select
+              value={updateMode}
+              onValueChange={(value) =>
+                setUpdateMode(value as "profile" | "password")
+              }
+            >
+              <SelectTrigger id="profile-update-mode">
+                <SelectValue placeholder="Select what to update" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="profile">Profile Details</SelectItem>
+                <SelectItem value="password">Password</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
+
+        {!isAdminUser && !loadingProfile ? (
+          <div className="space-y-2">
+            <Label>Profile Picture</Label>
+            <div className="flex items-center gap-4 rounded-lg border p-3">
+              {form.profileImageUrl ? (
+                <img
+                  src={form.profileImageUrl}
+                  alt={`${form.name || form.username || "User"} profile`}
+                  className="h-16 w-16 rounded-full border object-cover"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-600 text-lg font-semibold text-white">
+                  {(form.name || form.username || "U")
+                    .split(" ")
+                    .map((part) => part[0])
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()}
+                </div>
+              )}
+
+              <div>
+                <Label
+                  htmlFor="profile-image"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+                >
+                  {uploadingProfileImage ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      Upload Picture
+                    </>
+                  )}
+                </Label>
+                <Input
+                  id="profile-image"
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp,.gif"
+                  onChange={handleProfileImageUpload}
+                  className="hidden"
+                  disabled={uploadingProfileImage}
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Allowed formats: PNG, JPG, JPEG, WEBP, GIF (max 3MB)
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {loadingProfile && !isAdminUser ? (
           <div className="space-y-4 py-2">
@@ -472,7 +667,7 @@ export function ProfileDialog() {
               <Skeleton className="h-24 w-full" />
             </div>
           </div>
-        ) : isAdminUser ? (
+        ) : isAdminUser || updateMode === "password" ? (
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="profile-current-password">Current Password</Label>
@@ -638,11 +833,11 @@ export function ProfileDialog() {
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
-            disabled={savingProfile || uploadingResume}
+            disabled={savingProfile || uploadingResume || uploadingProfileImage}
           >
             Close
           </Button>
-          {isAdminUser ? (
+          {isAdminUser || updateMode === "password" ? (
             <Button onClick={handleChangePassword} disabled={savingProfile}>
               {savingProfile ? (
                 <>
@@ -656,7 +851,12 @@ export function ProfileDialog() {
           ) : (
             <Button
               onClick={handleSaveProfile}
-              disabled={loadingProfile || savingProfile || uploadingResume}
+              disabled={
+                loadingProfile ||
+                savingProfile ||
+                uploadingResume ||
+                uploadingProfileImage
+              }
             >
               {savingProfile ? (
                 <>

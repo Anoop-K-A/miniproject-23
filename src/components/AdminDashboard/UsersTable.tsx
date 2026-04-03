@@ -28,6 +28,8 @@ import type { AdminUser, AdminUserStatus } from "./types";
 
 interface UsersTableProps {
   users: AdminUser[];
+  totalUsers: number;
+  isLoading?: boolean;
   searchQuery: string;
   filterStatus: string;
   onSearchChange: (value: string) => void;
@@ -58,6 +60,8 @@ function getStatusColor(status: AdminUserStatus) {
 
 export function UsersTable({
   users,
+  totalUsers,
+  isLoading = false,
   searchQuery,
   filterStatus,
   onSearchChange,
@@ -74,7 +78,9 @@ export function UsersTable({
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <CardTitle className="flex items-center gap-2">All Users</CardTitle>
-            <CardDescription>{users.length} users</CardDescription>
+            <CardDescription>
+              {users.length} on this page • {totalUsers} total users
+            </CardDescription>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative">
@@ -116,7 +122,16 @@ export function UsersTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.length === 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-gray-500 py-10"
+                  >
+                    Loading users...
+                  </TableCell>
+                </TableRow>
+              ) : users.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}

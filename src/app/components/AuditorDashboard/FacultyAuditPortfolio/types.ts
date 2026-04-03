@@ -38,7 +38,7 @@ export interface CourseFile {
   semester: string;
   academicYear?: string;
   size?: string;
-  status: "Draft" | "Submitted" | "Pending" | "Approved" | "Rejected";
+  status: "Draft" | "Submitted" | "Approved" | "Rejected";
   auditorRemarks?: string;
   reviewedBy?: string;
   reviewedDate?: string;
@@ -56,6 +56,7 @@ export interface CourseFile {
 
 export interface EventReport {
   id: string;
+  facultyId?: string;
   eventName: string;
   eventType: string;
   eventDate: string;

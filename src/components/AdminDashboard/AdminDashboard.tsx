@@ -50,6 +50,7 @@ const ROLE_VALUES: UserRole[] = [
   "auditor",
   "staff-advisor",
   "admin",
+  "user",
 ];
 
 const STATUS_VALUES: AdminUserStatus[] = [
@@ -62,13 +63,19 @@ const STATUS_VALUES: AdminUserStatus[] = [
 
 function normalizeRole(role?: string): UserRole {
   if (!role) return "faculty";
-  if (ROLE_VALUES.includes(role as UserRole)) {
-    return role as UserRole;
+  const normalized = role.trim().toLowerCase();
+
+  if (ROLE_VALUES.includes(normalized as UserRole)) {
+    return normalized as UserRole;
   }
-  if (role === "StaffAdvisor" || role === "Staff Advisor") {
+  if (
+    normalized === "staffadvisor" ||
+    normalized === "staff advisor" ||
+    normalized === "staff-advisor"
+  ) {
     return "staff-advisor";
   }
-  if (role === "Auditor") {
+  if (normalized === "auditor") {
     return "auditor";
   }
   return "faculty";
@@ -149,33 +156,23 @@ function mapApiUserWithEngagement(
 
 export function AdminDashboard() {
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
-  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20; // Show 20 users per page
 
-  const fetchUsers = async () => {
+  const applyEngagementData = async (baseUsers: AdminUser[]) => {
     try {
-      const [usersResponse, engagementResponse] = await Promise.all([
-        fetch("/api/users?limit=500"), // Fetch limited initial set
-        fetch("/api/engagements"),
-      ]);
-
-      const usersData = await usersResponse.json();
+      const engagementResponse = await fetch("/api/engagements");
       const engagementData = await engagementResponse.json();
-
-      if (!usersResponse.ok) {
-        toast.error(usersData.error || "Failed to load users");
-        return;
-      }
-
       const engagementMap = (engagementData.engagements ?? []).reduce(
         (acc: Record<string, any>, eng: any) => {
           acc[eng.facultyId] = eng;
@@ -184,53 +181,113 @@ export function AdminDashboard() {
         {},
       );
 
+      setUsers((prevUsers) => {
+        const source = prevUsers.length > 0 ? prevUsers : baseUsers;
+        return source.map((user) => {
+          const engagement = engagementMap[user.id] ?? {};
+          return {
+            ...user,
+            courseFilesCount: engagement.uploadsCount ?? user.courseFilesCount,
+            eventReportsCount:
+              engagement.activityParticipationCount ?? user.eventReportsCount,
+            completionRate: engagement.score ?? user.completionRate,
+          };
+        });
+      });
+    } catch (error) {
+      console.error("Load engagement error:", error);
+    }
+  };
+
+  const fetchUsers = async (
+    page = currentPage,
+    query = searchQuery,
+    status = filterStatus,
+  ) => {
+    setIsUsersLoading(true);
+    try {
+      const searchParams = new URLSearchParams({
+        limit: String(pageSize),
+        offset: String((page - 1) * pageSize),
+        includeTotal: "1",
+      });
+
+      const trimmedQuery = query.trim();
+      if (trimmedQuery) {
+        searchParams.set("search", trimmedQuery);
+      }
+
+      if (status !== "all") {
+        searchParams.set("status", status);
+      }
+
+      const usersResponse = await fetch(
+        `/api/users?${searchParams.toString()}`,
+      );
+      const usersData = await usersResponse.json();
+
+      if (!usersResponse.ok) {
+        toast.error(usersData.error || "Failed to load users");
+        return;
+      }
+
       const mappedUsers = (usersData.users as ApiUser[]).map((user) =>
-        mapApiUserWithEngagement(user, engagementMap),
+        mapApiUserWithEngagement(user),
       );
       setUsers(mappedUsers);
-      setCurrentPage(1); // Reset to first page
+      setTotalUsers(
+        typeof usersData.total === "number"
+          ? usersData.total
+          : mappedUsers.length,
+      );
+
+      if (typeof window !== "undefined") {
+        if ("requestIdleCallback" in window) {
+          window.requestIdleCallback(() => {
+            void applyEngagementData(mappedUsers);
+          });
+        } else {
+          setTimeout(() => {
+            void applyEngagementData(mappedUsers);
+          }, 0);
+        }
+      } else {
+        void applyEngagementData(mappedUsers);
+      }
     } catch (error) {
       console.error("Load users error:", error);
       toast.error("Failed to load users");
+    } finally {
+      setIsUsersLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    const timer = window.setTimeout(() => {
+      void fetchUsers(currentPage, searchQuery, filterStatus);
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [currentPage, searchQuery, filterStatus]);
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
     [notifications],
   );
 
-  const filteredUsers = useMemo(() => {
-    let next = [...users];
+  const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
 
-    if (searchQuery) {
-      const needle = searchQuery.toLowerCase();
-      next = next.filter(
-        (user) =>
-          user.name.toLowerCase().includes(needle) ||
-          user.email.toLowerCase().includes(needle) ||
-          (user.department || "").toLowerCase().includes(needle),
-      );
-    }
+  const handleSearchChange = (value: string) => {
+    setCurrentPage(1);
+    setSearchQuery(value);
+  };
 
-    if (filterStatus !== "all") {
-      next = next.filter((user) => user.status === filterStatus);
-    }
-
-    return next;
-  }, [users, searchQuery, filterStatus]);
-
-  // Apply pagination to filtered results
-  const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredUsers.slice(start, start + pageSize);
-  }, [filteredUsers, currentPage]);
-
-  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  const handleFilterStatusChange = (value: string) => {
+    setCurrentPage(1);
+    setFilterStatus(value);
+  };
 
   const pushNotification = (
     message: string,
@@ -244,46 +301,6 @@ export function AdminDashboard() {
       read: false,
     };
     setNotifications((prev) => [notification, ...prev]);
-  };
-
-  const handleAddUser = async (payload: {
-    name: string;
-    email: string;
-    password: string;
-    phone?: string;
-    department?: string;
-    role: AdminUser["role"];
-    roles?: UserRole[];
-  }) => {
-    try {
-      const rolesArray = payload.roles || [payload.role];
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: payload.name,
-          password: payload.password,
-          name: payload.name,
-          role: payload.role,
-          roles: rolesArray,
-          department: payload.department,
-          email: payload.email,
-          phone: payload.phone,
-          status: "active",
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        toast.error(data.error || "Failed to add user");
-        return;
-      }
-      await fetchUsers();
-      toast.success(`User ${payload.name} added successfully`);
-      pushNotification(`User ${payload.name} added`, "success");
-    } catch (error) {
-      console.error("Add user error:", error);
-      toast.error("Failed to add user");
-    }
   };
 
   const updateUser = async (id: string, payload: Partial<ApiUser>) => {
@@ -316,6 +333,7 @@ export function AdminDashboard() {
     role: AdminUser["role"];
     roles?: UserRole[];
     status: AdminUserStatus;
+    password?: string;
   }) => {
     const updated = await updateUser(payload.id, {
       username: payload.name,
@@ -326,6 +344,7 @@ export function AdminDashboard() {
       role: payload.role,
       roles: payload.roles || [payload.role],
       status: payload.status,
+      ...(payload.password ? { password: payload.password } : {}),
     });
 
     if (updated) {
@@ -361,7 +380,6 @@ export function AdminDashboard() {
     if (updated) {
       toast.success(`Status updated to ${newStatus}`);
       pushNotification(`Status updated to ${newStatus}`, "info");
-      await fetchUsers();
     }
   };
 
@@ -392,19 +410,18 @@ export function AdminDashboard() {
         onToggleNotifications={setShowNotifications}
         onMarkAllRead={markAllAsRead}
         onMarkRead={markNotificationAsRead}
-        addDialogOpen={isAddUserDialogOpen}
-        onAddDialogOpenChange={setIsAddUserDialogOpen}
-        onAddUser={handleAddUser}
       />
 
-      <AdminStats users={users} />
+      <AdminStats users={users} totalUsers={totalUsers} />
 
       <UsersTable
-        users={paginatedUsers}
+        users={users}
+        totalUsers={totalUsers}
+        isLoading={isUsersLoading}
         searchQuery={searchQuery}
         filterStatus={filterStatus}
-        onSearchChange={setSearchQuery}
-        onFilterStatusChange={setFilterStatus}
+        onSearchChange={handleSearchChange}
+        onFilterStatusChange={handleFilterStatusChange}
         onEdit={(user) => {
           setSelectedUser(user);
           setIsEditDialogOpen(true);
@@ -422,9 +439,8 @@ export function AdminDashboard() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between gap-4 mt-6">
           <p className="text-sm text-gray-600">
-            Showing {(currentPage - 1) * pageSize + 1} to{" "}
-            {Math.min(currentPage * pageSize, filteredUsers.length)} of{" "}
-            {filteredUsers.length} users
+            Showing {totalUsers === 0 ? 0 : (currentPage - 1) * pageSize + 1} to{" "}
+            {Math.min(currentPage * pageSize, totalUsers)} of {totalUsers} users
           </p>
           <div className="flex gap-2">
             <button

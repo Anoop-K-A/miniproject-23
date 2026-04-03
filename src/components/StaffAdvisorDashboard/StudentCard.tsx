@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ interface StudentCardProps {
   onViewDetails: (student: Student) => void;
 }
 
-export function StudentCard({ student, onViewDetails }: StudentCardProps) {
+function StudentCardComponent({ student, onViewDetails }: StudentCardProps) {
   const getPlacementColor = (status: string) => {
     switch (status) {
       case "Placed":
@@ -31,7 +32,7 @@ export function StudentCard({ student, onViewDetails }: StudentCardProps) {
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
-            <div className="h-12 w-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+            <div className="h-12 w-12 bg-linear-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white shrink-0">
               {student.name
                 .split(" ")
                 .map((n) => n[0])
@@ -44,9 +45,7 @@ export function StudentCard({ student, onViewDetails }: StudentCardProps) {
                   {student.placementStatus}
                 </Badge>
               </div>
-              <p className="text-sm text-gray-500">
-                {student.rollNumber} • {student.semester} Semester
-              </p>
+              <p className="text-sm text-gray-500">{student.rollNumber}</p>
               <p className="text-xs text-gray-500 mt-1">
                 Batch {student.batchYear || "Not set"}
               </p>
@@ -68,7 +67,7 @@ export function StudentCard({ student, onViewDetails }: StudentCardProps) {
               <p className="text-xs text-gray-500">Attendance</p>
               <p className="font-medium">{student.attendance}%</p>
             </div>
-            <div className="text-center min-w-[120px]">
+            <div className="text-center min-w-30">
               <p className="text-xs text-gray-500 mb-1">Career Interest</p>
               <Badge variant="outline" className="text-xs">
                 <Target className="h-3 w-3 mr-1" />
@@ -86,3 +85,6 @@ export function StudentCard({ student, onViewDetails }: StudentCardProps) {
     </Card>
   );
 }
+
+export const StudentCard = memo(StudentCardComponent);
+StudentCard.displayName = "StudentCard";

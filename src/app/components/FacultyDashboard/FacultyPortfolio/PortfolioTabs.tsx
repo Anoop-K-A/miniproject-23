@@ -1,5 +1,6 @@
 import { Card, CardContent } from "../../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import { Alert, AlertDescription } from "../../ui/alert";
 import { FileText, Calendar } from "lucide-react";
 import { CourseFile, EventReport } from "./types";
 import { EventReportCard } from "./EventReportCard";

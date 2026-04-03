@@ -44,10 +44,10 @@ export function SignInForm({
   };
 
   return (
-    <Card className="shadow-2xl border-0">
+    <Card className="shadow-2xl border-0 w-150 max-w-xl">
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-4 md:hidden">
-          <div className="h-12 w-12 bg-blue-600 rounded-xl flex items-center justify-center">
+          <div className="h-12 w-12 rounded-xl flex items-center justify-center">
             <GraduationCap className="h-8 w-8 text-white" />
           </div>
         </div>

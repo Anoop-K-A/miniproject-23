@@ -38,7 +38,6 @@ interface StudentDetailDialogProps {
 interface StudentFormState {
   email: string;
   phone: string;
-  semester: string;
   batchYear: string;
   placementStatus: Student["placementStatus"];
   companyName: string;
@@ -51,7 +50,6 @@ interface StudentFormState {
 const emptyFormState: StudentFormState = {
   email: "",
   phone: "",
-  semester: "",
   batchYear: "",
   placementStatus: "Not Started",
   companyName: "",
@@ -61,25 +59,13 @@ const emptyFormState: StudentFormState = {
   skillsInput: "",
 };
 
-const semesterOptions = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
 const batchYearOptions = getStandardBatchYearOptions();
-
-function normalizeSemesterValue(value?: string) {
-  const raw = String(value ?? "").trim();
-  if (!raw) {
-    return "";
-  }
-
-  const match = raw.toUpperCase().match(/^(?:SEMESTER|SEM|S)?\s*([1-8])$/);
-  return match ? `S${match[1]}` : "";
-}
 
 const buildFormState = (student: Student | null): StudentFormState =>
   student
     ? {
         email: student.email ?? "",
         phone: student.phone ?? "",
-        semester: normalizeSemesterValue(student.semester),
         batchYear: normalizeBatchYear(student.batchYear),
         placementStatus: student.placementStatus,
         companyName: student.companyName ?? "",
@@ -148,7 +134,6 @@ export function StudentDetailDialog({
       ...student,
       email: form.email.trim(),
       phone: form.phone.trim(),
-      semester: normalizeSemesterValue(form.semester),
       batchYear: normalizedBatchYear,
       placementStatus: form.placementStatus,
       companyName: nextCompany || undefined,
@@ -255,7 +240,7 @@ export function StudentDetailDialog({
           {/* Academic Performance */}
           <div>
             <h4 className="font-medium mb-3">Academic Performance</h4>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-gray-600">CGPA</p>
                 <div className="text-2xl font-bold text-blue-600 mt-1">
@@ -266,12 +251,6 @@ export function StudentDetailDialog({
                 <p className="text-sm text-gray-600">Attendance</p>
                 <div className="text-2xl font-bold text-green-600 mt-1">
                   {student.attendance}%
-                </div>
-              </div>
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <p className="text-sm text-gray-600">Semester</p>
-                <div className="text-2xl font-bold text-purple-600 mt-1">
-                  {student.semester}
                 </div>
               </div>
             </div>
@@ -355,25 +334,6 @@ export function StudentDetailDialog({
                   }
                   disabled={!isEditing}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Semester</Label>
-                <Select
-                  value={form.semester}
-                  onValueChange={(value) => handleFormChange("semester", value)}
-                  disabled={!isEditing}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select semester" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {semesterOptions.map((semesterOption) => (
-                      <SelectItem key={semesterOption} value={semesterOption}>
-                        {semesterOption}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Placement Status</Label>

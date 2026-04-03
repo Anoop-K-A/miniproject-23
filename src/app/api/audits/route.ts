@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/jsonDb";
+import { randomUUID } from "crypto";
+import { getMongoDb } from "@/lib/mongoDb";
+import { COLLECTIONS, ensureNormalizedIndexes } from "@/lib/mongoNormalized";
 
 interface AuditRecord {
   id: string;
@@ -14,7 +16,13 @@ interface AuditRecord {
 
 export async function GET() {
   try {
-    const audits = await readJsonFile<AuditRecord[]>("audits.json");
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
+    const audits = (await db
+      .collection<AuditRecord>(COLLECTIONS.audits)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as AuditRecord[];
     return NextResponse.json({ audits });
   } catch (error) {
     console.error("Audits load error:", error);
@@ -27,12 +35,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const db = await getMongoDb();
+    await ensureNormalizedIndexes(db);
     const payload = await request.json();
-    const audits = await readJsonFile<AuditRecord[]>("audits.json");
     const timestamp = new Date().toISOString();
 
     const newAudit: AuditRecord = {
-      id: Date.now().toString(),
+      id: randomUUID(),
       auditorId: payload.auditorId,
       entityType: payload.entityType,
       entityId: payload.entityId,
@@ -42,8 +51,12 @@ export async function POST(request: NextRequest) {
       updatedAt: timestamp,
     };
 
-    const updatedAudits = [newAudit, ...audits];
-    await writeJsonFile("audits.json", updatedAudits);
+    await db.collection<AuditRecord>(COLLECTIONS.audits).insertOne(newAudit);
+    const updatedAudits = (await db
+      .collection<AuditRecord>(COLLECTIONS.audits)
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()) as AuditRecord[];
 
     return NextResponse.json({ audits: updatedAudits });
   } catch (error) {

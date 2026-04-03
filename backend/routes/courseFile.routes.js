@@ -6,6 +6,7 @@ const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 const { upload } = require("../middleware/upload.middleware");
 const path = require("path");
 const fs = require("fs");
+const fsPromises = fs.promises;
 
 /**
  * POST /api/course-files/upload
@@ -71,8 +72,11 @@ router.post(
           "uploads",
           req.file.filename,
         );
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
+        try {
+          await fsPromises.access(filePath);
+          await fsPromises.unlink(filePath);
+        } catch {
+          // Best effort cleanup: ignore missing/locked file errors.
         }
       }
 
@@ -107,11 +111,28 @@ router.get("/", verifyToken, async (req, res) => {
       filters.academicYear = academicYear;
     }
 
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 20);
+    const skip = (page - 1) * limit;
+
     const uploadedFiles = await UploadedFile.find(filters)
       .populate("facultyId", "name email department")
-      .sort({ uploadedAt: -1 });
+      .sort({ uploadedAt: -1 })
+      .limit(limit)
+      .skip(skip)
+      .lean();
 
-    res.json(uploadedFiles);
+    const total = await UploadedFile.countDocuments(filters);
+
+    res.json({
+      data: uploadedFiles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching course files:", error);
     res.status(500).json({ error: "Failed to fetch course files" });
@@ -211,8 +232,11 @@ router.delete(
 
       // Delete file from disk
       const filePath = path.join(__dirname, "..", uploadedFile.filePath);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      try {
+        await fsPromises.access(filePath);
+        await fsPromises.unlink(filePath);
+      } catch {
+        // Best effort cleanup: ignore missing/locked file errors.
       }
 
       // Delete from MongoDB

@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFacultyDashboardData } from "@/lib/dashboardData";
-import { unstable_cache } from "next/cache";
 import { buildTimingResponseHeaders } from "@/lib/serverTiming";
-
-const getCachedFacultyDashboardData = unstable_cache(
-  async (username?: string | null) => getFacultyDashboardData(username),
-  ["faculty-dashboard-data-v1"],
-  { revalidate: 30 },
-);
 
 export async function GET(request: NextRequest) {
   const requestStart = Date.now();
   const queryUsername = request.nextUrl.searchParams.get("username");
   const cookieUsername = request.cookies.get("auth_user")?.value ?? null;
   const username = queryUsername ?? cookieUsername;
-  const data = await getCachedFacultyDashboardData(username);
+  const data = await getFacultyDashboardData(username);
 
   const totalDurationMs = Date.now() - requestStart;
   if (totalDurationMs > 1200) {

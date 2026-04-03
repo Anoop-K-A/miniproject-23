@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { ObjectId } from "mongodb";
 import type { UserRole } from "@/lib/roles";
 import { getMongoDb } from "@/lib/mongoDb";
 import { userSeedData } from "@/lib/userSeed";
@@ -23,6 +24,7 @@ export interface UserRecord {
   firebaseUid?: string;
   phone?: string;
   status?: string;
+  emailVerified?: boolean;
   createdAt?: string;
   updatedAt?: string;
   lastActiveAt?: string;
@@ -51,6 +53,8 @@ interface CreateUserInput {
 
 let indexesEnsured = false;
 let seedEnsured = false;
+const USERS_CACHE_TTL_MS = 20000;
+let usersCache: { expiresAt: number; users: UserRecord[] } | null = null;
 
 function normalizeIdentity(value: string) {
   return value.trim().toLowerCase();
@@ -62,6 +66,37 @@ function mapUserDocument(document: UserDocument): UserRecord {
     ...rest,
     id: id || _id,
   } as UserRecord;
+}
+
+function cloneUserRecord(user: UserRecord): UserRecord {
+  return {
+    ...user,
+    roles: Array.isArray(user.roles) ? [...user.roles] : user.roles,
+  };
+}
+
+function invalidateUsersCache() {
+  usersCache = null;
+}
+
+function getCachedUsers(): UserRecord[] | null {
+  if (!usersCache) {
+    return null;
+  }
+
+  if (usersCache.expiresAt <= Date.now()) {
+    usersCache = null;
+    return null;
+  }
+
+  return usersCache.users.map(cloneUserRecord);
+}
+
+function setCachedUsers(users: UserRecord[]) {
+  usersCache = {
+    users: users.map(cloneUserRecord),
+    expiresAt: Date.now() + USERS_CACHE_TTL_MS,
+  };
 }
 
 async function enforceSingleAdminPolicy(collection: any) {
@@ -176,35 +211,83 @@ async function getUsersCollectionDirect() {
 }
 
 export async function getAllUsers() {
+  const cachedUsers = getCachedUsers();
+  if (cachedUsers) {
+    return cachedUsers;
+  }
+
   const collection = await getUsersCollection();
   const users = await collection.find({}).toArray();
-  return users.map(mapUserDocument);
+  const mappedUsers = users.map(mapUserDocument);
+  setCachedUsers(mappedUsers);
+  return mappedUsers.map(cloneUserRecord);
 }
 
 export async function findUserByUsername(username: string) {
   const normalizedUsername = normalizeIdentity(username);
-  const collection = await getUsersCollectionDirect();
+  const users = await getAllUsers();
 
-  const directMatch = await collection.findOne({
-    $or: [{ username: normalizedUsername }, { email: normalizedUsername }],
+  const directMatch = users.find((user) => {
+    const userUsername = normalizeIdentity(user.username || "");
+    const userEmail = normalizeIdentity(user.email || "");
+    return (
+      userUsername === normalizedUsername || userEmail === normalizedUsername
+    );
   });
 
   if (directMatch) {
-    return mapUserDocument(directMatch);
+    return cloneUserRecord(directMatch);
   }
 
   const escaped = normalizedUsername.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const nameMatch = await collection.findOne({
-    name: { $regex: new RegExp(`^${escaped}$`, "i") },
+  const nameRegex = new RegExp(`^${escaped}$`, "i");
+  const nameMatch = users.find((user) =>
+    nameRegex.test(String(user.name || "")),
+  );
+  return nameMatch ? cloneUserRecord(nameMatch) : null;
+}
+
+export async function findUserByEmail(email: string) {
+  const normalizedEmail = normalizeIdentity(email);
+  const users = await getAllUsers();
+
+  const emailMatch = users.find((user) => {
+    const userEmail = normalizeIdentity(user.email || "");
+    return userEmail === normalizedEmail;
   });
 
-  return nameMatch ? mapUserDocument(nameMatch) : null;
+  return emailMatch ? cloneUserRecord(emailMatch) : null;
+}
+
+export async function isUsernameTaken(username: string) {
+  const normalizedUsername = normalizeIdentity(username);
+  const users = await getAllUsers();
+
+  return users.some((user) => {
+    const userUsername = normalizeIdentity(user.username || "");
+    return userUsername === normalizedUsername;
+  });
 }
 
 export async function findUserById(id: string) {
-  const collection = await getUsersCollectionDirect();
-  const user = await collection.findOne({ _id: id });
-  return user ? mapUserDocument(user) : null;
+  const users = await getAllUsers();
+  const directMatch = users.find(
+    (user) =>
+      String(user.id || "") === id || String((user as any)._id || "") === id,
+  );
+  if (directMatch) {
+    return cloneUserRecord(directMatch);
+  }
+
+  if (ObjectId.isValid(id)) {
+    const objectId = new ObjectId(id).toString();
+    const objectIdMatch = users.find(
+      (user) => String(user.id || "") === objectId,
+    );
+    return objectIdMatch ? cloneUserRecord(objectIdMatch) : null;
+  }
+
+  return null;
 }
 
 export async function createUser(input: CreateUserInput) {
@@ -286,6 +369,7 @@ export async function createUser(input: CreateUserInput) {
   }
 
   await collection.insertOne(user);
+  invalidateUsersCache();
 
   return mapUserDocument(user);
 }
@@ -326,6 +410,9 @@ export async function updateUserById(id: string, updates: Partial<UserRecord>) {
   const isPrimaryAdmin =
     isPrimaryAdminEmail(existingUser.email) ||
     isPrimaryAdminUsername(existingUser.username || existingUser.name);
+  const existingIsAdmin =
+    normalizeRoleInput(existingUser.role) === "admin" ||
+    includesAdminRole(existingUser.roles || []);
 
   if (payload.username && isPrimaryAdminUsername(payload.username)) {
     if (!isPrimaryAdmin) {
@@ -363,13 +450,17 @@ export async function updateUserById(id: string, updates: Partial<UserRecord>) {
     }
   } else {
     if (
-      (hasRoleUpdate && requestedRole === "admin") ||
-      (hasRolesUpdate && includesAdminRole(requestedRoles))
+      ((hasRoleUpdate && requestedRole === "admin") ||
+        (hasRolesUpdate && includesAdminRole(requestedRoles))) &&
+      !existingIsAdmin
     ) {
       throw new Error("ADMIN_ROLE_ASSIGNMENT_DISABLED");
     }
 
-    if (hasRoleUpdate || hasRolesUpdate) {
+    if (existingIsAdmin && (hasRoleUpdate || hasRolesUpdate)) {
+      payload.role = "admin";
+      payload.roles = ["admin"];
+    } else if (hasRoleUpdate || hasRolesUpdate) {
       const nextRoles = sanitizeNonAdminRoles(
         hasRolesUpdate
           ? requestedRoles
@@ -393,6 +484,7 @@ export async function updateUserById(id: string, updates: Partial<UserRecord>) {
   delete payload.id;
 
   await collection.updateOne({ _id: id }, { $set: payload });
+  invalidateUsersCache();
   return findUserById(id);
 }
 
@@ -409,9 +501,32 @@ export async function updateUserLastActive(id: string) {
       },
     },
   );
+  invalidateUsersCache();
+}
+
+export async function updateUserVerification(
+  firebaseUid: string,
+  isVerified: boolean,
+) {
+  const collection = await getUsersCollection();
+  const timestamp = new Date().toISOString();
+
+  const result = await collection.updateOne(
+    { firebaseUid },
+    {
+      $set: {
+        emailVerified: isVerified,
+        updatedAt: timestamp,
+      },
+    },
+  );
+
+  invalidateUsersCache();
+  return result.modifiedCount > 0;
 }
 
 export async function deleteUserById(id: string) {
   const collection = await getUsersCollection();
   await collection.deleteOne({ _id: id });
+  invalidateUsersCache();
 }

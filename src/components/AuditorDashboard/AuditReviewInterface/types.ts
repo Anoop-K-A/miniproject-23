@@ -3,9 +3,10 @@ export interface CourseFile {
   fileName: string;
   fileType: string;
   uploadDate: string;
+  courseCode: string;
   courseName: string;
   semester: string;
-  status: "Draft" | "Submitted" | "Approved" | "Rejected";
+  status: "Draft" | "Submitted" | "Pending" | "Approved" | "Rejected";
   documentUrl?: string;
 }
 

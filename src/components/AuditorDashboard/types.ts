@@ -13,6 +13,7 @@ export interface FacultyMember {
   email?: string;
   phone?: string;
   experience?: string;
+  profileImageUrl?: string;
   resumeUrl?: string;
   resumeFileName?: string;
 }

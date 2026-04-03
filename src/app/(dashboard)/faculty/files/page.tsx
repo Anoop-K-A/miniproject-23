@@ -3,7 +3,7 @@ import { FacultySectionTabs } from "@/components/faculty/FacultySectionTabs";
 import type { CourseFile } from "@/components/CourseFileManager/types";
 import { readJsonFile } from "@/lib/jsonDb";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 20;
 
 export default async function FacultyFilesPage() {
   const files = await readJsonFile<CourseFile[]>("courseFiles.json");
