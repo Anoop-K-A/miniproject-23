@@ -99,7 +99,7 @@ export function sanitizeFacultyAssignableRoles(
         .map((role) => normalizeRoleInput(role))
         .filter(
           (role): role is UserRole =>
-            Boolean(role) && FACULTY_ASSIGNABLE_ROLES.includes(role),
+            role !== null && FACULTY_ASSIGNABLE_ROLES.includes(role),
         ),
     ),
   );
