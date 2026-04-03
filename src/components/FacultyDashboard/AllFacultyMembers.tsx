@@ -49,15 +49,22 @@ export const AllFacultyMembers = memo(function AllFacultyMembers({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {visibleFaculty.map((faculty) => (
-            <FacultyCard
-              key={faculty.id}
-              faculty={faculty}
-              onSelect={onSelectFaculty}
-            />
-          ))}
-        </div>
+        {visibleFaculty.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {visibleFaculty.map((faculty) => (
+              <FacultyCard
+                key={faculty.id}
+                faculty={faculty}
+                onSelect={onSelectFaculty}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500">
+            No faculty members available right now. Please refresh after the
+            backend is running.
+          </p>
+        )}
         {canShowMore ? (
           <div className="mt-4 flex justify-center">
             <Button

@@ -35,7 +35,7 @@ export default function AuditorDashboardPage() {
       try {
         const response = await fetch("/api/dashboard/auditor", {
           signal: controller.signal,
-          cache: "default",
+          cache: "no-store",
         });
         const data = await response.json();
 

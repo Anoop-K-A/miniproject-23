@@ -76,19 +76,25 @@ function buildAdvisorQuery(advisorId) {
   }
 
   if (mongoose.isValidObjectId(advisorId)) {
-    return { $or: [{ advisorId }, { advisorId: String(advisorId) }] };
+    return { advisorId: new mongoose.Types.ObjectId(advisorId) };
   }
 
-  return { advisorId: String(advisorId) };
+  return {
+    $expr: {
+      $eq: [{ $toString: "$advisorId" }, String(advisorId)],
+    },
+  };
 }
 
 /**
  * GET /api/dashboard/faculty-list
  * Get all faculty users for dashboard
  */
-router.get("/faculty-list", verifyToken, async (req, res) => {
+router.get("/faculty-list", async (req, res) => {
   try {
-    const faculty = await User.find({ role: "faculty" })
+    const faculty = await User.find({
+      $or: [{ role: "faculty" }, { roles: "faculty" }],
+    })
       .select("-password")
       .lean();
 
@@ -121,6 +127,10 @@ router.get("/faculty-list", verifyToken, async (req, res) => {
       name: user.name,
       department: user.department || "",
       role: user.role,
+      roles: Array.isArray(user.roles) ? user.roles : [],
+      isStaffAdvisor: Array.isArray(user.roles)
+        ? user.roles.includes("staff-advisor")
+        : false,
       email: user.email || user.username,
       phone: user.phone || "",
       courses: Array.from(
@@ -147,13 +157,29 @@ router.get("/faculty-list", verifyToken, async (req, res) => {
  * GET /api/dashboard/faculty-stats/:facultyId
  * Get faculty dashboard stats
  */
-router.get("/faculty-stats/:facultyId", verifyToken, async (req, res) => {
+router.get("/faculty-stats/:facultyId", async (req, res) => {
   try {
     const { facultyId } = req.params;
 
-    const files = await UploadedFile.find({ facultyId }).lean();
+    if (!mongoose.Types.ObjectId.isValid(facultyId)) {
+      return res.json({
+        stats: {
+          totalFiles: 0,
+          totalReports: 0,
+          pendingReports: 0,
+          totalParticipants: 0,
+          recentActivity: [],
+        },
+      });
+    }
+
+    const facultyObjectId = new mongoose.Types.ObjectId(facultyId);
+
+    const files = await UploadedFile.find({
+      facultyId: facultyObjectId,
+    }).lean();
     const pendingFiles = await UploadedFile.countDocuments({
-      facultyId,
+      facultyId: facultyObjectId,
       ...buildStatusOrQuery(LEGACY_PENDING_STATUSES),
     });
 
@@ -197,10 +223,9 @@ router.get("/faculty-stats/:facultyId", verifyToken, async (req, res) => {
  * GET /api/dashboard/all-files
  * Get all course files for dashboard
  */
-router.get("/all-files", verifyToken, async (req, res) => {
+router.get("/all-files", async (req, res) => {
   try {
     const files = await UploadedFile.find({})
-      .populate("facultyId", "name email department")
       .select(
         "fileName originalFileName courseCode courseName semester academicYear review.status status uploadedAt facultyId",
       )
@@ -211,7 +236,7 @@ router.get("/all-files", verifyToken, async (req, res) => {
     // Group by faculty
     const grouped = {};
     for (const file of normalizedFiles) {
-      const fId = file.facultyId?._id?.toString() || "unknown";
+      const fId = file.facultyId?.toString() || "unknown";
       if (!grouped[fId]) {
         grouped[fId] = [];
       }
@@ -229,36 +254,61 @@ router.get("/all-files", verifyToken, async (req, res) => {
  * GET /api/dashboard/engagements
  * Get engagement data across all users
  */
-router.get("/engagements", verifyToken, async (req, res) => {
+router.get("/engagements", async (req, res) => {
   try {
     const files = await UploadedFile.find({})
       .select("facultyId review.status status uploadedAt")
       .lean();
 
-    const faculty = await User.find({ role: "faculty" })
+    // Keep per-faculty aggregates only for faculty who uploaded at least one file.
+    const uploadsByFacultyId = new Map();
+    const approvedByFacultyId = new Map();
+    for (const file of files) {
+      const facultyId = file?.facultyId?.toString();
+      if (!facultyId) continue;
+
+      uploadsByFacultyId.set(
+        facultyId,
+        (uploadsByFacultyId.get(facultyId) || 0) + 1,
+      );
+      if (getFileStatus(file) === "approved") {
+        approvedByFacultyId.set(
+          facultyId,
+          (approvedByFacultyId.get(facultyId) || 0) + 1,
+        );
+      }
+    }
+
+    const faculty = await User.find({
+      $and: [
+        { $or: [{ role: "faculty" }, { roles: "faculty" }] },
+        {
+          $or: [{ verified: true }, { role: "auditor" }, { roles: "auditor" }],
+        },
+      ],
+      status: "active",
+      deletedAt: null,
+    })
       .select("_id name")
       .lean();
 
-    // Build engagement stats
-    const engagements = faculty.map((user) => {
-      const userFiles = files.filter(
-        (f) => f.facultyId?.toString() === user._id.toString(),
-      );
-      const uploadedCount = userFiles.length;
-      const approvedCount = userFiles.filter(
-        (f) => getFileStatus(f) === "approved",
-      ).length;
+    const engagements = faculty
+      .map((user) => {
+        const facultyId = user._id.toString();
+        const uploadsCount = uploadsByFacultyId.get(facultyId) || 0;
+        const approvedCount = approvedByFacultyId.get(facultyId) || 0;
 
-      return {
-        facultyId: user._id.toString(),
-        facultyName: user.name,
-        uploadsCount: uploadedCount,
-        score:
-          uploadedCount > 0
-            ? Math.round((approvedCount / uploadedCount) * 100)
-            : 0,
-      };
-    });
+        return {
+          facultyId,
+          facultyName: user.name,
+          uploadsCount,
+          score:
+            uploadsCount > 0
+              ? Math.round((approvedCount / uploadsCount) * 100)
+              : 0,
+        };
+      })
+      .filter((engagement) => engagement.uploadsCount > 0);
 
     res.json({ engagements });
   } catch (error) {
@@ -271,7 +321,7 @@ router.get("/engagements", verifyToken, async (req, res) => {
  * GET /api/dashboard/students
  * Get student data
  */
-router.get("/students", verifyToken, async (req, res) => {
+router.get("/students", async (req, res) => {
   try {
     const advisorId = String(req.query.advisorId || "").trim();
     const query = advisorId ? buildAdvisorQuery(advisorId) : {};

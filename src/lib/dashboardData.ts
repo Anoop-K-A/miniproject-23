@@ -100,26 +100,61 @@ function cloneFacultyDashboardData(
  * Fetch dashboard data from MongoDB via API
  */
 async function fetchFromDashboardAPI<T>(endpoint: string): Promise<T> {
-  const backendBaseUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.BACKEND_URL ||
-    "http://localhost:5000";
-  const response = await fetch(
-    `${backendBaseUrl.replace(/\/$/, "")}/api/dashboard${endpoint}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    },
-  );
+  const baseUrlCandidates = [
+    process.env.NEXT_PUBLIC_BACKEND_URL,
+    process.env.BACKEND_URL,
+    "http://localhost:5010",
+    "http://localhost:5000",
+  ]
+    .map((value) =>
+      String(value || "")
+        .trim()
+        .replace(/\/$/, ""),
+    )
+    .filter(Boolean)
+    .filter((value, index, array) => array.indexOf(value) === index);
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch from ${endpoint}: ${response.statusText}`);
+  const attemptErrors: string[] = [];
+
+  for (const baseUrl of baseUrlCandidates) {
+    const requestUrl = `${baseUrl}/api/dashboard${endpoint}`;
+    try {
+      const response = await fetch(requestUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return response.json();
+      }
+
+      let responseText = "";
+      try {
+        responseText = (await response.text()).slice(0, 200);
+      } catch {
+        responseText = "";
+      }
+
+      attemptErrors.push(
+        `${requestUrl} -> ${response.status} ${response.statusText}${
+          responseText ? ` (${responseText})` : ""
+        }`,
+      );
+    } catch (error) {
+      attemptErrors.push(
+        `${requestUrl} -> ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
   }
 
-  return response.json();
+  throw new Error(
+    `Failed to fetch dashboard endpoint '${endpoint}'. Attempts: ${attemptErrors.join(" | ")}`,
+  );
 }
 
 export async function getFacultyDashboardData(
@@ -149,12 +184,26 @@ export async function getFacultyDashboardData(
     };
 
     if (username && facultyMembers.length > 0) {
-      const selectedUser = facultyMembers.find((m) => m.name === username);
-      if (selectedUser) {
-        const statsData = await fetchFromDashboardAPI<FacultyStatsResponse>(
-          `/faculty-stats/${selectedUser.id}`,
+      const selectedUser = facultyMembers.find((m) => {
+        const normalizedName = normalizeIdentity(m.name);
+        const normalizedEmail = normalizeIdentity(m.email);
+        return (
+          normalizedName === normalizedUsername ||
+          normalizedEmail === normalizedUsername
         );
-        Object.assign(stats, statsData.stats);
+      });
+      if (selectedUser) {
+        try {
+          const statsData = await fetchFromDashboardAPI<FacultyStatsResponse>(
+            `/faculty-stats/${selectedUser.id}`,
+          );
+          Object.assign(stats, statsData.stats);
+        } catch (error) {
+          console.warn("Faculty stats lookup failed; using zero stats", {
+            selectedUserId: selectedUser.id,
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
       }
     }
 
@@ -190,8 +239,7 @@ export async function getAuditorDashboardData(): Promise<{
   facultyMembers: AuditorFacultyMember[];
 }> {
   try {
-    // Fetch all files and engagements from MongoDB
-    const files = await fetchFromDashboardAPI("/all-files");
+    // Fetch engagement summaries from MongoDB.
     const engagements =
       await fetchFromDashboardAPI<EngagementsResponse>("/engagements");
 
@@ -231,6 +279,19 @@ export async function getAuditorDashboardData(): Promise<{
     }));
 
     stats.totalFaculty = facultyMembers.length;
+    stats.totalFiles = facultyMembers.reduce(
+      (sum, faculty) => sum + (faculty.totalFiles || 0),
+      0,
+    );
+    stats.completionRate = (engagements.engagements || []).length
+      ? Math.round(
+          (engagements.engagements || []).reduce(
+            (sum, engagement) => sum + (engagement.score || 0),
+            0,
+          ) / (engagements.engagements || []).length,
+        )
+      : 0;
+
     return {
       stats,
       facultyMembers,
@@ -258,7 +319,43 @@ export async function getAuditorDashboardData(): Promise<{
 export async function getStaffAdvisorDashboardData(
   advisorId?: string | null,
 ): Promise<StaffAdvisorDashboardData> {
-  const cacheKey = advisorId || "__anonymous__";
+  const normalizedAdvisorId = String(advisorId || "").trim();
+  if (!normalizedAdvisorId) {
+    return {
+      stats: {
+        totalStudents: 0,
+        batchYear: "All",
+        placedStudents: 0,
+        inProcess: 0,
+        averageCGPA: 0,
+        averageAttendance: 0,
+        totalFaculty: 0,
+        approvedFiles: 0,
+        approvedReports: 0,
+      },
+      careerStats: {
+        totalInternships: 0,
+        activeInternships: 0,
+        completedProjects: 0,
+        skillWorkshops: 0,
+        campusInterviews: 0,
+      },
+      students: [],
+      batchCourseOverview: {
+        overall: {
+          batchYear: "All",
+          totalFiles: 0,
+          approvedFiles: 0,
+          inReviewFiles: 0,
+          rejectedFiles: 0,
+          completionRate: 0,
+        },
+        groups: [],
+      },
+    };
+  }
+
+  const cacheKey = normalizedAdvisorId;
   const cachedEntry = staffAdvisorDashboardCache.get(cacheKey);
 
   if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
@@ -270,9 +367,9 @@ export async function getStaffAdvisorDashboardData(
 
   try {
     // Fetch students and batch overview from MongoDB
-    const studentsData =
-      await fetchFromDashboardAPI<StudentsResponse>("/students");
-    await fetchFromDashboardAPI<EngagementsResponse>("/engagements");
+    const studentsData = await fetchFromDashboardAPI<StudentsResponse>(
+      `/students?advisorId=${encodeURIComponent(normalizedAdvisorId)}`,
+    );
 
     const students = studentsData.students || [];
     const totalStudents = students.length;

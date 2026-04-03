@@ -12,6 +12,12 @@ export const NON_ADMIN_ROLES: UserRole[] = [
   "user",
 ];
 
+export const FACULTY_ASSIGNABLE_ROLES: UserRole[] = [
+  "faculty",
+  "auditor",
+  "staff-advisor",
+];
+
 export function normalizeEmail(email: string | undefined | null): string {
   return String(email || "")
     .trim()
@@ -78,6 +84,23 @@ export function sanitizeNonAdminRoles(
       roles
         .map((role) => normalizeRoleInput(role))
         .filter((role): role is UserRole => Boolean(role) && role !== "admin"),
+    ),
+  );
+
+  return uniqueRoles.length > 0 ? uniqueRoles : ["faculty"];
+}
+
+export function sanitizeFacultyAssignableRoles(
+  roles: Array<string | null | undefined>,
+): UserRole[] {
+  const uniqueRoles = Array.from(
+    new Set(
+      roles
+        .map((role) => normalizeRoleInput(role))
+        .filter(
+          (role): role is UserRole =>
+            Boolean(role) && FACULTY_ASSIGNABLE_ROLES.includes(role),
+        ),
     ),
   );
 

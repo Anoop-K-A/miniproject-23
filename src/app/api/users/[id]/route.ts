@@ -9,10 +9,11 @@ import {
 } from "@/lib/userStore";
 import type { Student } from "@/components/StaffAdvisorDashboard/types";
 import {
+  FACULTY_ASSIGNABLE_ROLES,
   includesAdminRole,
   isPrimaryAdminEmail,
   normalizeRoleInput,
-  sanitizeNonAdminRoles,
+  sanitizeFacultyAssignableRoles,
 } from "@/lib/adminConfig";
 
 interface CourseFileRecord {
@@ -129,6 +130,28 @@ export async function PATCH(
       normalizeRoleInput(existingUser.role) === "admin" ||
       includesAdminRole(existingUser.roles || []);
 
+    if (
+      !existingIsAdmin &&
+      ((hasRoleField &&
+        requestedRole &&
+        !FACULTY_ASSIGNABLE_ROLES.includes(requestedRole)) ||
+        (hasRolesField &&
+          requestedRoles.some(
+            (role) =>
+              !!normalizeRoleInput(role) &&
+              !FACULTY_ASSIGNABLE_ROLES.includes(
+                normalizeRoleInput(
+                  role,
+                ) as (typeof FACULTY_ASSIGNABLE_ROLES)[number],
+              ),
+          )))
+    ) {
+      return NextResponse.json(
+        { error: "Selected roles are not allowed for faculty" },
+        { status: 400 },
+      );
+    }
+
     if (isPrimaryAdminEmail(existingUser.email || existingUser.username)) {
       if (
         (hasRoleField && requestedRole !== "admin") ||
@@ -159,7 +182,7 @@ export async function PATCH(
       payload.role = "admin";
       payload.roles = ["admin"];
     } else if (hasRoleField || hasRolesField) {
-      const sanitizedRoles = sanitizeNonAdminRoles(
+      const sanitizedRoles = sanitizeFacultyAssignableRoles(
         hasRolesField
           ? requestedRoles
           : [requestedRole || existingUser.role || "faculty"],
