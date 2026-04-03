@@ -68,7 +68,7 @@ export default function StaffAdvisorDashboardPage() {
       try {
         const response = await fetch(requestUrl, {
           signal: controller.signal,
-          cache: "default",
+          cache: "no-store",
         });
         const data = await response.json();
 

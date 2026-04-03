@@ -9,6 +9,7 @@ import {
   isPrimaryAdminEmail,
   isPrimaryAdminUsername,
   normalizeRoleInput,
+  sanitizeFacultyAssignableRoles,
   sanitizeNonAdminRoles,
 } from "@/lib/adminConfig";
 
@@ -495,7 +496,7 @@ export async function updateUserById(id: string, updates: Partial<UserRecord>) {
       payload.role = "admin";
       payload.roles = ["admin"];
     } else if (hasRoleUpdate || hasRolesUpdate) {
-      const nextRoles = sanitizeNonAdminRoles(
+      const nextRoles = sanitizeFacultyAssignableRoles(
         hasRolesUpdate
           ? requestedRoles
           : [requestedRole || existingUser.role || "faculty"],

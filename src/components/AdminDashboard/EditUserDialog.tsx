@@ -17,8 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { AdminUser, AdminUserStatus } from "./types";
 import type { UserRole } from "@/lib/roles";
+
+const FACULTY_ASSIGNABLE_ROLES: UserRole[] = [
+  "faculty",
+  "auditor",
+  "staff-advisor",
+];
 
 interface EditUserDialogProps {
   user: AdminUser;
@@ -40,6 +47,7 @@ interface EditUserDialogProps {
 interface FormData extends Omit<AdminUser, "role"> {
   role: AdminUser["role"];
   roles?: UserRole[];
+  selectedRoles: UserRole[];
 }
 
 export function EditUserDialog({
@@ -48,16 +56,38 @@ export function EditUserDialog({
   onOpenChange,
   onUpdateUser,
 }: EditUserDialogProps) {
-  const [formData, setFormData] = useState<FormData>(user as FormData);
+  const [formData, setFormData] = useState<FormData>({
+    ...(user as FormData),
+    selectedRoles: Array.isArray(user.roles) ? user.roles : [user.role],
+  });
 
   useEffect(() => {
     setFormData({
       ...(user as FormData),
+      selectedRoles: Array.isArray(user.roles) ? user.roles : [user.role],
     });
   }, [user]);
 
+  const handleRoleToggle = (role: UserRole) => {
+    setFormData((prev) => {
+      const isSelected = prev.selectedRoles.includes(role);
+      const newSelectedRoles = isSelected
+        ? prev.selectedRoles.filter((r) => r !== role)
+        : [...prev.selectedRoles, role];
+      return {
+        ...prev,
+        selectedRoles: newSelectedRoles,
+        role: newSelectedRoles.length > 0 ? newSelectedRoles[0] : prev.role,
+      };
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const rolesToSubmit =
+      formData.selectedRoles.length > 0
+        ? formData.selectedRoles
+        : [formData.role];
 
     onUpdateUser({
       id: user.id,
@@ -65,8 +95,8 @@ export function EditUserDialog({
       email: formData.email,
       phone: formData.phone || undefined,
       department: formData.department || undefined,
-      role: user.role,
-      roles: user.roles,
+      role: rolesToSubmit[0],
+      roles: rolesToSubmit,
       status: formData.status,
     });
     onOpenChange(false);
@@ -147,6 +177,30 @@ export function EditUserDialog({
                   <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="col-span-full space-y-3">
+              <Label>Roles</Label>
+              <div className="space-y-2 pl-2">
+                {FACULTY_ASSIGNABLE_ROLES.map((role) => (
+                  <div key={role} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`role-${role}`}
+                      checked={formData.selectedRoles.includes(role)}
+                      onCheckedChange={() => handleRoleToggle(role)}
+                    />
+                    <Label
+                      htmlFor={`role-${role}`}
+                      className="font-normal cursor-pointer"
+                    >
+                      {role
+                        .split("-")
+                        .map((part) => part[0].toUpperCase() + part.slice(1))
+                        .join(" ")}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>
